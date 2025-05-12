@@ -10,16 +10,11 @@
         var path = window.location.pathname;  // Initialize the path variable
 
         // For project pages:
-        window.location.href = '/project-name/index.html' + '?redirect=' + encodeURIComponent(path);
+        window.location.href = '/okiespedokie/index.html' + '?redirect=' + encodeURIComponent(path);
 
 
         // Or more dynamically:
-        var basePath = window.location.pathname.split('/')[1];
-        if (basePath === 'project-name') {
-            window.location.href = '/' + basePath + '/index.html' + '?redirect=' + encodeURIComponent(path);
-        } else {
-            window.location.href = '/index.html' + '?redirect=' + encodeURIComponent(path);
-        }
+
     </script>
 </head>
 <body>
