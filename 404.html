@@ -6,6 +6,10 @@
     <script type="text/javascript">
         // Extract the path from the current URL
         // For project pages:
+        // Extract the path from the current URL
+        var path = window.location.pathname;  // Initialize the path variable
+
+        // For project pages:
         window.location.href = '/project-name/index.html' + '?redirect=' + encodeURIComponent(path);
 
 
