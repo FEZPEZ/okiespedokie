@@ -5,9 +5,17 @@
     <title>Redirecting...</title>
     <script type="text/javascript">
         // Extract the path from the current URL
-        var path = window.location.pathname;
-        // Redirect to index.html while preserving the path (if needed, pass it to your SPA via query parameters or hash)
-        window.location.href = '/index.html' + '?redirect=' + encodeURIComponent(path);
+        // For project pages:
+        window.location.href = '/project-name/index.html' + '?redirect=' + encodeURIComponent(path);
+
+
+        // Or more dynamically:
+        var basePath = window.location.pathname.split('/')[1];
+        if (basePath === 'project-name') {
+            window.location.href = '/' + basePath + '/index.html' + '?redirect=' + encodeURIComponent(path);
+        } else {
+            window.location.href = '/index.html' + '?redirect=' + encodeURIComponent(path);
+        }
     </script>
 </head>
 <body>
