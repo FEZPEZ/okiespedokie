@@ -1,25 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Redirecting...</title>
-    <script type="text/javascript">
-        // Extract the path from the current URL
-        // For project pages:
-        // Extract the path from the current URL
-        var path = window.location.pathname;  // Initialize the path variable
-
-
-        // Or more dynamically:
-        var basePath = window.location.pathname.split('/')[1];
-        if (basePath === 'okiespedokie') {
-            window.location.href = '/' + basePath + '/index.html' + '?redirect=' + encodeURIComponent(path);
-        } else {
-            window.location.href = '/index.html' + '?redirect=' + encodeURIComponent(path);
-        }
-    </script>
+    <meta charset="UTF-8">
+    <title>Title</title>
 </head>
 <body>
-Redirecting...
+<b>This is the homepage!</b>
 </body>
 </html>
+
+
+
+
+window.location.href = '/project-name/index.html' + '?redirect=' + encodeURIComponent(path);
+window.location.href = '/project-name/index.html' + '?redirect=' + encodeURIComponent(path);
