@@ -7,14 +7,15 @@
         // Extract the path from the current URL
         // For project pages:
         // Extract the path from the current URL
-        var path = window.location.pathname;  // Initialize the path variable
-
-        // For project pages:
-        window.location.href = '/okiespedokie/index.html' + '?redirect=' + encodeURIComponent(path);
 
 
         // Or more dynamically:
-
+        var basePath = window.location.pathname.split('/')[1];
+        if (basePath === 'okiespedokie') {
+            window.location.href = '/' + basePath + '/index.html' + '?redirect=' + encodeURIComponent(path);
+        } else {
+            window.location.href = '/index.html' + '?redirect=' + encodeURIComponent(path);
+        }
     </script>
 </head>
 <body>
