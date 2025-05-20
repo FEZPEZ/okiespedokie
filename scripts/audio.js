@@ -44,7 +44,7 @@ export async function playChurchClapLoop() {
     churchClapSource.loop = true;
 
     const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.9;
+    gainNode.gain.value = 0.4;
 
     churchClapSource.connect(gainNode).connect(audioCtx.destination);
     churchClapSource.start(0);
@@ -66,7 +66,7 @@ export function playCatMeow() {
     source.playbackRate.value = 1 + (Math.random() * 0.06 - 0.03);
 
     const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.4;
+    gainNode.gain.value = 0.03;
 
     source.connect(gainNode).connect(audioCtx.destination);
     source.start(0);
