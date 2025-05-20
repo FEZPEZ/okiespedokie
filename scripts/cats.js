@@ -15,42 +15,116 @@ const catGifs = [
     "https://res.cloudinary.com/jerrick/image/upload/v1514493943/teqcyxcn1hboqpuwifcq.gif"
 ];
 
-let audio = new Audio('../audio/churchclap.ogg');
-audio.loop = true;
+let audioCtx = null;
+let churchClapBuffer = null;
+let churchClapSource = null;
+let catMeowBuffer = null;
 
 let originalDescText = null;
 
-function updateEffectState(active) {
+async function initAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+    }
+}
+
+async function loadAudioBuffer(url) {
+    await initAudioContext();
+
+    try {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        return await audioCtx.decodeAudioData(arrayBuffer);
+    } catch (e) {
+        console.error(`Failed to load audio from ${url}:`, e);
+        return null;
+    }
+}
+
+async function loadBuffers() {
+    if (!churchClapBuffer) {
+        churchClapBuffer = await loadAudioBuffer('../audio/churchclap.mp3');
+    }
+    if (!catMeowBuffer) {
+        catMeowBuffer = await loadAudioBuffer('../audio/catmeow.wav');
+    }
+}
+
+function playChurchClapLoop() {
+    if (!churchClapBuffer || !audioCtx) return;
+    if (churchClapSource) return; // already playing
+
+    churchClapSource = audioCtx.createBufferSource();
+    churchClapSource.buffer = churchClapBuffer;
+    churchClapSource.loop = true;
+
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.9; // 50% volume
+
+    churchClapSource.connect(gainNode).connect(audioCtx.destination);
+    churchClapSource.start(0);
+}
+
+function stopChurchClapLoop() {
+    if (churchClapSource) {
+        churchClapSource.stop();
+        churchClapSource.disconnect();
+        churchClapSource = null;
+    }
+}
+
+function playCatMeow() {
+    if (!catMeowBuffer || !audioCtx) return;
+
+    const source = audioCtx.createBufferSource();
+    source.buffer = catMeowBuffer;
+
+    // Randomize pitch ±50 cents (±~3%)
+    source.playbackRate.value = 1 + (Math.random() * 0.06 - 0.03);
+
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.4; // 40% volume
+
+    source.connect(gainNode).connect(audioCtx.destination);
+    source.start(0);
+}
+
+async function updateEffectState(active) {
     const img = document.getElementById('thumbnail');
     const desc = document.getElementById('description');
+
+    await initAudioContext();
 
     if (active) {
         img.classList.add('crazy-flash');
         desc.classList.remove('normal');
         desc.classList.add('crazy-flash');
-        if (audio.paused) audio.play();
 
         if (originalDescText === null) {
             originalDescText = desc.textContent;
         }
         desc.textContent = "itsa...CUTE!!!";
+
+        await loadBuffers();
+        playChurchClapLoop();
     } else {
         img.classList.remove('crazy-flash');
         desc.classList.remove('crazy-flash');
         desc.classList.add('normal');
-        audio.pause();
-        audio.currentTime = 0;
+
+        stopChurchClapLoop();
 
         if (originalDescText !== null) {
             desc.textContent = originalDescText;
-            originalDescText = null; // Reset so it doesn't get reused
+            originalDescText = null;
         }
     }
 }
 
-
 function spawnCatGif(x, y) {
-    // Play cat meow sound
     playCatMeow();
 
     const gif = document.createElement('img');
@@ -68,7 +142,7 @@ function spawnCatGif(x, y) {
     let velX = 0;
     let velY = 0;
 
-    updateEffectState(true); // Turn on color/audio
+    updateEffectState(true);
 
     function animate() {
         const dx = posX + 50 - centerX;
@@ -92,7 +166,7 @@ function spawnCatGif(x, y) {
         ) {
             gif.remove();
             if (!document.querySelector('.cat-gif')) {
-                updateEffectState(false); // No more cats, stop color/audio
+                updateEffectState(false);
             }
         } else {
             requestAnimationFrame(animate);
@@ -105,26 +179,3 @@ function spawnCatGif(x, y) {
 document.addEventListener('click', e => {
     spawnCatGif(e.clientX, e.clientY);
 });
-
-
-function playCatMeow() {
-    fetch('../audio/catmeow.wav')
-        .then(res => res.arrayBuffer())
-        .then(data => {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            audioCtx.decodeAudioData(data, buffer => {
-                const source = audioCtx.createBufferSource();
-                source.buffer = buffer;
-
-                // Randomize pitch ±50 cents (~±3%)
-                source.playbackRate.value = 1 + (Math.random() * 0.06 - 0.03);
-
-                const gainNode = audioCtx.createGain();
-                gainNode.gain.value = 0.4;
-
-                source.connect(gainNode).connect(audioCtx.destination);
-                source.start(0);
-            });
-        })
-        .catch(e => console.error('Failed to play cat meow:', e));
-}
