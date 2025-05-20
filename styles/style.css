@@ -78,7 +78,7 @@ img#thumbnail {
 
 #cuteness-meter-container {
     position: absolute;
-    top: 0; /* Stick to the top of the thumbnail */
+    top: -30px; /* Stick to the top of the thumbnail */
     left: 0;
     width: 100%; /* Match thumbnail width */
     height: 20px;

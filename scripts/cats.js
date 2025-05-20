@@ -120,8 +120,10 @@ function updateCutenessMeter() {
 
         if (percentage >= 100) {
             startBackgroundCircles();
+            meterFill.classList.add('crazy-flash');
         } else {
             stopBackgroundCircles();
+            meterFill.classList.remove('crazy-flash');
         }
     } else {
         meterContainer.style.display = 'none';
