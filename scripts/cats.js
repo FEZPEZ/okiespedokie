@@ -1,3 +1,10 @@
+import {
+    loadBuffers,
+    playChurchClapLoop,
+    stopChurchClapLoop,
+    playCatMeow
+} from './audio.js';
+
 const catGifs = [
     "https://media1.giphy.com/media/gh38GGyKPFff36j6aE/200w.gif",
     "https://media3.giphy.com/media/jUKBVRKJwoB9fC8g8p/200.gif",
@@ -15,88 +22,11 @@ const catGifs = [
     "https://res.cloudinary.com/jerrick/image/upload/v1514493943/teqcyxcn1hboqpuwifcq.gif"
 ];
 
-let audioCtx = null;
-let churchClapBuffer = null;
-let churchClapSource = null;
-let catMeowBuffer = null;
-
 let originalDescText = null;
-
-async function initAudioContext() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-        await audioCtx.resume();
-    }
-}
-
-async function loadAudioBuffer(url) {
-    await initAudioContext();
-
-    try {
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        return await audioCtx.decodeAudioData(arrayBuffer);
-    } catch (e) {
-        console.error(`Failed to load audio from ${url}:`, e);
-        return null;
-    }
-}
-
-async function loadBuffers() {
-    if (!churchClapBuffer) {
-        churchClapBuffer = await loadAudioBuffer('../audio/churchclap.mp3');
-    }
-    if (!catMeowBuffer) {
-        catMeowBuffer = await loadAudioBuffer('../audio/catmeow.wav');
-    }
-}
-
-function playChurchClapLoop() {
-    if (!churchClapBuffer || !audioCtx) return;
-    if (churchClapSource) return; // already playing
-
-    churchClapSource = audioCtx.createBufferSource();
-    churchClapSource.buffer = churchClapBuffer;
-    churchClapSource.loop = true;
-
-    const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.9; // 50% volume
-
-    churchClapSource.connect(gainNode).connect(audioCtx.destination);
-    churchClapSource.start(0);
-}
-
-function stopChurchClapLoop() {
-    if (churchClapSource) {
-        churchClapSource.stop();
-        churchClapSource.disconnect();
-        churchClapSource = null;
-    }
-}
-
-function playCatMeow() {
-    if (!catMeowBuffer || !audioCtx) return;
-
-    const source = audioCtx.createBufferSource();
-    source.buffer = catMeowBuffer;
-
-    // Randomize pitch ±50 cents (±~3%)
-    source.playbackRate.value = 1 + (Math.random() * 0.06 - 0.03);
-
-    const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.4; // 40% volume
-
-    source.connect(gainNode).connect(audioCtx.destination);
-    source.start(0);
-}
 
 async function updateEffectState(active) {
     const img = document.getElementById('thumbnail');
     const desc = document.getElementById('description');
-
-    await initAudioContext();
 
     if (active) {
         img.classList.add('crazy-flash');
@@ -124,6 +54,82 @@ async function updateEffectState(active) {
     }
 }
 
+const circleColors = [
+    "#F19A8A", "#9ED5D9", "#B6D6EB", "#D7E5DB", "#68BAB3", "#89CAB5",
+    "#E4A3B2", "#EFD1E2", "#C5B5D3", "#CD7D88", "#E57A81", "#778592", "#323F4B"
+];
+
+let circleAnimationRunning = false;
+
+function spawnBackgroundCircle() {
+    const container = document.getElementById('background-circles');
+    const circle = document.createElement('div');
+
+    const size = Math.random() * 80 + 20;
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    const color = circleColors[Math.floor(Math.random() * circleColors.length)];
+
+    circle.style.position = 'absolute';
+    circle.style.left = `${x}px`;
+    circle.style.top = `${y}px`;
+    circle.style.width = `${size}px`;
+    circle.style.height = `${size}px`;
+    circle.style.borderRadius = '50%';
+    circle.style.backgroundColor = color;
+    circle.style.opacity = '0.7';
+    circle.style.zIndex = '1';
+
+    container.appendChild(circle);
+
+    // Fade and remove
+    setTimeout(() => {
+        circle.style.transition = 'opacity 2s ease-out';
+        circle.style.opacity = '0';
+        setTimeout(() => circle.remove(), 2000);
+    }, 500);
+}
+
+function startBackgroundCircles() {
+    if (circleAnimationRunning) return;
+    circleAnimationRunning = true;
+
+    function loop() {
+        if (!circleAnimationRunning) return;
+        spawnBackgroundCircle();
+        requestAnimationFrame(loop);
+    }
+
+    loop();
+}
+
+function stopBackgroundCircles() {
+    circleAnimationRunning = false;
+}
+
+// Update meter + background animation
+function updateCutenessMeter() {
+    const meterContainer = document.getElementById('cuteness-meter-container');
+    const meterFill = document.getElementById('cuteness-meter-fill');
+    const cats = document.querySelectorAll('.cat-gif').length;
+
+    if (cats > 0) {
+        meterContainer.style.display = 'block';
+        const percentage = Math.min(100, (cats / 20) * 100);
+        meterFill.style.width = `${percentage}%`;
+
+        if (percentage >= 100) {
+            startBackgroundCircles();
+        } else {
+            stopBackgroundCircles();
+        }
+    } else {
+        meterContainer.style.display = 'none';
+        meterFill.style.width = '0%';
+        stopBackgroundCircles();
+    }
+}
+
 function spawnCatGif(x, y) {
     playCatMeow();
 
@@ -143,6 +149,7 @@ function spawnCatGif(x, y) {
     let velY = 0;
 
     updateEffectState(true);
+    updateCutenessMeter();
 
     function animate() {
         const dx = posX + 50 - centerX;
@@ -168,6 +175,7 @@ function spawnCatGif(x, y) {
             if (!document.querySelector('.cat-gif')) {
                 updateEffectState(false);
             }
+            updateCutenessMeter();
         } else {
             requestAnimationFrame(animate);
         }

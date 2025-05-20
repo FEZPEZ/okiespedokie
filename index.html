@@ -7,10 +7,19 @@
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-<img id="thumbnail" alt="Loading..."/>
+<div id="thumbnail-container">
+    <div id="cuteness-meter-container">
+        <div id="cuteness-meter-fill"></div>
+    </div>
+    <img id="thumbnail" alt="Loading..."/>
+</div>
+
+<div id="background-circles"></div>
+
 <div id="description" class="normal">Loading description...</div>
 
-<script src="scripts/thumbnail.js"></script>
-<script src="scripts/cats.js"></script>
+<script type="module" src="scripts/thumbnail.js"></script>
+<script type="module" src="scripts/cats.js"></script>
 </body>
+
 </html>
