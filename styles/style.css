@@ -78,17 +78,17 @@ img#thumbnail {
 
 #cuteness-meter-container {
     position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 200px;
+    top: 0; /* Stick to the top of the thumbnail */
+    left: 0;
+    width: 100%; /* Match thumbnail width */
     height: 20px;
     border: 2px solid #ff69b4;
     background-color: #fff;
-    display: none;
-    z-index: 1;
+    display: none; /* Show via JS when needed */
+    z-index: 2; /* Ensure it's above the image */
     overflow: hidden;
 }
+
 
 #cuteness-meter-fill {
     height: 100%;
