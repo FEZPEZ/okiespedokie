@@ -2,9 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Wowie Zowie</title>
+    <style>
+        body {
+            background: #000;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            box-shadow: 0 0 20px #333;
+        }
+    </style>
 </head>
 <body>
-<b>This is the homepage!</b>
+<img id="thumbnail" alt="Loading..."/>
+
+<script>
+    const apiKey = 'AIzaSyCssneg_uP3Ezv2qC_Lbnbl15tkpRDkgHU';
+    const channelId = 'UCvukZoO33A0UcNI2g8uoxRg';
+
+    async function fetchVideoIds() {
+        const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet&type=video&maxResults=50`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.items.map(item => ({
+            videoId: item.id.videoId,
+            thumbnailUrl: item.snippet.thumbnails.maxres?.url ||
+                item.snippet.thumbnails.high?.url ||
+                item.snippet.thumbnails.default?.url
+        }));
+    }
+
+    async function displayRandomThumbnail() {
+        try {
+            const videos = await fetchVideoIds();
+            const random = videos[Math.floor(Math.random() * videos.length)];
+            const img = document.getElementById('thumbnail');
+            img.src = random.thumbnailUrl;
+        } catch (err) {
+            console.error('Failed to fetch thumbnail:', err);
+        }
+    }
+
+    displayRandomThumbnail();
+</script>
 </body>
 </html>
