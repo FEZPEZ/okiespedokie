@@ -8,20 +8,33 @@
             background: #000;
             margin: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            color: white;
+            font-family: sans-serif;
+            text-align: center;
+            padding: 1rem;
+            box-sizing: border-box;
         }
         img {
             max-width: 90vw;
-            max-height: 90vh;
+            max-height: 70vh;
             object-fit: contain;
             box-shadow: 0 0 20px #333;
+        }
+        #description {
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            max-width: 80vw;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
 <img id="thumbnail" alt="Loading..."/>
+<div id="description">Loading description...</div>
 
 <script>
     const apiKey = 'AIzaSyCssneg_uP3Ezv2qC_Lbnbl15tkpRDkgHU';
@@ -39,14 +52,27 @@
         }));
     }
 
+    async function fetchVideoDescription(videoId) {
+        const url = `https://www.googleapis.com/youtube/v3/videos?key=${apiKey}&id=${videoId}&part=snippet`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const desc = data.items[0]?.snippet?.description || '';
+        return desc.trim() !== '' ? desc : 'Funny video';
+    }
+
     async function displayRandomThumbnail() {
         try {
             const videos = await fetchVideoIds();
             const random = videos[Math.floor(Math.random() * videos.length)];
-            const img = document.getElementById('thumbnail');
-            img.src = random.thumbnailUrl;
+
+            document.getElementById('thumbnail').src = random.thumbnailUrl;
+
+            const description = await fetchVideoDescription(random.videoId);
+            document.getElementById('description').textContent = description;
+
         } catch (err) {
-            console.error('Failed to fetch thumbnail:', err);
+            console.error('Failed to fetch thumbnail or description:', err);
+            document.getElementById('description').textContent = 'Funny video';
         }
     }
 
