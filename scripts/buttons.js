@@ -14,6 +14,42 @@ const validCodes = {
 let buffer = "";
 const art = new CircleArt("bgCanvas");
 
+// --- Animation variables ---
+let chaseInterval = null;
+let chaseIndex = 0;
+
+// --- Chasing animation ---
+function startChase() {
+    if (chaseInterval) return;
+
+    chaseIndex = 0;
+    chaseInterval = setInterval(() => {
+        buttons.forEach((btn, idx) => {
+            btn.classList.remove("bg-pink-600");
+            btn.classList.add("bg-pink-400");
+        });
+
+        const current = buttons[chaseIndex % buttons.length];
+        current.classList.remove("bg-pink-400");
+        current.classList.add("bg-pink-600");
+
+        chaseIndex++;
+    }, 100); // Adjust speed here
+}
+
+function stopChase() {
+    if (chaseInterval) {
+        clearInterval(chaseInterval);
+        chaseInterval = null;
+    }
+    // Restore all buttons to base color
+    buttons.forEach(btn => {
+        btn.classList.remove("bg-pink-600");
+        btn.classList.add("bg-pink-400");
+    });
+}
+
+// --- Keypad logic ---
 function handleKey(key) {
     buffer += key;
     if (buffer.length > 10) buffer = buffer.slice(-10);
@@ -24,14 +60,17 @@ function handleKey(key) {
             messageEl.textContent = validCodes[code];
             matched = true;
             art.start();
+            startChase();
             return;
         }
     }
 
     messageEl.textContent = "";
     art.stop();
+    stopChase();
 }
 
+// --- Input listeners ---
 buttons.forEach((btn, i) => {
     const key = String(i + 1);
     btn.addEventListener("touchstart", e => {
@@ -44,6 +83,7 @@ buttons.forEach((btn, i) => {
     });
 });
 
+// --- Prevent double-tap zoom on mobile ---
 let lastTouchEnd = 0;
 document.addEventListener('touchend', (e) => {
     const now = Date.now();

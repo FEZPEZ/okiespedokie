@@ -25,7 +25,7 @@ export class CircleArt {
             x: Math.random() * this.width,
             y: Math.random() * this.height,
             r: Math.random() * 30 + 10,
-            opacity: 1
+            opacity: 0.3
         };
     }
 
