@@ -1,25 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-pink-100">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Wowie Zowie</title>
-    <link rel="stylesheet" href="styles/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pink Keypad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
 </head>
-<body>
-<div id="thumbnail-container">
-    <div id="cuteness-meter-container">
-        <div id="cuteness-meter-fill"></div>
-    </div>
-    <img id="thumbnail" alt="Loading..."/>
+<body class="flex flex-col items-center justify-center h-full">
+<div id="message" class="text-center text-pink-700 font-bold text-2xl mb-4 h-8"></div>
+<div class="grid grid-cols-3 gap-4 w-64">
+    <!-- Generate keypad buttons -->
+    <script>
+        const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        document.write(keys.map(k => `
+        <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg active:bg-pink-600 ${k === '' ? 'invisible' : ''}"
+                onclick="handleKey('${k}')">
+          ${k}
+        </button>
+      `).join(''));
+    </script>
 </div>
 
-<div id="background-circles"></div>
+<script>
+    const validCodes = {
+        "1234": "Access Granted",
+        "5678": "Welcome Back",
+        "1111": "Admin Mode"
+    };
 
-<div id="description" class="normal">Loading description...</div>
+    let buffer = "";
 
-<script type="module" src="scripts/thumbnail.js"></script>
-<script type="module" src="scripts/cats.js"></script>
+    function handleKey(key) {
+        if (key === 'C') {
+            buffer = "";
+            document.getElementById('message').textContent = "";
+            return;
+        }
+        if (!/\d/.test(key)) return;
+
+        buffer += key;
+        if (buffer.length > 10) buffer = buffer.slice(-10); // prevent unbounded growth
+
+        for (const code in validCodes) {
+            if (buffer.endsWith(code)) {
+                document.getElementById('message').textContent = validCodes[code];
+                return;
+            }
+        }
+    }
+</script>
 </body>
-
 </html>
