@@ -1,110 +1,47 @@
-body {
-    background: #000;
+html, body {
+    height: 100%;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    color: white;
-    font-family: sans-serif;
-    text-align: center;
-    padding: 1rem;
-    box-sizing: border-box;
     overflow: hidden;
-    position: relative;
+    user-select: none;
     touch-action: manipulation;
 }
 
-img#thumbnail {
-    max-width: 90vw;
-    max-height: 70vh;
-    object-fit: contain;
-    box-shadow: 0 0 20px #333;
+button {
+    -webkit-tap-highlight-color: transparent;
+    transition: none;
 }
 
-@keyframes crazyShake {
-    0%   { transform: translate(0px, 0px); }
-    25%  { transform: translate(-7px, 3px); }
-    50%  { transform: translate(8px, -4px); }
-    75%  { transform: translate(-3px, 7px); }
-    100% { transform: translate(0px, 0px); }
+button:active {
+    background-color: #be185d;
+    transform: scale(0.9);
 }
 
-.crazy-flash {
-    animation: crazyShake 0.1s infinite;
-}
-
-#description {
-    min-height: 4rem; /* or whatever height fits your largest font size */
-}
-
-#description.crazy-flash {
-    display: block; /* or block */
-    position: relative;
-    font-size: 2.2rem;
-    max-width: 80vw;
-    white-space: pre-wrap;
-    font-weight: bold;
-    background: linear-gradient(270deg, red, yellow, orange, hotpink, pink);
-    background-size: 1400% 1400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: rainbow 5s linear infinite, crazyShake 0.1s infinite;
-}
-
-#description.normal {
-    font-size: 1.2rem;
-}
-
-@keyframes rainbow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
-}
-
-.cat-gif {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
+svg {
+    stroke-width: 2.5;
+    stroke: white;
+    width: 2.5rem;
+    height: 2.5rem;
     pointer-events: none;
-    z-index: 4;
 }
 
-#thumbnail-container {
-    position: relative;
-    display: inline-block;
-}
-
-#cuteness-meter-container {
+canvas#bgCanvas {
     position: absolute;
-    top: -30px; /* Stick to the top of the thumbnail */
-    left: 0;
-    width: 100%; /* Match thumbnail width */
-    height: 20px;
-    border: 2px solid #ff69b4;
-    background-color: #fff;
-    display: none; /* Show via JS when needed */
-    z-index: 2; /* Ensure it's above the image */
-    overflow: hidden;
-}
-
-
-#cuteness-meter-fill {
-    height: 100%;
-    width: 0%;
-    background-color: #ff69b4;
-    transition: width 0.2s ease-out;
-}
-
-#background-circles {
-    position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
     z-index: 0;
-    overflow: hidden;
+    pointer-events: none;
 }
 
+#ui {
+    position: relative;
+    z-index: 10;
+}
+
+.btn {
+    background-color: #f472b6; /* Tailwind pink-400 */
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

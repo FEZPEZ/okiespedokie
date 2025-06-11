@@ -3,127 +3,31 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Pink Keypad with Lucide Icons</title>
+    <title>Pink Keypad</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide CDN (unchanged) -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            overflow: hidden;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            touch-action: manipulation;
-        }
-
-        button {
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            /* Remove all transitions for instant response */
-            transition: none;
-        }
-
-        button:active {
-            background-color: #be185d; /* Tailwind pink-700 */
-            transform: scale(0.9);
-        }
-
-        svg {
-            stroke-width: 2.5;
-            stroke: white;
-            width: 2.5rem;
-            height: 2.5rem;
-            pointer-events: none;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/style.css">
 </head>
-<body class="flex flex-col items-center justify-center h-full">
-<div id="message" class="text-center text-pink-700 font-bold text-2xl mb-4 h-8"></div>
-<div class="grid grid-cols-3 gap-4 w-64 max-w-full px-2">
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="1">
-        <svg data-lucide="flame"></svg>
-    </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="2">
-        <svg data-lucide="paw-print"></svg>
-    </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="3">
-        <svg data-lucide="key"></svg>
-    </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="4">
-        <svg data-lucide="star"></svg>
-    </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="5">
-        <svg data-lucide="heart"></svg>
-    </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="6">
-        <svg data-lucide="moon"></svg>
-    </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="7">
-        <svg data-lucide="sun"></svg>
-    </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="8">
-        <svg data-lucide="umbrella"></svg>
-    </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="9">
-        <svg data-lucide="zap"></svg>
-    </button>
+<body class="flex flex-col items-center justify-center h-full relative">
+<canvas id="bgCanvas"></canvas>
+
+<div id="ui" class="flex flex-col items-center justify-center">
+    <div id="message" class="text-center text-pink-700 font-bold text-2xl mb-4 h-8"></div>
+    <div class="grid grid-cols-3 gap-4 w-64 max-w-full px-2">
+        <!-- Buttons 1 to 9 -->
+        <button class="btn" aria-label="1"><svg data-lucide="flame"></svg></button>
+        <button class="btn" aria-label="2"><svg data-lucide="paw-print"></svg></button>
+        <button class="btn" aria-label="3"><svg data-lucide="key"></svg></button>
+        <button class="btn" aria-label="4"><svg data-lucide="star"></svg></button>
+        <button class="btn" aria-label="5"><svg data-lucide="heart"></svg></button>
+        <button class="btn" aria-label="6"><svg data-lucide="moon"></svg></button>
+        <button class="btn" aria-label="7"><svg data-lucide="sun"></svg></button>
+        <button class="btn" aria-label="8"><svg data-lucide="umbrella"></svg></button>
+        <button class="btn" aria-label="9"><svg data-lucide="zap"></svg></button>
+    </div>
 </div>
 
-<script>
-    lucide.createIcons();
-
-    const validCodes = {
-        "1234": "look in the tree",
-        "5678": "go under the deck",
-        "1397": "feed the chickens"
-    };
-
-    let buffer = "";
-
-    function handleKey(key) {
-        buffer += key;
-        if (buffer.length > 10) buffer = buffer.slice(-10);
-
-        let matched = false;
-        for (const code in validCodes) {
-            if (buffer.endsWith(code)) {
-                document.getElementById('message').textContent = validCodes[code];
-                matched = true;
-                break;
-            }
-        }
-
-        if (!matched) {
-            document.getElementById('message').textContent = "";
-        }
-    }
-
-    // Add fast event listeners
-    document.querySelectorAll("button").forEach((btn, index) => {
-        const key = String(index + 1);
-
-        btn.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            handleKey(key);
-        }, { passive: false });
-
-        btn.addEventListener("mousedown", () => {
-            handleKey(key);
-        });
-    });
-
-    // Prevent double-tap zoom
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
-            e.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, false);
-</script>
+<script type="module" src="scripts/circle-art.js"></script>
+<script type="module" src="scripts/buttons.js"></script>
 </body>
 </html>
