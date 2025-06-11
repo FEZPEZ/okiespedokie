@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" class="bg-pink-100">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Pink Keypad</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -14,43 +14,54 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            touch-action: manipulation; /* prevents double-tap zoom on most browsers */
+        }
+        button:active {
+            /* fallback in case JS fails */
+            transform: scale(0.9);
+            background-color: #be185d; /* Tailwind pink-700 */
         }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center h-full">
 <div id="message" class="text-center text-pink-700 font-bold text-2xl mb-4 h-8"></div>
 <div class="grid grid-cols-3 gap-4 w-64">
-    <!-- Generate keypad buttons -->
-    <script>
-        const keys = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        document.write(keys.map(k => `
-        <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg active:bg-pink-600 ${k === '' ? 'invisible' : ''}"
-                onclick="handleKey('${k}')">
-          ${k}
-        </button>
-      `).join(''));
-    </script>
+    <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg" onclick="handleKey('1')">1</button>
+    <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg" onclick="handleKey('2')">2</button>
+    <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg" onclick="handleKey('3')">3</button>
+    <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg" onclick="handleKey('4')">4</button>
+    <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg" onclick="handleKey('5')">5</button>
+    <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg" onclick="handleKey('6')">6</button>
+    <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg" onclick="handleKey('7')">7</button>
+    <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg" onclick="handleKey('8')">8</button>
+    <button class="bg-pink-400 text-white text-2xl font-semibold p-6 rounded-lg" onclick="handleKey('9')">9</button>
 </div>
 
 <script>
     const validCodes = {
         "1234": "Access Granted",
         "5678": "Welcome Back",
-        "1111": "Admin Mode"
+        "9876": "Special Code"
     };
 
     let buffer = "";
 
     function handleKey(key) {
-        if (key === 'C') {
-            buffer = "";
-            document.getElementById('message').textContent = "";
-            return;
-        }
-        if (!/\d/.test(key)) return;
+        const btn = event.currentTarget;
+        if (!btn) return;
+
+        // Visual feedback: scale and color change temporarily
+        btn.style.transition = "transform 0.15s ease, background-color 0.15s ease";
+        btn.style.transform = "scale(0.9)";
+        btn.style.backgroundColor = "#be185d"; // Tailwind pink-700
+
+        setTimeout(() => {
+            btn.style.transform = "";
+            btn.style.backgroundColor = "#ec4899"; // Tailwind pink-400
+        }, 150);
 
         buffer += key;
-        if (buffer.length > 10) buffer = buffer.slice(-10); // prevent unbounded growth
+        if (buffer.length > 10) buffer = buffer.slice(-10);
 
         for (const code in validCodes) {
             if (buffer.endsWith(code)) {
@@ -58,7 +69,18 @@
                 return;
             }
         }
+        document.getElementById('message').textContent = "";
     }
+
+    // Prevent double-tap zoom by blocking double taps quickly in succession
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
 </script>
 </body>
 </html>
