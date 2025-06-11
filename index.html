@@ -7,12 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="styles/style.css">
+
 </head>
 <body class="flex flex-col items-center justify-center h-full relative">
 <canvas id="bgCanvas"></canvas>
 
 <div id="ui" class="flex flex-col items-center justify-center">
-    <div id="message" class="text-center text-pink-700 font-bold text-2xl mb-4 h-8"></div>
+    <div id="message-wrapper">
+        <div id="message"></div>
+    </div>
     <div class="grid grid-cols-3 gap-4 w-64 max-w-full px-2">
         <!-- Buttons 1 to 9 -->
         <button class="btn" aria-label="1"><svg data-lucide="flame"></svg></button>
@@ -26,6 +29,7 @@
         <button class="btn" aria-label="9"><svg data-lucide="zap"></svg></button>
     </div>
 </div>
+
 
 <script type="module" src="scripts/circle-art.js"></script>
 <script type="module" src="scripts/buttons.js"></script>

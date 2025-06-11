@@ -6,7 +6,7 @@ const messageEl = document.getElementById("message");
 const buttons = document.querySelectorAll(".btn");
 
 const validCodes = {
-    "1234": "look in the tree",
+    "1234": "look in the tree what is going on are you going to look or what",
     "5678": "go under the deck",
     "1397": "feed the chickens"
 };
