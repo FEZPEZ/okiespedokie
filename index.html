@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Pink Keypad with Lucide Icons</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide CDN -->
+    <!-- Lucide CDN (unchanged) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         html, body {
@@ -16,56 +16,58 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            touch-action: manipulation; /* prevent double-tap zoom */
+            touch-action: manipulation;
         }
+
         button {
-            transition-property: background-color, transform;
-            transition-duration: 150ms;
-            transition-timing-function: ease-in-out;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            /* Remove all transitions for instant response */
+            transition: none;
         }
+
         button:active {
             background-color: #be185d; /* Tailwind pink-700 */
             transform: scale(0.9);
         }
+
         svg {
             stroke-width: 2.5;
             stroke: white;
-            width: 2.5rem; /* 40px */
+            width: 2.5rem;
             height: 2.5rem;
-            pointer-events: none; /* Make sure taps go to button */
+            pointer-events: none;
         }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center h-full">
 <div id="message" class="text-center text-pink-700 font-bold text-2xl mb-4 h-8"></div>
 <div class="grid grid-cols-3 gap-4 w-64 max-w-full px-2">
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" onclick="handleKey('1')" aria-label="1">
+    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="1">
         <svg data-lucide="flame"></svg>
     </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" onclick="handleKey('2')" aria-label="2">
+    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="2">
         <svg data-lucide="paw-print"></svg>
     </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" onclick="handleKey('3')" aria-label="3">
+    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="3">
         <svg data-lucide="key"></svg>
     </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" onclick="handleKey('4')" aria-label="4">
+    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="4">
         <svg data-lucide="star"></svg>
     </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" onclick="handleKey('5')" aria-label="5">
+    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="5">
         <svg data-lucide="heart"></svg>
     </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" onclick="handleKey('6')" aria-label="6">
+    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="6">
         <svg data-lucide="moon"></svg>
     </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" onclick="handleKey('7')" aria-label="7">
+    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="7">
         <svg data-lucide="sun"></svg>
     </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" onclick="handleKey('8')" aria-label="8">
+    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="8">
         <svg data-lucide="umbrella"></svg>
     </button>
-    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" onclick="handleKey('9')" aria-label="9">
+    <button class="bg-pink-400 p-6 rounded-lg flex items-center justify-center" aria-label="9">
         <svg data-lucide="zap"></svg>
     </button>
 </div>
@@ -93,12 +95,27 @@
                 break;
             }
         }
+
         if (!matched) {
             document.getElementById('message').textContent = "";
         }
     }
 
-    // Prevent double-tap zoom by blocking double taps quickly in succession
+    // Add fast event listeners
+    document.querySelectorAll("button").forEach((btn, index) => {
+        const key = String(index + 1);
+
+        btn.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            handleKey(key);
+        }, { passive: false });
+
+        btn.addEventListener("mousedown", () => {
+            handleKey(key);
+        });
+    });
+
+    // Prevent double-tap zoom
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (e) => {
         const now = Date.now();
