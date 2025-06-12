@@ -50,24 +50,26 @@ function stopChase() {
 }
 
 // --- Circle Button Activation ---
-function enableCircleButton(code, message) {
+function enableCircleButton(code, data) {
     if (codeToButton[code]) return;
 
-    const btn = [...circleButtons].find(b => !b.classList.contains("enabled"));
-    if (!btn) return;
+    const btnIndex = data.buttonIndex;
+    if (btnIndex == null || btnIndex < 0 || btnIndex >= circleButtons.length) return;
+
+    const btn = circleButtons[btnIndex];
+    if (!btn || btn.classList.contains("enabled")) return;
 
     btn.classList.add("enabled");
     btn.disabled = false;
     btn.dataset.code = code;
-    btn.dataset.message = message;
+    btn.dataset.message = data.message;
     codeToButton[code] = btn;
 
-    // Pop animation
+    // Flash animation
     btn.classList.add("pop");
-    setTimeout(() => {
-        btn.classList.remove("pop");
-    }, 800);
+    setTimeout(() => btn.classList.remove("pop"), 800);
 }
+
 
 // --- Message Display ---
 function showMessage(text) {
@@ -88,7 +90,7 @@ function handleKey(key) {
         if (buffer.endsWith(code) && !usedCodes.has(code)) {
             enableCircleButton(code, validCodes[code]);
             usedCodes.add(code);
-            showMessage(validCodes[code]);
+            showMessage(validCodes[code].message);
             buffer = "";
 
             art.start();

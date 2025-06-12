@@ -58,18 +58,30 @@ canvas#bgCanvas {
 /* Wrap message and buttons in a container with fixed height */
 #message-wrapper {
     position: relative;
-    width: 16rem; /* same as grid width */
-    height: 3.5rem; /* fixed height to match message's expected max height */
-    overflow-y: visible; /* or hidden if you want to clip */
+    width: 18rem;
+    height: 3.5rem;
     display: flex;
-    align-items: flex-end; /* bottom justify text */
-    margin-bottom: 2rem; /* spacing from buttons */
+    align-items: flex-end;
+    justify-content: center; /* center text even with inline-block pop */
+    margin-bottom: 2rem;
+    overflow: visible; /* allow scaled content to overflow if needed */
+    padding: 0 0.5rem; /* space to prevent clipping */
+    box-sizing: content-box;
 }
+
+.message-content {
+    display: inline-block;
+    max-width: 100%;
+    word-break: break-word;
+    flex-shrink: 1; /* allow scaling down without forcing overflow */
+}
+
 
 #message {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
+    transform: scale(0.93);
     background: linear-gradient(270deg,
     #ff0000,
     #ff7f00,
@@ -103,10 +115,10 @@ canvas#bgCanvas {
 
 @keyframes messagePop {
     0% {
-        transform: scale(1.1);
+        transform: scale(1);
     }
     100% {
-        transform: scale(1);
+        transform: scale(0.93);
     }
 }
 
