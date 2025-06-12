@@ -162,7 +162,7 @@ circleButtons.forEach(btn => {
     };
 
     btn.addEventListener("touchstart", handlePress, { passive: true });
-    btn.addEventListener("click", handlePress); // covers desktop and mouse input
+    btn.addEventListener("mousedown", handlePress); // covers desktop and mouse input
 });
 
 
