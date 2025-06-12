@@ -3,27 +3,29 @@ import { fetchCodes } from './code-loader.js';
 
 lucide.createIcons();
 
+// DOM References
 const messageEl = document.getElementById("message");
+const contentEl = messageEl.querySelector(".message-content");
 const buttons = document.querySelectorAll(".btn");
+const circleButtons = document.querySelectorAll(".circle-btn");
 
-const sheetId = "YOUR_SHEET_ID"; // <-- Replace this with your actual ID
-const sheetName = "Sheet1";      // Optional: change if your sheet name is different
-
+// State
 let validCodes = {};
+let usedCodes = new Set();
 let buffer = "";
+let codeToButton = {};
 const art = new CircleArt("bgCanvas");
 
-// --- Animation variables ---
+// --- Animation: Keypad Chase ---
 let chaseInterval = null;
 let chaseIndex = 0;
 
-// --- Chasing animation ---
 function startChase() {
     if (chaseInterval) return;
 
     chaseIndex = 0;
     chaseInterval = setInterval(() => {
-        buttons.forEach((btn, idx) => {
+        buttons.forEach(btn => {
             btn.classList.remove("bg-pink-600");
             btn.classList.add("bg-pink-400");
         });
@@ -47,26 +49,60 @@ function stopChase() {
     });
 }
 
-// --- Keypad logic ---
+// --- Circle Button Activation ---
+function enableCircleButton(code, message) {
+    if (codeToButton[code]) return;
+
+    const btn = [...circleButtons].find(b => !b.classList.contains("enabled"));
+    if (!btn) return;
+
+    btn.classList.add("enabled");
+    btn.disabled = false;
+    btn.dataset.code = code;
+    btn.dataset.message = message;
+    codeToButton[code] = btn;
+
+    // Pop animation
+    btn.classList.add("pop");
+    setTimeout(() => {
+        btn.classList.remove("pop");
+    }, 800);
+}
+
+// --- Message Display ---
+function showMessage(text) {
+    if (!contentEl) return;
+    contentEl.textContent = text;
+
+    contentEl.classList.remove("animate-pop");
+    void contentEl.offsetWidth; // trigger reflow
+    contentEl.classList.add("animate-pop");
+}
+
+// --- Keypad Entry ---
 function handleKey(key) {
     buffer += key;
     if (buffer.length > 10) buffer = buffer.slice(-10);
 
     for (const code in validCodes) {
-        if (buffer.endsWith(code)) {
-            messageEl.textContent = validCodes[code];
+        if (buffer.endsWith(code) && !usedCodes.has(code)) {
+            enableCircleButton(code, validCodes[code]);
+            usedCodes.add(code);
+            showMessage(validCodes[code]);
+            buffer = "";
+
             art.start();
             startChase();
             return;
         }
     }
 
-    messageEl.textContent = "";
+    contentEl.textContent = "";
     art.stop();
     stopChase();
 }
 
-// --- Input listeners ---
+// --- Button Events ---
 buttons.forEach((btn, i) => {
     const key = String(i + 1);
     btn.addEventListener("touchstart", e => {
@@ -74,22 +110,29 @@ buttons.forEach((btn, i) => {
         handleKey(key);
     }, { passive: false });
 
-    btn.addEventListener("mousedown", () => {
-        handleKey(key);
+    btn.addEventListener("mousedown", () => handleKey(key));
+});
+
+circleButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        const msg = btn.dataset.message;
+        if (msg) {
+            showMessage(msg);
+        }
+        art.stop();
+        stopChase();
     });
 });
 
-// --- Prevent double-tap zoom on mobile ---
+// --- Prevent mobile zoom ---
 let lastTouchEnd = 0;
-document.addEventListener('touchend', (e) => {
+document.addEventListener("touchend", e => {
     const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-    }
+    if (now - lastTouchEnd <= 300) e.preventDefault();
     lastTouchEnd = now;
 }, false);
 
-// --- Load codes from sheet ---
+// --- Fetch code data ---
 (async () => {
-    validCodes = await fetchCodes(sheetId, sheetName);
+    validCodes = await fetchCodes();
 })();

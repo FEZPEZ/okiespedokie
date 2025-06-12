@@ -7,17 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="styles/style.css">
-
 </head>
 <body class="flex flex-col items-center justify-center h-full relative">
 <canvas id="bgCanvas"></canvas>
 
 <div id="ui" class="flex flex-col items-center justify-center">
     <div id="message-wrapper">
-        <div id="message"></div>
+        <div id="message"><span class="message-content"></span></div>
     </div>
+
+    <!-- Keypad Grid -->
     <div class="grid grid-cols-3 gap-4 w-64 max-w-full px-2">
-        <!-- Buttons 1 to 9 -->
         <button class="btn" aria-label="1"><svg data-lucide="flame"></svg></button>
         <button class="btn" aria-label="2"><svg data-lucide="paw-print"></svg></button>
         <button class="btn" aria-label="3"><svg data-lucide="key"></svg></button>
@@ -28,10 +28,16 @@
         <button class="btn" aria-label="8"><svg data-lucide="umbrella"></svg></button>
         <button class="btn" aria-label="9"><svg data-lucide="zap"></svg></button>
     </div>
+
+    <!-- Extra Buttons Below -->
+    <div id="circle-buttons" class="flex gap-4 mt-6">
+        <button class="circle-btn" data-id="1" disabled>1</button>
+        <button class="circle-btn" data-id="2" disabled>2</button>
+        <button class="circle-btn" data-id="3" disabled>3</button>
+        <button class="circle-btn" data-id="4" disabled>4</button>
+    </div>
 </div>
 
-
-<script type="module" src="scripts/circle-art.js"></script>
 <script type="module" src="scripts/buttons.js"></script>
 </body>
 </html>
