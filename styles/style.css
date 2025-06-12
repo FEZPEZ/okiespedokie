@@ -69,50 +69,38 @@ canvas#bgCanvas {
     box-sizing: content-box;
 }
 
-.message-content {
-    display: inline-block;
-    max-width: 100%;
-    word-break: break-word;
-    flex-shrink: 1; /* allow scaling down without forcing overflow */
-}
-
-
 #message {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
     font-size: 1.6rem;
     transform: scale(0.93);
+    text-align: center;
+    width: 100%;
+    word-wrap: break-word;
+    margin: 0;
+}
+
+/* Apply static rainbow gradient to the inner text span */
+.message-content {
+    display: inline-block;
+    max-width: 100%;
+    word-break: break-word;
+    flex-shrink: 1;
     background: linear-gradient(270deg,
     #ff0000,
     #ff7f00,
     #ffff00,
-    #00ff00,
-    #0000ff,
-    #4b0082,
+    #2d2dff,
+    #9403ff,
     #8f00ff,
     #ff0000);
-    background-size: 1400% 1400%;
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: rainbow 8s ease infinite;
-    text-align: center;
-    width: 100%;
-    word-wrap: break-word;
-    margin: 0; /* remove default margin */
+    transform: scale(0.93);
 }
 
-@keyframes rainbow {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
+/* Pop animation without gradient change */
 @keyframes messagePop {
     0% {
         transform: scale(1);
@@ -122,9 +110,11 @@ canvas#bgCanvas {
     }
 }
 
-.message-wrapper.animate-pop {
+.message-content.animate-pop {
     animation: messagePop 0.08s cubic-bezier(0.4, 0, 1, 1) forwards;
+    display: inline-block;
 }
+
 
 /* Buttons container fixed width and grid */
 .grid {

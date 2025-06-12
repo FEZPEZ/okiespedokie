@@ -152,15 +152,19 @@ buttons.forEach((btn, i) => {
 });
 
 circleButtons.forEach(btn => {
-    btn.addEventListener("touchstart", () => {
+    const handlePress = () => {
         const msg = btn.dataset.message;
         if (msg) {
             showMessage(msg);
         }
         art.stop();
         stopChase();
-    });
+    };
+
+    btn.addEventListener("touchstart", handlePress, { passive: true });
+    btn.addEventListener("click", handlePress); // covers desktop and mouse input
 });
+
 
 // --- Prevent mobile zoom ---
 let lastTouchEnd = 0;
