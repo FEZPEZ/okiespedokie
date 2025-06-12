@@ -49,8 +49,36 @@ function stopChase() {
     });
 }
 
+// --- Persistence ---
+
+function saveState(lastMessage = "") {
+    localStorage.setItem('usedCodes', JSON.stringify(Array.from(usedCodes)));
+    if (lastMessage !== undefined) {
+        localStorage.setItem('lastMessage', lastMessage);
+    }
+}
+
+
+function loadState() {
+    const savedUsed = localStorage.getItem('usedCodes');
+    if (savedUsed) {
+        try {
+            usedCodes = new Set(JSON.parse(savedUsed));
+        } catch {
+            usedCodes = new Set();
+        }
+    }
+
+    // Enable circle buttons for persisted codes WITHOUT animation
+    for (const code of usedCodes) {
+        if (validCodes[code]) {
+            enableCircleButton(code, validCodes[code], true);
+        }
+    }
+}
+
 // --- Circle Button Activation ---
-function enableCircleButton(code, data) {
+function enableCircleButton(code, data, skipAnimation = false) {
     if (codeToButton[code]) return;
 
     const btnIndex = data.buttonIndex;
@@ -65,20 +93,28 @@ function enableCircleButton(code, data) {
     btn.dataset.message = data.message;
     codeToButton[code] = btn;
 
-    // Flash animation
-    btn.classList.add("pop");
-    setTimeout(() => btn.classList.remove("pop"), 800);
+    if (!skipAnimation) {
+        btn.classList.add("pop");
+        setTimeout(() => btn.classList.remove("pop"), 800);
+    }
+
+    // Save state to persist this activation
+    if (!skipAnimation) saveState(data.message);
 }
 
-
 // --- Message Display ---
-function showMessage(text) {
+function showMessage(text, skipAnimation = false) {
     if (!contentEl) return;
     contentEl.textContent = text;
 
-    contentEl.classList.remove("animate-pop");
-    void contentEl.offsetWidth; // trigger reflow
-    contentEl.classList.add("animate-pop");
+    if (!skipAnimation) {
+        contentEl.classList.remove("animate-pop");
+        void contentEl.offsetWidth; // trigger reflow
+        contentEl.classList.add("animate-pop");
+    }
+
+    // Save current message so it persists
+    if (!skipAnimation) saveState(text);
 }
 
 // --- Keypad Entry ---
@@ -134,7 +170,12 @@ document.addEventListener("touchend", e => {
     lastTouchEnd = now;
 }, false);
 
-// --- Fetch code data ---
+// --- Fetch code data and load persisted state ---
 (async () => {
     validCodes = await fetchCodes();
+
+    // Assuming fetchCodes returns an object like:
+    // { "1111": { message: "...", buttonIndex: 0 }, ... }
+
+    loadState();
 })();
