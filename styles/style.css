@@ -81,25 +81,17 @@ canvas#bgCanvas {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
     font-size: 1.6rem;
-    transform: scale(0.93);
-    background: linear-gradient(270deg,
-    #ff0000,
-    #ff7f00,
-    #ffff00,
-    #00ff00,
-    #0000ff,
-    #4b0082,
-    #8f00ff,
-    #ff0000);
-    background-size: 1400% 1400%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: rainbow 8s ease infinite;
+    color: black;
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    transform: none;
+    animation: none;
     text-align: center;
     width: 100%;
-    word-wrap: break-word;
-    margin: 0; /* remove default margin */
+    margin: 0;
 }
+
 
 @keyframes rainbow {
     0% {
