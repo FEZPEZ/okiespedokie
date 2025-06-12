@@ -143,26 +143,24 @@ function handleKey(key) {
 // --- Button Events ---
 buttons.forEach((btn, i) => {
     const key = String(i + 1);
-    btn.addEventListener("touchstart", e => {
-        e.preventDefault();
-        handleKey(key);
-    }, { passive: false });
-
-    btn.addEventListener("mousedown", () => handleKey(key));
+    btn.addEventListener("pointerdown", e => {
+        if (e.pointerType === "mouse" || e.pointerType === "touch") {
+            handleKey(key);
+        }
+    });
 });
 
 circleButtons.forEach(btn => {
-    const handlePress = () => {
-        const msg = btn.dataset.message;
-        if (msg) {
-            showMessage(msg);
+    btn.addEventListener("pointerdown", e => {
+        if (e.pointerType === "mouse" || e.pointerType === "touch") {
+            const msg = btn.dataset.message;
+            if (msg) {
+                showMessage(msg);
+            }
+            art.stop();
+            stopChase();
         }
-        art.stop();
-        stopChase();
-    };
-
-    btn.addEventListener("touchstart", handlePress, { passive: true });
-    btn.addEventListener("mousedown", handlePress); // covers desktop and mouse input
+    });
 });
 
 
