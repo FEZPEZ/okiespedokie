@@ -152,7 +152,7 @@ buttons.forEach((btn, i) => {
 });
 
 circleButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("touchstart", () => {
         const msg = btn.dataset.message;
         if (msg) {
             showMessage(msg);

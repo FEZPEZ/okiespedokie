@@ -81,17 +81,25 @@ canvas#bgCanvas {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
     font-size: 1.6rem;
-    color: black;
-    background: none;
-    -webkit-background-clip: unset;
-    -webkit-text-fill-color: unset;
-    transform: none;
-    animation: none;
+    transform: scale(0.93);
+    background: linear-gradient(270deg,
+    #ff0000,
+    #ff7f00,
+    #ffff00,
+    #00ff00,
+    #0000ff,
+    #4b0082,
+    #8f00ff,
+    #ff0000);
+    background-size: 1400% 1400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow 8s ease infinite;
     text-align: center;
     width: 100%;
-    margin: 0;
+    word-wrap: break-word;
+    margin: 0; /* remove default margin */
 }
-
 
 @keyframes rainbow {
     0% {
@@ -114,11 +122,9 @@ canvas#bgCanvas {
     }
 }
 
-.message-content.animate-pop {
+.message-wrapper.animate-pop {
     animation: messagePop 0.08s cubic-bezier(0.4, 0, 1, 1) forwards;
-    display: inline-block;
 }
-
 
 /* Buttons container fixed width and grid */
 .grid {
