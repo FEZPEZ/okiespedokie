@@ -14,6 +14,11 @@ html, body {
     touch-action: manipulation;
 }
 
+body.fade-to-black {
+    background-color: black;
+    transition: background-color 1.5s ease;
+}
+
 button {
     -webkit-tap-highlight-color: transparent;
     transition: none;
@@ -104,6 +109,12 @@ canvas#bgCanvas {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     transform: scale(0.93);
+}
+
+.message-content.fade-to-white {
+    background: none !important;
+    -webkit-text-fill-color: white;
+    transition: color 1.5s ease, -webkit-text-fill-color 1.5s ease;
 }
 
 /* Pop animation without gradient change */

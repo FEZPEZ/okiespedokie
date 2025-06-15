@@ -16,6 +16,14 @@ let buffer = "";
 let codeToButton = {};
 const art = new CircleArt("bgCanvas");
 
+let tapSequence = [];
+const maxTapLength = 4;
+let unlockSequence = [];
+let unlockMessage = "";
+let userCircleSequence = [];
+
+
+
 // --- Animation: Keypad Chase ---
 let chaseInterval = null;
 let chaseIndex = 0;
@@ -150,13 +158,33 @@ buttons.forEach((btn, i) => {
     });
 });
 
-circleButtons.forEach(btn => {
+circleButtons.forEach((btn, index) => {
     btn.addEventListener("pointerdown", e => {
         if (e.pointerType === "mouse" || e.pointerType === "touch") {
             const msg = btn.dataset.message;
             if (msg) {
                 showMessage(msg);
             }
+
+            // Track input for unlock sequence
+            if (unlockSequence.length > 0) {
+                userCircleSequence.push(index);
+
+                if (userCircleSequence.length === unlockSequence.length) {
+                    const matched = unlockSequence.every(
+                        (val, i) => userCircleSequence[i] === val
+                    );
+
+                    if (matched) {
+                        showMessage(unlockMessage);
+                        userCircleSequence = [];
+                        triggerFinalSequence();
+                    } else {
+                        userCircleSequence = []; // reset on wrong input
+                    }
+                }
+            }
+
             art.stop();
             stopChase();
         }
@@ -172,12 +200,56 @@ document.addEventListener("touchend", e => {
     lastTouchEnd = now;
 }, false);
 
+
+function triggerFinalSequence() {
+    // 1. Disable all buttons
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.pointerEvents = "none";
+    });
+    circleButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.pointerEvents = "none";
+    });
+
+    // 2. Fade out all circle buttons
+    circleButtons.forEach(btn => {
+        btn.style.transition = "opacity 0.8s ease";
+        btn.style.opacity = "0";
+    });
+
+    // 3. Flatten each main button one-by-one
+    buttons.forEach((btn, i) => {
+        setTimeout(() => {
+            btn.style.transition = "transform 0.4s ease, opacity 0.4s ease";
+            btn.style.transform = "scaleX(0)";
+            btn.style.opacity = "0";
+        }, i * 120);
+    });
+
+    // 4. Fade background to black and message to white
+    document.body.classList.add("fade-to-black");
+    contentEl.classList.add("fade-to-white");
+}
+
+
+
+
 // --- Fetch code data and load persisted state ---
 (async () => {
-    validCodes = await fetchCodes();
-
-    // Assuming fetchCodes returns an object like:
-    // { "1111": { message: "...", buttonIndex: 0 }, ... }
+    const { codes, circleUnlock } = await fetchCodes();
+    validCodes = codes;
 
     loadState();
+
+    // Setup circle sequence unlock
+    if (
+        circleUnlock &&
+        Array.isArray(circleUnlock.sequence) &&
+        circleUnlock.sequence.length >= 4
+    ) {
+        unlockSequence = circleUnlock.sequence;
+        unlockMessage = circleUnlock.message;
+    }
 })();
+
