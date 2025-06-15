@@ -170,18 +170,20 @@ circleButtons.forEach((btn, index) => {
             if (unlockSequence.length > 0) {
                 userCircleSequence.push(index);
 
-                if (userCircleSequence.length === unlockSequence.length) {
-                    const matched = unlockSequence.every(
-                        (val, i) => userCircleSequence[i] === val
-                    );
+                // Keep buffer within max length
+                if (userCircleSequence.length > unlockSequence.length) {
+                    userCircleSequence.shift();
+                }
 
-                    if (matched) {
-                        showMessage(unlockMessage);
-                        userCircleSequence = [];
-                        triggerFinalSequence();
-                    } else {
-                        userCircleSequence = []; // reset on wrong input
-                    }
+                // Check if last N entries match the unlock sequence
+                const matched = unlockSequence.every(
+                    (val, i) => userCircleSequence[i] === val
+                );
+
+                if (matched) {
+                    showMessage(unlockMessage);
+                    userCircleSequence = [];
+                    triggerFinalSequence();
                 }
             }
 
