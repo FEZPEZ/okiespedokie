@@ -16,8 +16,6 @@ let buffer = "";
 let codeToButton = {};
 const art = new CircleArt("bgCanvas");
 
-let tapSequence = [];
-const maxTapLength = 4;
 let unlockSequence = [];
 let unlockMessage = "";
 let userCircleSequence = [];
@@ -131,12 +129,25 @@ function handleKey(key) {
     if (buffer.length > 10) buffer = buffer.slice(-10);
 
     for (const code in validCodes) {
-        if (buffer.endsWith(code) && !usedCodes.has(code)) {
-            enableCircleButton(code, validCodes[code]);
-            usedCodes.add(code);
-            showMessage(validCodes[code].message);
-            buffer = "";
+        if (buffer.endsWith(code)) {
+            const data = validCodes[code];
+            const hasCircleButton = data.buttonIndex != null && data.buttonIndex >= 0 && data.buttonIndex < circleButtons.length;
 
+            // If code has already been used and it triggers a circle button, skip it
+            if (hasCircleButton && usedCodes.has(code)) {
+                continue;
+            }
+
+            // Show the message
+            showMessage(data.message);
+
+            // Only enable circle button and mark as used if it has a valid circle button
+            if (hasCircleButton) {
+                enableCircleButton(code, data);
+                usedCodes.add(code);
+            }
+
+            buffer = "";
             art.start();
             startChase();
             return;
@@ -147,6 +158,7 @@ function handleKey(key) {
     art.stop();
     stopChase();
 }
+
 
 // --- Button Events ---
 buttons.forEach((btn, i) => {
