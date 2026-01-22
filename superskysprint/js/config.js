@@ -6,7 +6,7 @@ const CONFIG = {
     // ==========================================
     // DEBUG MODE
     // ==========================================
-    DEBUG_MODE: true,                  // DEF: Toggle to show hitboxes and collision info
+    DEBUG_MODE: false,                  // DEF: Toggle to show hitboxes and collision info
     
     // ==========================================
     // SCREEN & PLAY FIELD
@@ -51,14 +51,14 @@ const CONFIG = {
     // GAME SPEED
     // ==========================================
     INITIAL_SPAWN_INTERVAL: 1.2,        // DEF: Initial seconds between bread spawns
-    FINAL_SPAWN_INTERVAL: 0.4,          // DEF: Final seconds between bread spawns
-    SPEED_RAMP_TIME: 60,                // DEF: Seconds to reach max speed
+    FINAL_SPAWN_INTERVAL: 0.2,          // DEF: Final seconds between bread spawns
+    SPEED_RAMP_TIME: 10,                // DEF: Seconds to reach max speed
     
     // ==========================================
     // ANIMATION SPEED MULTIPLIER (applies to bread, speed lines, NOT player/disco)
     // ==========================================
     ANIM_SPEED_MULT_START: 1.0,         // DEF: Animation speed multiplier at game start
-    ANIM_SPEED_MULT_END: 1.8,           // DEF: Animation speed multiplier at max speed
+    ANIM_SPEED_MULT_END: 1.6,           // DEF: Animation speed multiplier at max speed
     
     // ==========================================
     // HEALTH SYSTEM

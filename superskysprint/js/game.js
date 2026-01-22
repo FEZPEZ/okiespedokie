@@ -185,12 +185,13 @@ const Game = {
             this.isMaxHealth
         );
 
-        if (this.isMaxHealth) {
-            FloatingTextSystem.spawnMaxHealthText(
-                Player.x,
-                screen.height * CONFIG.BOTTOM_LINE_Y_PCT
-            );
-        }
+        if (this.isMaxHealth && Math.random() < 0.25) {
+			FloatingTextSystem.spawnMaxHealthText(
+				Player.x,
+				screen.height * CONFIG.BOTTOM_LINE_Y_PCT
+			);
+		}
+
     } else {
         // Miss!
         bread.miss();
