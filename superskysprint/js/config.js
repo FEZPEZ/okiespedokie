@@ -6,13 +6,13 @@ const CONFIG = {
     // ==========================================
     // DEBUG MODE
     // ==========================================
-    DEBUG_MODE: true,                  // DEF: Toggle to show hitboxes and collision info
+    DEBUG_MODE: false,                  // DEF: Toggle to show hitboxes and collision info
     
     // ==========================================
     // SCREEN & PLAY FIELD
     // ==========================================
-    OOB_MARGIN_PERCENT: 0.12,          // DEF: Out of bounds zone on each side (%)
-    NUM_STEPS: 12,                      // DEF: Number of quantized bread positions
+    OOB_MARGIN_PERCENT: 0.07,          // DEF: Out of bounds zone on each side (%)
+    NUM_STEPS: 14,                      // DEF: Number of quantized bread positions
     PORTRAIT_ASPECT_RATIO: 9 / 16,      // DEF: Aspect ratio for portrait mode (width/height)
     MAX_GAME_WIDTH: 450,                // DEF: Maximum game width on desktop
     

@@ -193,20 +193,6 @@ const Renderer = {
             frameWidth * CONFIG.DISCO_SCALE, frameHeight * CONFIG.DISCO_SCALE
         );
 
-        // Draw flash overlay (only on the sprite, not the whole square)
-        if (this.discoFlashOpacity > 0) {
-            ctx.filter = 'none';
-            ctx.globalAlpha = this.discoFlashOpacity;
-            ctx.globalCompositeOperation = 'source-atop';
-            ctx.fillStyle = 'white';
-            ctx.fillRect(
-                -frameWidth * CONFIG.DISCO_SCALE / 2,
-                -frameHeight * CONFIG.DISCO_SCALE / 2,
-                frameWidth * CONFIG.DISCO_SCALE,
-                frameHeight * CONFIG.DISCO_SCALE
-            );
-        }
-
         ctx.restore();
 
         return { x, y };

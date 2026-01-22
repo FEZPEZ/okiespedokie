@@ -129,7 +129,7 @@ const BreadManager = {
         
         switch (patternType) {
             case 0: // Sequential
-                let pos = Utils.randomInt(0, CONFIG.NUM_STEPS - 1);
+                let pos = Utils.randomInt(1, CONFIG.NUM_STEPS - 2);
                 let dir = Math.random() < 0.5 ? 1 : -1;
                 for (let i = 0; i < patternLength; i++) {
                     this.currentPattern.push(pos);
@@ -146,20 +146,20 @@ const BreadManager = {
                 for (let i = 0; i < patternLength; i++) {
                     this.currentPattern.push(col);
                     col += (i % 2 === 0) ? 2 : -2;
-                    col = Utils.clamp(col, 0, CONFIG.NUM_STEPS - 1);
+                    col = Utils.clamp(col, 1, CONFIG.NUM_STEPS - 2);
                 }
                 break;
                 
             case 2: // Clusters
                 for (let i = 0; i < patternLength / 3; i++) {
-                    const center = Utils.randomInt(1, CONFIG.NUM_STEPS - 2);
+                    const center = Utils.randomInt(2, CONFIG.NUM_STEPS - 3);
                     this.currentPattern.push(center - 1, center, center + 1);
                 }
                 break;
                 
             default: // Random
                 for (let i = 0; i < patternLength; i++) {
-                    this.currentPattern.push(Utils.randomInt(0, CONFIG.NUM_STEPS - 1));
+                    this.currentPattern.push(Utils.randomInt(1, CONFIG.NUM_STEPS - 2));
                 }
         }
         

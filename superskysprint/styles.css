@@ -12,7 +12,7 @@ html, body {
     width: 100%;
     height: 100dvh;
     overflow: hidden;
-    background: #000;
+    background: #0d0d0d;
     font-family: 'Arial Black', sans-serif;
 }
 
@@ -22,8 +22,7 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     overflow: hidden;
-    background: #1a1a1a;
-    /* Will be sized by JS for portrait mode */
+    background: #111;
 }
 
 /* Menu Screens */
@@ -37,21 +36,21 @@ html, body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(180deg, #1f003f 0%, #35004f 50%, #4f0080 100%);
     z-index: 100;
 }
 
 .game-title {
-    color: #f39c12;
+    color: #ff6edb;
     font-size: clamp(36px, 10vw, 64px);
     text-align: center;
     margin-bottom: 30px;
-    text-shadow: 4px 4px 0 #000, 0 0 20px rgba(243, 156, 18, 0.5);
+    text-shadow: 4px 4px 0 #000, 0 0 20px rgba(255,110,219,0.6);
     letter-spacing: 4px;
 }
 
 .high-score {
-    color: #ecf0f1;
+    color: #ff77ff;
     font-size: clamp(16px, 4vw, 24px);
     margin-bottom: 40px;
     text-shadow: 2px 2px 0 #000;
@@ -63,12 +62,12 @@ html, body {
     margin: 10px;
     font-size: clamp(18px, 5vw, 28px);
     font-weight: bold;
-    background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
+    background: linear-gradient(180deg, #ff00ff 0%, #ff77ff 100%);
+    color: #fff;
+    border: 3px solid #ff6edb;
+    border-radius: 0; /* square edges */
     cursor: pointer;
-    box-shadow: 0 6px 0 #1a5276, 0 8px 15px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 0 #9c00ff, 0 8px 15px rgba(0,0,0,0.4);
     text-transform: uppercase;
     letter-spacing: 2px;
     transition: transform 0.1s, box-shadow 0.1s;
@@ -76,7 +75,7 @@ html, body {
 
 .menu-button:active {
     transform: translateY(4px);
-    box-shadow: 0 2px 0 #1a5276, 0 4px 8px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 0 #9c00ff, 0 4px 8px rgba(0,0,0,0.4);
 }
 
 /* Game Screen */
@@ -107,31 +106,31 @@ html, body {
 
 #healthBar {
     height: 30px;
-    background: #2c3e50;
-    border-radius: 15px;
+    background: #2c003d;
+    border-radius: 0; /* square */
     overflow: hidden;
-    box-shadow: inset 0 4px 8px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: inset 0 4px 8px rgba(255,0,255,0.3), 0 2px 4px rgba(255,0,255,0.2);
 }
 
 #healthFill {
     height: 100%;
     width: 50%;
-    background: linear-gradient(90deg, #3498db, #2ecc71);
-    border-radius: 15px;
+    background: linear-gradient(90deg, #ff00ff, #ff77ff);
+    border-radius: 0; /* square */
     transition: width 0.3s ease-out, background 0.3s;
     box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
 }
 
 #healthFill.limbo {
-    background: linear-gradient(90deg, #7f8c8d, #95a5a6);
+    background: linear-gradient(90deg, #aa00aa, #bb33bb);
 }
 
 #healthFill.normal {
-    background: linear-gradient(90deg, #3498db, #2ecc71);
+    background: linear-gradient(90deg, #ff00ff, #ff77ff);
 }
 
 #healthFill.hyper {
-    background: linear-gradient(90deg, #e74c3c, #f39c12, #f1c40f, #2ecc71, #3498db, #9b59b6);
+    background: linear-gradient(90deg, #ff6edb, #ff00ff, #ff77ff, #ff33ff, #ff00cc);
     background-size: 200% 100%;
     animation: rainbowShift 1s linear infinite;
 }
@@ -146,11 +145,11 @@ html, body {
     position: absolute;
     top: 60px;
     left: 20px;
-    color: white;
+    color: #ff77ff;
     font-size: clamp(18px, 5vw, 28px);
     font-weight: bold;
     z-index: 10;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    text-shadow: 2px 2px 4px #000;
 }
 
 /* Pause Button */
@@ -161,10 +160,10 @@ html, body {
     width: 50px;
     height: 50px;
     font-size: 24px;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    border: 2px solid white;
-    border-radius: 10px;
+    background: rgba(50,0,50,0.7);
+    color: #ff77ff;
+    border: 2px solid #ff6edb;
+    border-radius: 0; /* square edges */
     cursor: pointer;
     z-index: 10;
 }
@@ -176,10 +175,10 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: clamp(48px, 15vw, 80px);
-    color: white;
+    color: #ff6edb;
     font-weight: bold;
     z-index: 50;
-    text-shadow: 4px 4px 0 #000, 0 0 30px rgba(255,255,255,0.5);
+    text-shadow: 4px 4px 0 #000, 0 0 30px rgba(255,110,219,0.5);
     text-transform: uppercase;
     letter-spacing: 6px;
 }
@@ -191,7 +190,7 @@ html, body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.8);
+    background: rgba(20,0,40,0.85);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -199,23 +198,23 @@ html, body {
 }
 
 .modal-content {
-    background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+    background: linear-gradient(180deg, #330066 0%, #440077 100%);
     padding: 40px;
-    border-radius: 20px;
+    border-radius: 0; /* square edges */
     text-align: center;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    border: 2px solid #34495e;
+    box-shadow: 0 10px 40px rgba(255,0,255,0.3);
+    border: 2px solid #ff6edb;
 }
 
 .modal-content h2 {
-    color: white;
+    color: #ff77ff;
     font-size: clamp(28px, 8vw, 42px);
     margin-bottom: 20px;
     text-shadow: 2px 2px 0 #000;
 }
 
 .final-score {
-    color: #f39c12;
+    color: #ff6edb;
     font-size: clamp(20px, 6vw, 32px);
     margin-bottom: 30px;
     text-shadow: 2px 2px 0 #000;
