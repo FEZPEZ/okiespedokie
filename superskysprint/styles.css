@@ -1,0 +1,227 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Arial Black', sans-serif;
+}
+
+#gameContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+    background: #1a1a1a;
+    /* Will be sized by JS for portrait mode */
+}
+
+/* Menu Screens */
+.menu-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    z-index: 100;
+}
+
+.game-title {
+    color: #f39c12;
+    font-size: clamp(36px, 10vw, 64px);
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 4px 4px 0 #000, 0 0 20px rgba(243, 156, 18, 0.5);
+    letter-spacing: 4px;
+}
+
+.high-score {
+    color: #ecf0f1;
+    font-size: clamp(16px, 4vw, 24px);
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.menu-button {
+    width: clamp(180px, 50vw, 260px);
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: clamp(18px, 5vw, 28px);
+    font-weight: bold;
+    background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #1a5276, 0 8px 15px rgba(0,0,0,0.4);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.menu-button:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #1a5276, 0 4px 8px rgba(0,0,0,0.4);
+}
+
+/* Game Screen */
+.game-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#gameCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Health Bar */
+#healthBarContainer {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+#healthBar {
+    height: 30px;
+    background: #2c3e50;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
+}
+
+#healthFill {
+    height: 100%;
+    width: 50%;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 15px;
+    transition: width 0.3s ease-out, background 0.3s;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+}
+
+#healthFill.limbo {
+    background: linear-gradient(90deg, #7f8c8d, #95a5a6);
+}
+
+#healthFill.normal {
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+}
+
+#healthFill.hyper {
+    background: linear-gradient(90deg, #e74c3c, #f39c12, #f1c40f, #2ecc71, #3498db, #9b59b6);
+    background-size: 200% 100%;
+    animation: rainbowShift 1s linear infinite;
+}
+
+@keyframes rainbowShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+/* Score Display */
+#scoreDisplay {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    color: white;
+    font-size: clamp(18px, 5vw, 28px);
+    font-weight: bold;
+    z-index: 10;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Pause Button */
+#pauseButton {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: 2px solid white;
+    border-radius: 10px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Overlay Text */
+.overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(48px, 15vw, 80px);
+    color: white;
+    font-weight: bold;
+    z-index: 50;
+    text-shadow: 4px 4px 0 #000, 0 0 30px rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+}
+
+/* Modals */
+.modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+}
+
+.modal-content {
+    background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    border: 2px solid #34495e;
+}
+
+.modal-content h2 {
+    color: white;
+    font-size: clamp(28px, 8vw, 42px);
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.final-score {
+    color: #f39c12;
+    font-size: clamp(20px, 6vw, 32px);
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}

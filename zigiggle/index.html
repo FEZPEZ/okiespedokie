@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-pink-100">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>?????</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+</head>
+<body class="flex flex-col items-center justify-center h-full relative">
+<canvas id="bgCanvas"></canvas>
+
+<div id="ui" class="flex flex-col items-center justify-center">
+    <div id="message-wrapper">
+        <div id="message"><span class="message-content"></span></div>
+    </div>
+
+    <!-- Keypad Grid -->
+    <div class="grid grid-cols-3 gap-4 w-64 max-w-full px-2">
+        <button class="btn" aria-label="1"><svg data-lucide="hammer"></svg></button>
+        <button class="btn" aria-label="2"><svg data-lucide="dollar-sign"></svg></button>
+        <button class="btn" aria-label="3"><svg data-lucide="phone"></svg></button>
+        <button class="btn" aria-label="4"><svg data-lucide="cloud"></svg></button>
+        <button class="btn" aria-label="5"><svg data-lucide="crown"></svg></button>
+        <button class="btn" aria-label="6"><svg data-lucide="shirt"></svg></button>
+        <button class="btn" aria-label="7"><svg data-lucide="map"></svg></button>
+        <button class="btn" aria-label="8"><svg data-lucide="banana"></svg></button>
+        <button class="btn" aria-label="9"><svg data-lucide="clock"></svg></button>
+    </div>
+
+    <!-- Extra Buttons Below -->
+    <div id="circle-buttons" class="flex gap-4 mt-6">
+        <button class="circle-btn" data-id="1" disabled>1</button>
+        <button class="circle-btn" data-id="2" disabled>2</button>
+        <button class="circle-btn" data-id="3" disabled>3</button>
+        <button class="circle-btn" data-id="4" disabled>4</button>
+    </div>
+</div>
+
+<script type="module" src="scripts/buttons.js"></script>
+</body>
+</html>

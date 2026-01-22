@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+
+* {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    user-select: none;
+    touch-action: manipulation;
+    background-color: #e9f0ff;
+}
+
+body.fade-to-black {
+    background-color: black;
+    transition: background-color 1.5s ease;
+}
+
+button {
+    -webkit-tap-highlight-color: transparent;
+    transition: none;
+}
+
+button:active {
+    background-color: #1839be;
+    transform: scale(0.9);
+}
+
+svg {
+    stroke-width: 2.5;
+    stroke: white;
+    width: 2.5rem;
+    height: 2.5rem;
+    pointer-events: none;
+}
+
+canvas#bgCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.btn {
+    background-color: #7283f4; /* Tailwind pink-400 */
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#ui {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 80vh;
+    padding-top: 1rem;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Wrap message and buttons in a container with fixed height */
+#message-wrapper {
+    position: relative;
+    width: 18rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center; /* center text even with inline-block pop */
+    margin-bottom: 2rem;
+    overflow: visible; /* allow scaled content to overflow if needed */
+    padding: 0 0.5rem; /* space to prevent clipping */
+    box-sizing: content-box;
+}
+
+#message {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    transform: scale(0.93);
+    text-align: center;
+    width: 100%;
+    word-wrap: break-word;
+    margin: 0;
+}
+
+/* Apply static rainbow gradient to the inner text span */
+.message-content {
+    display: inline-block;
+    max-width: 100%;
+    word-break: break-word;
+    flex-shrink: 1;
+    background: linear-gradient(270deg,
+    #ff0000,
+    #ff7f00,
+    #ffff00,
+    #2d2dff,
+    #9404ff,
+    #8f00ff,
+    #ff0000);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transform: scale(0.93);
+}
+
+.message-content.fade-to-white {
+    background: none !important;
+    -webkit-text-fill-color: white;
+    transition: color 1.5s ease, -webkit-text-fill-color 1.5s ease;
+}
+
+/* Pop animation without gradient change */
+@keyframes messagePop {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.93);
+    }
+}
+
+.message-content.animate-pop {
+    animation: messagePop 0.08s cubic-bezier(0.4, 0, 1, 1) forwards;
+    display: inline-block;
+}
+
+
+/* Buttons container fixed width and grid */
+.grid {
+    width: 16rem; /* fixed width to align with message */
+}
+
+.circle-btn {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background-color: #d1d5db; /* gray-300 */
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    opacity: 0.5;
+    pointer-events: none;
+    transition: background-color 0.3s ease;
+}
+.circle-btn.enabled {
+    background-color: #1839be; /* pink-500 */
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@keyframes pop {
+    0% {
+        transform: scale(1);
+    }
+    10% {
+        transform: scale(1.7);
+    }
+    30% {
+        transform: scale(1.7);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.circle-btn.pop {
+    animation: pop 0.9s ease-out;
+}

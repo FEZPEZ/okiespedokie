@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bread Collector</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Main Menu -->
+        <div id="mainMenu" class="menu-screen">
+            <h1 class="game-title">Bread<br>Collector</h1>
+            <div id="highScoreDisplay" class="high-score">High Score: 0</div>
+            <button class="menu-button" id="startButton">Play</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen hidden">
+            <canvas id="gameCanvas"></canvas>
+            
+            <!-- Health Bar -->
+            <div id="healthBarContainer">
+                <div id="healthBar">
+                    <div id="healthFill"></div>
+                </div>
+            </div>
+            
+            <!-- Score Display -->
+            <div id="scoreDisplay">Score: 0</div>
+            
+            <!-- Pause Button -->
+            <button id="pauseButton">⏸</button>
+            
+            <!-- Ready/Go Text -->
+            <div id="readyText" class="overlay-text hidden"></div>
+            
+            <!-- Countdown Text -->
+            <div id="countdownText" class="overlay-text hidden"></div>
+        </div>
+
+        <!-- Pause Modal -->
+        <div id="pauseModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Paused</h2>
+                <button class="menu-button" id="resumeButton">Resume</button>
+                <button class="menu-button" id="quitButton">Quit</button>
+            </div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div id="gameOverModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Game Over</h2>
+                <div id="finalScore" class="final-score">Score: 0</div>
+                <button class="menu-button" id="tryAgainButton">Try Again</button>
+                <button class="menu-button" id="gameOverQuitButton">Quit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts (order matters) -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/sprites.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/speedlines.js"></script>
+    <script src="js/floatingtext.js"></script>
+    <script src="js/damageflash.js"></script>
+    <script src="js/actionlines.js"></script>
+    <script src="js/bread.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
