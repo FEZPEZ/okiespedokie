@@ -52,7 +52,7 @@ const CONFIG = {
     // ==========================================
     INITIAL_SPAWN_INTERVAL: 1.2,        // DEF: Initial seconds between bread spawns
     FINAL_SPAWN_INTERVAL: 0.1,          // DEF: Final seconds between bread spawns
-    SPEED_RAMP_TIME: 180,                // DEF: Seconds to reach max speed
+    SPEED_RAMP_TIME: 120,                // DEF: Seconds to reach max speed
     
     // ==========================================
     // ANIMATION SPEED MULTIPLIER (applies to bread, speed lines, NOT player/disco)
@@ -64,8 +64,8 @@ const CONFIG = {
     // HEALTH SYSTEM
     // ==========================================
     MAX_HEALTH: 300,                    // DEF: Max health per state
-    HEALTH_LOSS_PER_MISS: 100,          // DEF: Health lost when missing bread
-    HEALTH_GAIN_PER_COLLECT: 3,        // DEF: Health gained when collecting bread
+    HEALTH_LOSS_PER_MISS: 150,          // DEF: Health lost when missing bread
+    HEALTH_GAIN_PER_COLLECT: 5,        // DEF: Health gained when collecting bread
     
     // ==========================================
     // HEALTH STATES
