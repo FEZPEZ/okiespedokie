@@ -60,8 +60,7 @@ class FloatingText {
             ctx.fillText(this.text, this.x, this.y);
         } else {
             // Normal text with outline
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 4;
+            
             ctx.strokeText(this.text, this.x, this.y);
             ctx.fillStyle = this.color;
             ctx.fillText(this.text, this.x, this.y);

@@ -69,14 +69,14 @@ const UI = {
         box.style.textAlign = 'center';
 
         const title = document.createElement('h2');
-        title.textContent = 'Enable Tilt Controls?';
+        title.textContent = 'Tilt Your Phone to Collect Toast!';
         title.style.color = '#fff';
         title.style.marginBottom = '20px';
         title.style.fontFamily = "'Arial Black', sans-serif";
         box.appendChild(title);
 
         const button = document.createElement('button');
-        button.textContent = 'Enable Tilt';
+        button.textContent = 'GET THE BREAD';
         button.className = 'menu-button';
         button.style.borderRadius = '0';
         button.style.background = 'linear-gradient(180deg, #ff88ff, #88ffcc)';

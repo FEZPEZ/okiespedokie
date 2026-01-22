@@ -139,41 +139,72 @@ const Game = {
     },
 
     handleCollision(bread) {
-        const screen = Renderer.getScreen();
-        const playerStep = Player.getStep(screen);
-        const playerInOOB = Player.isInOOB(screen);
+    const screen = Renderer.getScreen();
+    const playerStep = Player.getStep(screen);
+    const playerInOOB = Player.isInOOB(screen);
 
-        // Get bread position for particles/text
-        const breadPos = bread.getScreenPosition(screen);
+    // Get bread position for particles/text
+    const breadPos = bread.getScreenPosition(screen);
 
-        // Check collision with margin
+    const stepBoundaries = Utils.getStepBoundaries(screen);
+    const totalSteps = stepBoundaries.length;
+
+    // === EDGE BUFFER (number of steps auto-collected in margins) ===
+    const EDGE_BUFFER_STEPS = 3; // change this value as needed
+
+    const leftEdgeMaxStep = EDGE_BUFFER_STEPS - 1;
+    const rightEdgeMinStep = totalSteps - EDGE_BUFFER_STEPS;
+
+    let isHit = false;
+
+    if (!playerInOOB) {
+        // Normal in-bounds collision
         const stepDiff = Math.abs(bread.step - playerStep);
-        const isHit = !playerInOOB && stepDiff <= CONFIG.COLLISION_STEP_MARGIN;
-
-        if (isHit) {
-            // Collect!
-            bread.collect();
-            this.score++;
-            this.addHealth(CONFIG.HEALTH_GAIN_PER_COLLECT);
-            
-            // Spawn particles (rainbow if max health)
-            ParticleSystem.spawn(breadPos.x, breadPos.y, CONFIG.PARTICLE_COUNT, this.isMaxHealth);
-            
-            // Spawn text if max health
-            if (this.isMaxHealth) {
-                FloatingTextSystem.spawnMaxHealthText(Player.x, screen.height * CONFIG.BOTTOM_LINE_Y_PCT);
-            }
+        isHit = stepDiff <= CONFIG.COLLISION_STEP_MARGIN;
+    } else {
+        // Margin behavior with buffer
+        if (playerStep < 0) {
+            // Left margin → collect leftmost N breads
+            isHit = bread.step <= leftEdgeMaxStep;
         } else {
-            // Miss!
-            bread.miss();
-            this.removeHealth(CONFIG.HEALTH_LOSS_PER_MISS);
-            Player.triggerDamage();
-            DamageFlash.trigger();
-            FloatingTextSystem.spawnDamageText(Player.x, screen.height * CONFIG.BOTTOM_LINE_Y_PCT);
+            // Right margin → collect rightmost N breads
+            isHit = bread.step >= rightEdgeMinStep;
         }
+    }
 
-        UI.updateScore(this.score);
-    },
+    if (isHit) {
+        // Collect!
+        bread.collect();
+        this.score++;
+        this.addHealth(CONFIG.HEALTH_GAIN_PER_COLLECT);
+
+        ParticleSystem.spawn(
+            breadPos.x,
+            breadPos.y,
+            CONFIG.PARTICLE_COUNT,
+            this.isMaxHealth
+        );
+
+        if (this.isMaxHealth) {
+            FloatingTextSystem.spawnMaxHealthText(
+                Player.x,
+                screen.height * CONFIG.BOTTOM_LINE_Y_PCT
+            );
+        }
+    } else {
+        // Miss!
+        bread.miss();
+        this.removeHealth(CONFIG.HEALTH_LOSS_PER_MISS);
+        Player.triggerDamage();
+        DamageFlash.trigger();
+        FloatingTextSystem.spawnDamageText(
+            Player.x,
+            screen.height * CONFIG.BOTTOM_LINE_Y_PCT
+        );
+    }
+
+    UI.updateScore(this.score);
+},
 
     addHealth(amount) {
         // Don't add health if already at max

@@ -6,12 +6,12 @@ const CONFIG = {
     // ==========================================
     // DEBUG MODE
     // ==========================================
-    DEBUG_MODE: false,                  // DEF: Toggle to show hitboxes and collision info
+    DEBUG_MODE: true,                  // DEF: Toggle to show hitboxes and collision info
     
     // ==========================================
     // SCREEN & PLAY FIELD
     // ==========================================
-    OOB_MARGIN_PERCENT: 0.07,          // DEF: Out of bounds zone on each side (%)
+    OOB_MARGIN_PERCENT: 0.14,          // DEF: Out of bounds zone on each side (%)
     NUM_STEPS: 14,                      // DEF: Number of quantized bread positions
     PORTRAIT_ASPECT_RATIO: 9 / 16,      // DEF: Aspect ratio for portrait mode (width/height)
     MAX_GAME_WIDTH: 450,                // DEF: Maximum game width on desktop
@@ -30,8 +30,8 @@ const CONFIG = {
     // ==========================================
     // DEPTH SCALE (z-based sprite scaling)
     // ==========================================
-    SCALE_FAR: 0.25,                    // DEF: Scale at z=0 (far)
-    SCALE_NEAR: 1.0,                    // DEF: Scale at z=1 (near)
+    SCALE_FAR: 0.4,                    // DEF: Scale at z=0 (far)
+    SCALE_NEAR: 1.6,                    // DEF: Scale at z=1 (near)
     SCALE_POWER: 1.8,                   // DEF: Power for scale easing curve
     
     // ==========================================
@@ -45,7 +45,7 @@ const CONFIG = {
     // COLLISION
     // ==========================================
     COLLISION_Z: 1.0,                   // DEF: z value at which collision is checked
-    COLLISION_STEP_MARGIN: 1,           // DEF: Number of steps margin on each side for collision (0 = exact match only)
+    COLLISION_STEP_MARGIN: 3,           // DEF: Number of steps margin on each side for collision (0 = exact match only)
     
     // ==========================================
     // GAME SPEED
@@ -65,7 +65,7 @@ const CONFIG = {
     // ==========================================
     MAX_HEALTH: 300,                    // DEF: Max health per state
     HEALTH_LOSS_PER_MISS: 100,          // DEF: Health lost when missing bread
-    HEALTH_GAIN_PER_COLLECT: 50,        // DEF: Health gained when collecting bread
+    HEALTH_GAIN_PER_COLLECT: 5,        // DEF: Health gained when collecting bread
     
     // ==========================================
     // HEALTH STATES
@@ -133,7 +133,7 @@ const CONFIG = {
     DISCO_ANIM_DIRECTION: 1,            // DEF: 1 = forward, -1 = backward
     DISCO_FLASH_OPACITY: 0.85,          // DEF: Flash opacity on state change
     DISCO_FLASH_FADE_TIME: 350,         // DEF: Flash fade duration in ms
-    DISCO_SCALE: 0.4,                   // DEF: Base scale of disco ball
+    DISCO_SCALE: 0.8,                   // DEF: Base scale of disco ball
     DISCO_RAINBOW_SPEED: 180,           // DEF: Hue rotation speed (degrees/second) during max health
     
     // ==========================================
@@ -176,7 +176,7 @@ const CONFIG = {
         rows: 4,
         frames: 20,
         fps: 15,
-        scale: 0.7
+        scale: 1.4
     },
     GIF_CHEETAH: {
         x: 0.5,
@@ -185,7 +185,7 @@ const CONFIG = {
         rows: 3,
         frames: 6,
         fps: 10,
-        scale: 0.8
+        scale: 1.6
     },
     GIF_DANCING_CAT: {
         x: 0.85,
@@ -232,7 +232,7 @@ const CONFIG = {
     // FLOATING TEXT
     // ==========================================
     // Damage text
-    FLOAT_TEXT_DAMAGE_TEXTS: ['OUCH!', 'YIKES!', 'OOF!', 'NO!', 'MISS!'],
+    FLOAT_TEXT_DAMAGE_TEXTS: ['OUCH!', 'YIKES!'],
     FLOAT_TEXT_DAMAGE_COLOR: '#FF4444',
     FLOAT_TEXT_DAMAGE_FONT_SIZE: 32,
     FLOAT_TEXT_DAMAGE_RISE_DISTANCE: 80,
@@ -240,7 +240,7 @@ const CONFIG = {
     FLOAT_TEXT_DAMAGE_OFFSET_Y: -50,    // DEF: Spawn offset from player position
     
     // Max health text
-    FLOAT_TEXT_MAX_TEXTS: ['BREAD!', 'WOW!', 'AMAZING!', 'YUMMY!', 'EPIC!', 'NICE!'],
+    FLOAT_TEXT_MAX_TEXTS: ['BREAD!', 'WOW!', 'YUM!', 'EPIC!', 'NICE!'],
     FLOAT_TEXT_MAX_FONT_SIZE: 36,
     FLOAT_TEXT_MAX_RISE_DISTANCE: 100,
     FLOAT_TEXT_MAX_DURATION: 1000,
