@@ -83,11 +83,28 @@ const UI = {
         button.style.color = '#000';
         button.style.fontWeight = 'bold';
         button.style.fontSize = 'clamp(18px,5vw,28px)';
-        button.addEventListener('click', () => {
-            Input.enableTilt();
-            this.tiltEnabled = true;
-            overlay.remove();
-        });
+        button.addEventListener('click', async () => {
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        try {
+            const response = await DeviceMotionEvent.requestPermission();
+            if (response === 'granted') {
+                Input.enableTilt();
+                this.tiltEnabled = true;
+            } else {
+                alert('Tilt permission denied.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Tilt permission request failed.');
+        }
+    } else {
+        // Non-iOS or old devices
+        Input.enableTilt();
+        this.tiltEnabled = true;
+    }
+    overlay.remove();
+});
+
         box.appendChild(button);
 
         overlay.appendChild(box);
