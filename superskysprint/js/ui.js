@@ -5,6 +5,7 @@
 const UI = {
     elements: {},
     highScore: 0,
+    tiltEnabled: false, // Tracks whether tilt is active
 
     init() {
         this.elements = {
@@ -32,10 +33,15 @@ const UI = {
 
         // Setup button handlers
         this.setupButtons();
+
+        // Show initial tilt dialogue
+        this.showTiltDialog();
     },
 
     setupButtons() {
-        this.elements.startButton.addEventListener('click', () => Game.start());
+        this.elements.startButton.addEventListener('click', () => {
+            Game.start();
+        });
         this.elements.pauseButton.addEventListener('click', () => Game.pause());
         this.elements.resumeButton.addEventListener('click', () => Game.resume());
         this.elements.quitButton.addEventListener('click', () => Game.quit());
@@ -43,6 +49,54 @@ const UI = {
         this.elements.gameOverQuitButton.addEventListener('click', () => Game.quit());
     },
 
+    // =============================
+    // Tilt Dialog
+    // =============================
+    showTiltDialog() {
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'tiltDialog';
+        overlay.className = 'modal';
+        overlay.style.background = 'rgba(0,0,0,0.9)';
+        overlay.style.zIndex = 300;
+
+        // Content box
+        const box = document.createElement('div');
+        box.className = 'modal-content';
+        box.style.borderRadius = '0'; // Bauhaus square edges
+        box.style.background = 'linear-gradient(180deg, #ff77ff, #77ffff)';
+        box.style.padding = '30px';
+        box.style.textAlign = 'center';
+
+        const title = document.createElement('h2');
+        title.textContent = 'Enable Tilt Controls?';
+        title.style.color = '#fff';
+        title.style.marginBottom = '20px';
+        title.style.fontFamily = "'Arial Black', sans-serif";
+        box.appendChild(title);
+
+        const button = document.createElement('button');
+        button.textContent = 'Enable Tilt';
+        button.className = 'menu-button';
+        button.style.borderRadius = '0';
+        button.style.background = 'linear-gradient(180deg, #ff88ff, #88ffcc)';
+        button.style.color = '#000';
+        button.style.fontWeight = 'bold';
+        button.style.fontSize = 'clamp(18px,5vw,28px)';
+        button.addEventListener('click', () => {
+            Input.enableTilt();
+            this.tiltEnabled = true;
+            overlay.remove();
+        });
+        box.appendChild(button);
+
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    },
+
+    // =============================
+    // Existing functions (menus, score, health)
+    // =============================
     showMainMenu() {
         this.elements.mainMenu.classList.remove('hidden');
         this.elements.gameScreen.classList.add('hidden');
@@ -100,8 +154,6 @@ const UI = {
     updateHealthBar(health, maxHealth, healthState, isMaxed) {
         const percentage = isMaxed ? 100 : (health / maxHealth) * 100;
         this.elements.healthFill.style.width = `${percentage}%`;
-        
-        // Update class based on state
         this.elements.healthFill.classList.remove('limbo', 'normal', 'hyper');
         switch (healthState) {
             case 0: this.elements.healthFill.classList.add('limbo'); break;
