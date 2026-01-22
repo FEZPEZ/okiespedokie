@@ -7,7 +7,7 @@ const Input = {
     isActive: false,
     canvas: null,
     tiltEnabled: false,
-    maxTilt: 15, // max degrees left/right mapped to screen edges
+    maxTilt: 9, // max degrees left/right mapped to screen edges
 
     init(canvas) {
         this.canvas = canvas;
