@@ -1,6 +1,6 @@
 const CONFIG = {
     // ==========================================
-    // DEBUG MODE
+    // DEBUG MODE!
     // ==========================================
     DEBUG_MODE: false,
     
@@ -12,8 +12,24 @@ const CONFIG = {
     SPEED_RAMP_TIME: 120,
     
     // Thresholds based on spawn interval (lower = faster)
-    TIER_2_SPAWN_THRESHOLD: 0.6,        // Below this interval → tier 2
-    TIER_3_SPAWN_THRESHOLD: 0.2,        // Below this interval → tier 3 (default = max speed)
+    TIER_2_SPAWN_THRESHOLD: 0.6,
+    TIER_3_SPAWN_THRESHOLD: 0.2,
+
+    // ==========================================
+    // DISTANCE PROGRESSION TIERS
+    // After reaching these scores, TIER_3_MAX_COLUMN_DISTANCE increases
+    // ==========================================
+    DISTANCE_TIERS: [
+        { score: 500, maxColumnDistance: 4 },
+        { score: 600, maxColumnDistance: 5 },
+        { score: 800, maxColumnDistance: 6 }
+    ],
+    
+    // ==========================================
+    // COLLISION
+    // ==========================================
+    COLLISION_Z: 1.0,
+    COLLISION_STEP_MARGIN: 2,
 
     // ==========================================
     // FONTS
@@ -26,14 +42,21 @@ const CONFIG = {
     FONT_REACTION: "'Lilita One', cursive",
     FONT_DEFAULT: "'Raleway', sans-serif",
 
+    // Title styling (applied via JS)
+    TITLE_FONT: "'Lilita One', cursive",
+    TITLE_SIZE: 64, // pixels
+
     // Ready/Go text size (as percentage of screen width)
-    READY_GO_SIZE_VW: 18, // vw units
+    READY_GO_SIZE_VW: 18,
 
     // ==========================================
     // SCREEN & PLAY FIELD
+    // NUM_STEPS lanes span the full screen width edge-to-edge.
+    // MARGIN_STEPS lanes on each side cannot spawn bread.
+    // Example: NUM_STEPS=14, MARGIN_STEPS=2 → bread spawns in lanes 2-11
     // ==========================================
-    OOB_MARGIN_PERCENT: 0.14,
     NUM_STEPS: 14,
+    MARGIN_STEPS: 2,
     PORTRAIT_ASPECT_RATIO: 9 / 16,
     MAX_GAME_WIDTH: 450,
 
@@ -61,12 +84,6 @@ const CONFIG = {
     Z_EASE_POWER: 2.2,
     BREAD_TRAVEL_TIME: 5.0,
     MIN_TRAVEL_TIME: 0.8,
-
-    // ==========================================
-    // COLLISION
-    // ==========================================
-    COLLISION_Z: 1.0,
-    COLLISION_STEP_MARGIN: 3,
 
     // ==========================================
     // ANIMATION SPEED MULTIPLIER
@@ -102,15 +119,15 @@ const CONFIG = {
         limbo: '#888888',
         normal: '#ff77ff',
         hyper: '#ff00ff',
-        ultra: ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#4488FF'] // per letter U-L-T-R-A
+        ultra: ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#4488FF']
     },
 
     // State announcement (middle of screen)
-    STATE_ANNOUNCE_VERTICAL_OFFSET_PCT: 0.38, // % from top
-    STATE_ANNOUNCE_INITIAL_SIZE: 72,           // px
-    STATE_ANNOUNCE_FINAL_SIZE: 95,             // px
-    STATE_ANNOUNCE_FADE_TIME: 2500,            // ms
-    STATE_ANNOUNCE_LIMBO_DROP_DISTANCE: 40,    // px for limbo drop
+    STATE_ANNOUNCE_VERTICAL_OFFSET_PCT: 0.38,
+    STATE_ANNOUNCE_INITIAL_SIZE: 72,
+    STATE_ANNOUNCE_FINAL_SIZE: 95,
+    STATE_ANNOUNCE_FADE_TIME: 2500,
+    STATE_ANNOUNCE_LIMBO_DROP_DISTANCE: 40,
 
     // ==========================================
     // BACKGROUND
@@ -147,6 +164,14 @@ const CONFIG = {
     },
 
     // ==========================================
+    // PARTICLE COLORS BY STATE
+    // ==========================================
+    PARTICLE_COLORS_LIMBO: ['#333333', '#444444', '#555555', '#666666'],
+    PARTICLE_COLORS_NORMAL: ['#87CEEB', '#ADD8E6', '#B0E0E6', '#AFEEEE'],
+    PARTICLE_COLORS_HYPER: ['#FFD700', '#FFA500', '#FF6347', '#FFFF00'],
+    PARTICLE_COLORS_ULTRA: ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#8B00FF', '#FF00FF'],
+
+    // ==========================================
     // BREAD SPRITES
     // ==========================================
     BREAD_TOTAL_FRAMES: 13,
@@ -162,27 +187,27 @@ const CONFIG = {
     // ==========================================
 
     // Tier 1 patterns: sequential, zigzag, clusters, random burst
-    TIER_1_PATTERN_MIN_LENGTH: 20,
-    TIER_1_PATTERN_MAX_LENGTH: 40,
-    TIER_1_ZIGZAG_STEP: 2,              // Step size for zigzag drift
-    TIER_1_CLUSTER_SIZE: 3,             // Breads per cluster group
-    TIER_1_RANDOM_BURST_LENGTH: 5,      // Number of random spawns in a row
+    TIER_1_PATTERN_MIN_LENGTH: 5,
+    TIER_1_PATTERN_MAX_LENGTH: 15,
+    TIER_1_ZIGZAG_STEP: 2,
+    TIER_1_CLUSTER_SIZE: 3,
+    TIER_1_RANDOM_BURST_LENGTH: 5,
 
     // Tier 2 patterns: sequential, stepping clusters
-    TIER_2_PATTERN_MIN_LENGTH: 20,
-    TIER_2_PATTERN_MAX_LENGTH: 40,
-    TIER_2_CLUSTER_LENGTH: 5,           // Steps per stepping cluster
-    TIER_2_CLUSTER_STEP: 1,             // How many lanes each cluster step moves
+    TIER_2_PATTERN_MIN_LENGTH: 10,
+    TIER_2_PATTERN_MAX_LENGTH: 30,
+    TIER_2_CLUSTER_LENGTH: 5,
+    TIER_2_CLUSTER_STEP: 1,
 
-    // Tier 3 patterns: sequential w/ 2-lane jumps, clusters (original style)
+    // Tier 3 patterns: sequential w/ 2-lane jumps, clusters
     TIER_3_PATTERN_MIN_LENGTH: 20,
     TIER_3_PATTERN_MAX_LENGTH: 40,
-    TIER_3_MAX_COLUMN_DISTANCE: 3,      // Max lanes between subsequent breads
-    TIER_3_WIDE_JUMP_CHANCE: 0.5,       // Chance of 2-lane jump on direction change
-    TIER_3_WIDE_JUMP_SIZE: 2,           // Lanes to jump
-    TIER_3_CLUSTER_SIZE: 3,             // Cluster group size
-    TIER_3_CLUSTER_MIN_CENTER: 2,       // Min center position for clusters
-    TIER_3_CLUSTER_MAX_CENTER_OFFSET: 3,// Offset from NUM_STEPS for max center
+    TIER_3_MAX_COLUMN_DISTANCE: 3,      // Base max lanes between subsequent breads
+    TIER_3_WIDE_JUMP_CHANCE: 0.5,
+    TIER_3_WIDE_JUMP_SIZE: 2,
+    TIER_3_CLUSTER_SIZE: 3,
+    TIER_3_CLUSTER_MIN_CENTER: 2,
+    TIER_3_CLUSTER_MAX_CENTER_OFFSET: 3,
 
     // ==========================================
     // DISCO BALL
@@ -264,8 +289,6 @@ const CONFIG = {
     PARTICLE_LIFETIME: 0.6,
     PARTICLE_SIZE_MIN: 4,
     PARTICLE_SIZE_MAX: 10,
-    PARTICLE_COLORS: ['#FFD700', '#FFA500', '#FF6347', '#FFFF00'],
-    PARTICLE_RAINBOW_COLORS: ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#8B00FF', '#FF00FF'],
 
     // ==========================================
     // DAMAGE FLASH EFFECT

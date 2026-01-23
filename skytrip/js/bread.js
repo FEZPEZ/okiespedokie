@@ -101,13 +101,15 @@ const BreadManager = {
     currentPattern: [],
     patternIndex: 0,
     currentTier: 1,
-    lastSpawnedStep: -1, // Track last spawned step for tier 3 enforcement
+    lastSpawnedStep: -1,
+    currentMaxColumnDistance: 3,
 
     init() {
         this.breads = [];
         this.spawnTimer = 0;
         this.currentTier = 1;
         this.lastSpawnedStep = -1;
+        this.currentMaxColumnDistance = CONFIG.TIER_3_MAX_COLUMN_DISTANCE;
         this.generatePattern();
     },
 
@@ -115,6 +117,19 @@ const BreadManager = {
         if (spawnInterval >= CONFIG.TIER_2_SPAWN_THRESHOLD) return 1;
         if (spawnInterval >= CONFIG.TIER_3_SPAWN_THRESHOLD) return 2;
         return 3;
+    },
+
+    updateMaxColumnDistance(score) {
+        // Start with base distance
+        let maxDist = CONFIG.TIER_3_MAX_COLUMN_DISTANCE;
+        // Check distance tiers from highest to lowest
+        for (let i = CONFIG.DISTANCE_TIERS.length - 1; i >= 0; i--) {
+            if (score >= CONFIG.DISTANCE_TIERS[i].score) {
+                maxDist = CONFIG.DISTANCE_TIERS[i].maxColumnDistance;
+                break;
+            }
+        }
+        this.currentMaxColumnDistance = maxDist;
     },
 
     generatePattern(tier) {
@@ -136,18 +151,10 @@ const BreadManager = {
         const patternType = Utils.randomInt(0, 3);
 
         switch (patternType) {
-            case 0: // Sequential
-                this.genSequential(len, 1);
-                break;
-            case 1: // Zigzag (drifting)
-                this.genZigzag(len, CONFIG.TIER_1_ZIGZAG_STEP);
-                break;
-            case 2: // Clusters
-                this.genClusters(len, CONFIG.TIER_1_CLUSTER_SIZE);
-                break;
-            case 3: // Random burst
-                this.genRandomBurst(CONFIG.TIER_1_RANDOM_BURST_LENGTH);
-                break;
+            case 0: this.genSequential(len, 1); break;
+            case 1: this.genZigzag(len, CONFIG.TIER_1_ZIGZAG_STEP); break;
+            case 2: this.genClusters(len, CONFIG.TIER_1_CLUSTER_SIZE); break;
+            case 3: this.genRandomBurst(CONFIG.TIER_1_RANDOM_BURST_LENGTH); break;
         }
     },
 
@@ -156,12 +163,8 @@ const BreadManager = {
         const patternType = Utils.randomInt(0, 1);
 
         switch (patternType) {
-            case 0: // Sequential
-                this.genSequential(len, 1);
-                break;
-            case 1: // Stepping clusters
-                this.genSteppingClusters(len, CONFIG.TIER_2_CLUSTER_LENGTH, CONFIG.TIER_2_CLUSTER_STEP);
-                break;
+            case 0: this.genSequential(len, 1); break;
+            case 1: this.genSteppingClusters(len, CONFIG.TIER_2_CLUSTER_LENGTH, CONFIG.TIER_2_CLUSTER_STEP); break;
         }
     },
 
@@ -170,57 +173,60 @@ const BreadManager = {
         const patternType = Utils.randomInt(0, 1);
 
         switch (patternType) {
-            case 0: // Sequential with 2-lane jumps
-                this.genSequentialWideJump(len);
-                break;
-            case 1: // Clusters (original style, tier 3 config)
-                this.genClusters(len, CONFIG.TIER_3_CLUSTER_SIZE);
-                break;
+            case 0: this.genSequentialWideJump(len); break;
+            case 1: this.genClusters(len, CONFIG.TIER_3_CLUSTER_SIZE); break;
         }
     },
 
     // === Pattern generators ===
+    // All generators produce steps within spawnable range: [MARGIN_STEPS, NUM_STEPS - MARGIN_STEPS - 1]
 
     genSequential(length, stepSize) {
-        let pos = Utils.randomInt(1, CONFIG.NUM_STEPS - 2);
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+        let pos = Utils.randomInt(minStep + 1, maxStep - 1);
         let dir = Math.random() < 0.5 ? 1 : -1;
         for (let i = 0; i < length; i++) {
             this.currentPattern.push(pos);
             pos += dir * stepSize;
-            if (pos < 0 || pos >= CONFIG.NUM_STEPS) {
+            if (pos < minStep || pos > maxStep) {
                 dir = -dir;
                 pos += dir * stepSize * 2;
             }
-            pos = Utils.clamp(pos, 0, CONFIG.NUM_STEPS - 1);
+            pos = Utils.clamp(pos, minStep, maxStep);
         }
     },
 
     genZigzag(length, stepSize) {
-        let col = Utils.randomInt(stepSize + 1, CONFIG.NUM_STEPS - stepSize - 2);
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+        let col = Utils.randomInt(minStep + stepSize, maxStep - stepSize);
         let dir = Math.random() < 0.5 ? 1 : -1;
         for (let i = 0; i < length; i++) {
             this.currentPattern.push(col);
             col += dir * stepSize;
-            if (col <= 0) {
-                col = 0;
+            if (col <= minStep) {
+                col = minStep;
                 dir = 1;
-            } else if (col >= CONFIG.NUM_STEPS - 1) {
-                col = CONFIG.NUM_STEPS - 1;
+            } else if (col >= maxStep) {
+                col = maxStep;
                 dir = -1;
             }
         }
     },
 
     genClusters(totalLength, clusterSize) {
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
         let count = 0;
         while (count < totalLength) {
             const halfSize = Math.floor(clusterSize / 2);
             const center = Utils.randomInt(
-                Math.max(1, halfSize),
-                Math.min(CONFIG.NUM_STEPS - 2, CONFIG.NUM_STEPS - 1 - halfSize)
+                Math.max(minStep, minStep + halfSize),
+                Math.min(maxStep, maxStep - halfSize)
             );
             for (let j = -halfSize; j <= halfSize && count < totalLength; j++) {
-                const step = Utils.clamp(center + j, 0, CONFIG.NUM_STEPS - 1);
+                const step = Utils.clamp(center + j, minStep, maxStep);
                 this.currentPattern.push(step);
                 count++;
             }
@@ -228,30 +234,36 @@ const BreadManager = {
     },
 
     genRandomBurst(length) {
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
         for (let i = 0; i < length; i++) {
-            this.currentPattern.push(Utils.randomInt(1, CONFIG.NUM_STEPS - 2));
+            this.currentPattern.push(Utils.randomInt(minStep, maxStep));
         }
     },
 
     genSteppingClusters(totalLength, clusterLength, clusterStep) {
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
         let count = 0;
         while (count < totalLength) {
-            let pos = Utils.randomInt(2, CONFIG.NUM_STEPS - 3);
+            let pos = Utils.randomInt(minStep + 2, maxStep - 2);
             let dir = Math.random() < 0.5 ? 1 : -1;
             for (let i = 0; i < clusterLength && count < totalLength; i++) {
-                if (pos + dir * clusterStep < 0 || pos + dir * clusterStep >= CONFIG.NUM_STEPS) {
+                if (pos + dir * clusterStep < minStep || pos + dir * clusterStep > maxStep) {
                     dir = -dir;
                 }
                 this.currentPattern.push(pos);
                 pos += dir * clusterStep;
-                pos = Utils.clamp(pos, 0, CONFIG.NUM_STEPS - 1);
+                pos = Utils.clamp(pos, minStep, maxStep);
                 count++;
             }
         }
     },
 
     genSequentialWideJump(length) {
-        let pos = Utils.randomInt(2, CONFIG.NUM_STEPS - 3);
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+        let pos = Utils.randomInt(minStep + 2, maxStep - 2);
         let dir = Math.random() < 0.5 ? 1 : -1;
         let useWideJump = false;
 
@@ -261,7 +273,7 @@ const BreadManager = {
             let stepSize = useWideJump ? CONFIG.TIER_3_WIDE_JUMP_SIZE : 1;
             let nextPos = pos + dir * stepSize;
 
-            if (nextPos < 0 || nextPos >= CONFIG.NUM_STEPS) {
+            if (nextPos < minStep || nextPos > maxStep) {
                 dir = -dir;
                 useWideJump = Math.random() < CONFIG.TIER_3_WIDE_JUMP_CHANCE;
                 stepSize = useWideJump ? CONFIG.TIER_3_WIDE_JUMP_SIZE : 1;
@@ -270,16 +282,16 @@ const BreadManager = {
 
             // Enforce max column distance within pattern
             const dist = Math.abs(nextPos - pos);
-            if (dist > CONFIG.TIER_3_MAX_COLUMN_DISTANCE) {
-                nextPos = pos + dir * CONFIG.TIER_3_MAX_COLUMN_DISTANCE;
+            if (dist > this.currentMaxColumnDistance) {
+                nextPos = pos + dir * this.currentMaxColumnDistance;
             }
 
-            nextPos = Utils.clamp(nextPos, 0, CONFIG.NUM_STEPS - 1);
+            nextPos = Utils.clamp(nextPos, minStep, maxStep);
             pos = nextPos;
         }
     },
 
-    getNextStep(spawnInterval) {
+    getNextStep(spawnInterval, score) {
         const tier = this.getCurrentTier(spawnInterval);
         if (tier !== this.currentTier) {
             this.currentTier = tier;
@@ -293,21 +305,25 @@ const BreadManager = {
 
         // TIER 3: Globally enforce max column distance between ANY two adjacent breads
         if (tier === 3 && this.lastSpawnedStep !== -1) {
-            const maxDist = CONFIG.TIER_3_MAX_COLUMN_DISTANCE;
-            const minStep = Math.max(0, this.lastSpawnedStep - maxDist);
-            const maxStep = Math.min(CONFIG.NUM_STEPS - 1, this.lastSpawnedStep + maxDist);
+            this.updateMaxColumnDistance(score);
+            const maxDist = this.currentMaxColumnDistance;
+            const minStep = Math.max(CONFIG.MARGIN_STEPS, this.lastSpawnedStep - maxDist);
+            const maxStep = Math.min(CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1, this.lastSpawnedStep + maxDist);
             step = Utils.clamp(step, minStep, maxStep);
         }
+
+        // Final safety clamp to spawnable range
+        step = Utils.clamp(step, CONFIG.MARGIN_STEPS, CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1);
 
         this.lastSpawnedStep = step;
         return step;
     },
 
-    update(deltaTime, gameTime, travelDuration, spawnInterval, animSpeedMult) {
+    update(deltaTime, gameTime, travelDuration, spawnInterval, animSpeedMult, score) {
         this.spawnTimer += deltaTime;
         if (this.spawnTimer >= spawnInterval) {
             this.spawnTimer -= spawnInterval;
-            const step = this.getNextStep(spawnInterval);
+            const step = this.getNextStep(spawnInterval, score);
             this.breads.push(new Bread(step));
         }
 
@@ -340,5 +356,6 @@ const BreadManager = {
         this.currentPattern = [];
         this.currentTier = 1;
         this.lastSpawnedStep = -1;
+        this.currentMaxColumnDistance = CONFIG.TIER_3_MAX_COLUMN_DISTANCE;
     }
 };

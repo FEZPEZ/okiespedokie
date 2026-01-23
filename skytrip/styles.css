@@ -41,13 +41,32 @@ html, body {
 }
 
 .game-title {
-    font-family: 'Lilita One', cursive;
-    color: #ff6edb;
-    font-size: clamp(36px, 10vw, 64px);
-    text-align: center;
+    font-family: 'Honk', cursive;
+
+    /* Responsive size: scales with screen, capped for sanity */
+    font-size: clamp(4rem, 12vw, 8rem);
+
+    letter-spacing: 0.03em;
+    line-height: 0.75;
+
+    width: 80%;
+    max-width: 320px;
     margin-bottom: 30px;
-    text-shadow: 4px 4px 0 #000, 0 0 20px rgba(255,110,219,0.6);
-    letter-spacing: 4px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+.title-sky {
+    display: block;
+    text-align: left;
+}
+
+.title-trip {
+    display: block;
+    text-align: right;
 }
 
 .high-score {
@@ -183,7 +202,7 @@ html, body {
     top: 62px;
     left: 50%;
     transform: translateX(-50%);
-    font-family: 'Teko', sans-serif; /* Changed from Fjalla One */
+    font-family: 'Teko', sans-serif;
     font-weight: 700;
     font-size: clamp(16px, 4vw, 22px);
     text-transform: uppercase;
@@ -217,18 +236,18 @@ html, body {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
-/* Overlay Text */
+/* Overlay Text (Ready/Go/Countdown) */
 .overlay-text {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-family: 'Teko', sans-serif;
-    font-size: 18vw;
+    font-size: 8vw;
     font-weight: 700;
-    color: #ff6edb;
+    color: #ffffff;
     z-index: 50;
-    text-shadow: 4px 4px 0 #000, 0 0 30px rgba(255,110,219,0.5);
+    text-shadow: 3px 3px 0 #000;
     text-transform: uppercase;
     letter-spacing: 6px;
 }
@@ -238,7 +257,7 @@ html, body {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    font-family: 'Teko', sans-serif; /* Changed from Fjalla One */
+    font-family: 'Teko', sans-serif;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 4px;

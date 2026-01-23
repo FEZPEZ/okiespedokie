@@ -38,31 +38,34 @@ class FloatingText {
     }
 
     draw(ctx) {
-        if (!this.alive) return;
-
-        const progress = this.age / this.duration;
-        const alpha = 1 - Utils.easeIn(progress, 2);
-
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.font = `bold ${this.fontSize}px ${this.fontFamily}`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        if (this.isRainbow) {
-            const rgb = Utils.hslToRgb(this.hue, 100, 60);
-            ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-            ctx.shadowColor = `hsl(${this.hue}, 100%, 50%)`;
-            ctx.shadowBlur = 15;
-            ctx.fillText(this.text, this.x, this.y);
-            ctx.fillText(this.text, this.x, this.y);
-        } else {
-            ctx.fillStyle = this.color;
-            ctx.fillText(this.text, this.x, this.y);
-        }
-        
-        ctx.restore();
-    }
+		if (!this.alive) return;
+	
+		const progress = this.age / this.duration;
+		const alpha = 1 - Utils.easeIn(progress, 2);
+	
+		ctx.save();
+		ctx.globalAlpha = alpha;
+		ctx.font = `bold ${this.fontSize}px ${this.fontFamily}`;
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		
+		if (this.isRainbow) {
+			const rgb = Utils.hslToRgb(this.hue, 100, 60);
+			ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+			// Reduced shadow blur from 15 to 5
+			ctx.shadowColor = `hsl(${this.hue}, 100%, 50%)`;
+			ctx.shadowBlur = 5;
+			ctx.fillText(this.text, this.x, this.y);
+		} else {
+			ctx.fillStyle = this.color;
+			// Add subtle shadow for non-rainbow text
+			ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+			ctx.shadowBlur = 3;
+			ctx.fillText(this.text, this.x, this.y);
+		}
+		
+		ctx.restore();
+	}
 }
 
 const FloatingTextSystem = {

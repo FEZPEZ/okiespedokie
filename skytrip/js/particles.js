@@ -1,7 +1,3 @@
-// ============================================
-// PARTICLE SYSTEM
-// ============================================
-
 class Particle {
     constructor(x, y, color, isRainbow = false) {
         this.x = x;
@@ -31,13 +27,11 @@ class Particle {
 
         this.x += this.vx * deltaTime;
         this.y += this.vy * deltaTime;
-        this.vy += 300 * deltaTime; // Gravity
+        this.vy += 300 * deltaTime;
         
-        // Shrink over time
         const progress = this.age / this.lifetime;
         this.currentSize = this.size * (1 - progress);
         
-        // Update rainbow hue
         if (this.isRainbow) {
             this.hue = (this.hue + 720 * deltaTime) % 360;
         }
@@ -53,8 +47,6 @@ class Particle {
         if (this.isRainbow) {
             const rgb = Utils.hslToRgb(this.hue, 100, 60);
             ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-            
-            // Add glow for rainbow particles
             ctx.shadowColor = `hsl(${this.hue}, 100%, 50%)`;
             ctx.shadowBlur = 10;
         } else {
@@ -71,10 +63,10 @@ class Particle {
 const ParticleSystem = {
     particles: [],
 
-    spawn(x, y, count = CONFIG.PARTICLE_COUNT, isRainbow = false) {
-        const colors = isRainbow ? CONFIG.PARTICLE_RAINBOW_COLORS : CONFIG.PARTICLE_COLORS;
+    spawn(x, y, count = CONFIG.PARTICLE_COUNT, isRainbow = false, colors = null) {
+        const colorArray = colors || (isRainbow ? CONFIG.PARTICLE_COLORS_ULTRA : CONFIG.PARTICLE_COLORS_NORMAL);
         for (let i = 0; i < count; i++) {
-            const color = Utils.randomPick(colors);
+            const color = Utils.randomPick(colorArray);
             this.particles.push(new Particle(x, y, color, isRainbow));
         }
     },

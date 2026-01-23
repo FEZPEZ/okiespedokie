@@ -212,15 +212,18 @@ const Renderer = {
         });
     },
 
-    drawDebugInfo(screen, playerStep, playerX, playerInOOB) {
+    drawDebugInfo(screen, playerStep, playerX) {
         if (!CONFIG.DEBUG_MODE) return;
 
         const ctx = this.ctx;
         const stepBoundaries = Utils.getStepBoundaries(screen);
         const collisionY = screen.height * CONFIG.BOTTOM_LINE_Y_PCT;
+        const minSpawnStep = CONFIG.MARGIN_STEPS;
+        const maxSpawnStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
 
         ctx.save();
         
+        // Draw collision line
         ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -228,23 +231,36 @@ const Renderer = {
         ctx.lineTo(screen.width, collisionY);
         ctx.stroke();
 
+        // Draw all lanes
         stepBoundaries.forEach((step, i) => {
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+            const isMargin = i < minSpawnStep || i > maxSpawnStep;
+            
+            // Lane boundary rectangles
+            ctx.strokeStyle = isMargin ? 'rgba(255, 100, 0, 0.7)' : 'rgba(0, 200, 255, 0.5)';
             ctx.lineWidth = 1;
             ctx.strokeRect(step.left, collisionY - 20, step.right - step.left, 40);
             
+            // Shade margin lanes across full height
+            if (isMargin) {
+                ctx.fillStyle = 'rgba(255, 100, 0, 0.1)';
+                ctx.fillRect(step.left, 0, step.right - step.left, screen.height);
+            }
+            
+            // Highlight collision margin around player
             const margin = CONFIG.COLLISION_STEP_MARGIN;
-            if (i >= playerStep - margin && i <= playerStep + margin && !playerInOOB) {
-                ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+            if (i >= playerStep - margin && i <= playerStep + margin) {
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.25)';
                 ctx.fillRect(step.left, collisionY - 20, step.right - step.left, 40);
             }
             
-            ctx.fillStyle = 'red';
+            // Lane numbers
+            ctx.fillStyle = isMargin ? '#ff8800' : '#00ccff';
             ctx.font = '10px Arial';
             ctx.textAlign = 'center';
             ctx.fillText(i.toString(), step.center, collisionY + 35);
         });
 
+        // Draw bread positions near collision line
         BreadManager.breads.forEach(bread => {
             if (bread.z >= 0.9) {
                 const pos = bread.getScreenPosition(screen);
@@ -252,18 +268,39 @@ const Renderer = {
                 ctx.beginPath();
                 ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
                 ctx.fill();
+                
+                // Show bread step number
+                ctx.fillStyle = 'yellow';
+                ctx.font = '9px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`s${bread.step}`, pos.x, pos.y - 10);
             }
         });
 
-        ctx.fillStyle = playerInOOB ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)';
+        // Draw player position
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
         ctx.beginPath();
         ctx.arc(playerX, collisionY, 8, 0, Math.PI * 2);
         ctx.fill();
 
-        const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
-        ctx.fillRect(0, 0, marginX, screen.height);
-        ctx.fillRect(screen.width - marginX, 0, marginX, screen.height);
+        // Player step label
+        ctx.fillStyle = '#00ff00';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Step: ${playerStep}`, playerX, collisionY - 15);
+
+        // Draw spawnable range indicator at top
+        const spawnLeft = stepBoundaries[minSpawnStep].left;
+        const spawnRight = stepBoundaries[maxSpawnStep].right;
+        ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(spawnLeft, 5, spawnRight - spawnLeft, 15);
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+        ctx.font = '9px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Spawn: ${minSpawnStep}-${maxSpawnStep}`, (spawnLeft + spawnRight) / 2, 16);
 
         ctx.restore();
     },
@@ -295,8 +332,7 @@ const Renderer = {
         DamageFlash.draw(this.ctx, this.screen.width, this.screen.height);
 
         const playerStep = Player.getStep(this.screen);
-        const playerInOOB = Player.isInOOB(this.screen);
-        this.drawDebugInfo(this.screen, playerStep, playerX, playerInOOB);
+        this.drawDebugInfo(this.screen, playerStep, playerX);
     },
 
     resetState() {

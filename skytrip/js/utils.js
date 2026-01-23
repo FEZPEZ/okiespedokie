@@ -52,38 +52,19 @@ const Utils = {
     },
 
     /**
-     * Calculate play field boundaries
-     */
-    getPlayField() {
-        const screen = this.getScreenDimensions();
-        const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
-        
-        return {
-            left: marginX,
-            right: screen.width - marginX,
-            width: screen.width - 2 * marginX,
-            screenWidth: screen.width,
-            screenHeight: screen.height
-        };
-    },
-
-    /**
-     * Convert normalized u (0-1) to screen X at a given z depth
+     * Convert normalized u (0-1) to screen X at a given z depth.
+     * All NUM_STEPS lanes span the full screen width at z=1 (bottom/close).
      */
     uToScreenX(u, z, screen) {
-        // Top line (far)
+        // Top line (far) - narrow, centered
         const topWidth = screen.width * CONFIG.TOP_LINE_WIDTH_PCT;
         const topLeft = (screen.width - topWidth) / 2;
         const topRight = topLeft + topWidth;
         const xTop = this.lerp(topLeft, topRight, u);
 
-        // Bottom line (close)
-        const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
-        const bottomLeft = marginX;
-        const bottomRight = screen.width - marginX;
-        const xBottom = this.lerp(bottomLeft, bottomRight, u);
+        // Bottom line (close) - full screen width
+        const xBottom = u * screen.width;
 
-        // Interpolate based on z
         return this.lerp(xTop, xBottom, z);
     },
 
@@ -105,56 +86,46 @@ const Utils = {
     },
 
     /**
-     * Convert step index to normalized u value
+     * Convert step index to normalized u value.
+     * Steps 0..NUM_STEPS-1 span full width.
      */
     stepToU(step) {
         return (step + 0.5) / CONFIG.NUM_STEPS;
     },
 
     /**
-     * Convert screen X to step index
+     * Convert screen X to step index.
+     * All NUM_STEPS steps span the full screen width evenly.
      */
     screenXToStep(x, screen) {
-        const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
-        const playWidth = screen.width - 2 * marginX;
-        const relativeX = x - marginX;
-        const u = relativeX / playWidth;
-        return Math.floor(Utils.clamp(u, 0, 0.9999) * CONFIG.NUM_STEPS);
+        const step = Math.floor((x / screen.width) * CONFIG.NUM_STEPS);
+        return this.clamp(step, 0, CONFIG.NUM_STEPS - 1);
     },
 
     /**
-     * Check if screen X is in OOB zone
+     * Check if screen X is in margin zone (where bread doesn't spawn).
+     * Player is still valid here; this only matters for spawn logic.
      */
     isInOOBZone(x, screen) {
-        const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
+        const stepWidth = screen.width / CONFIG.NUM_STEPS;
+        const marginX = stepWidth * CONFIG.MARGIN_STEPS;
         return x < marginX || x > screen.width - marginX;
     },
 
     /**
-     * Convert continuous player X to normalized u (0-1)
-     */
-    screenXToU(x, screen) {
-        const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
-        const playWidth = screen.width - 2 * marginX;
-        const relativeX = x - marginX;
-        return Utils.clamp(relativeX / playWidth, 0, 1);
-    },
-
-    /**
-     * Get step boundaries for collision line
+     * Get step boundaries for debug visualization and collision.
+     * All NUM_STEPS steps span the full screen width evenly.
      */
     getStepBoundaries(screen) {
-        const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
-        const playWidth = screen.width - 2 * marginX;
-        const stepWidth = playWidth / CONFIG.NUM_STEPS;
+        const stepWidth = screen.width / CONFIG.NUM_STEPS;
         const y = screen.height * CONFIG.BOTTOM_LINE_Y_PCT;
         
         const steps = [];
         for (let i = 0; i < CONFIG.NUM_STEPS; i++) {
             steps.push({
-                left: marginX + i * stepWidth,
-                right: marginX + (i + 1) * stepWidth,
-                center: marginX + (i + 0.5) * stepWidth,
+                left: i * stepWidth,
+                right: (i + 1) * stepWidth,
+                center: (i + 0.5) * stepWidth,
                 y: y
             });
         }

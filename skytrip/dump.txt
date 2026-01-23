@@ -1,0 +1,3266 @@
+###[./index.html]###
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sky Trip</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fjalla+One&family=Lilita+One&family=Raleway:ital,wght@0,100..900;1,100..900&family=Teko:wght@300..700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Main Menu -->
+        <div id="mainMenu" class="menu-screen">
+            <h1 class="game-title">
+                <span class="title-sky">SKY</span>
+                <span class="title-trip">TRIP</span>
+            </h1>
+            <div id="highScoreDisplay" class="high-score">High Score: 0</div>
+            <button class="menu-button" id="startButton">Play</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen hidden">
+            <canvas id="gameCanvas"></canvas>
+            
+            <!-- Health Bar -->
+            <div id="healthBarContainer">
+                <div id="healthBar">
+                    <div id="healthFill"></div>
+                </div>
+            </div>
+            
+            <!-- Score Display -->
+            <div id="scoreDisplay">
+                <img src="favicon.png" id="scoreIcon" alt="">
+                <span id="scoreValue">0</span>
+            </div>
+
+            <!-- State Name Header -->
+            <div id="stateNameHeader"></div>
+            
+            <!-- Pause Button -->
+            <button id="pauseButton">II</button>
+            
+            <!-- Ready/Go Text -->
+            <div id="readyText" class="overlay-text hidden"></div>
+            
+            <!-- Countdown Text -->
+            <div id="countdownText" class="overlay-text hidden"></div>
+
+            <!-- State Announcement (center screen) -->
+            <div id="stateAnnouncement" class="state-announcement hidden"></div>
+        </div>
+
+        <!-- Pause Modal -->
+        <div id="pauseModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Paused</h2>
+                <button class="menu-button" id="resumeButton">Resume</button>
+                <button class="menu-button" id="quitButton">Quit</button>
+            </div>
+        </div>
+
+        <!-- Game Over Modal -->
+        <div id="gameOverModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Game Over</h2>
+                <div id="finalScore" class="final-score">Score: 0</div>
+                <button class="menu-button" id="tryAgainButton">Try Again</button>
+                <button class="menu-button" id="gameOverQuitButton">Quit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/sprites.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/speedlines.js"></script>
+    <script src="js/floatingtext.js"></script>
+    <script src="js/damageflash.js"></script>
+    <script src="js/actionlines.js"></script>
+    <script src="js/bread.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+
+###EOF###
+
+###[./styles.css]###
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    background: #0d0d0d;
+    font-family: 'Raleway', sans-serif;
+}
+
+#gameContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+    background: #111;
+}
+
+/* Menu Screens */
+.menu-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #1f003f 0%, #35004f 50%, #4f0080 100%);
+    z-index: 100;
+}
+
+.game-title {
+    font-family: 'Lilita One', cursive;
+    color: #ff6edb;
+    font-size: 64px;
+    text-shadow: 4px 4px 0 #000;
+    letter-spacing: 4px;
+    line-height: 0.95;
+    width: 80%;
+    max-width: 320px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.title-sky {
+    display: block;
+    text-align: left;
+}
+
+.title-trip {
+    display: block;
+    text-align: right;
+}
+
+.high-score {
+    font-family: 'Raleway', sans-serif;
+    color: #ff77ff;
+    font-size: clamp(16px, 4vw, 24px);
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 0 #000;
+    font-weight: 600;
+}
+
+.menu-button {
+    font-family: 'Archivo Black', sans-serif;
+    width: clamp(180px, 50vw, 260px);
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: clamp(18px, 5vw, 28px);
+    font-weight: bold;
+    background: linear-gradient(180deg, #ff00ff 0%, #ff77ff 100%);
+    color: #fff;
+    border: 3px solid #ff6edb;
+    border-radius: 0;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #9c00ff, 0 8px 15px rgba(0,0,0,0.4);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.menu-button:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #9c00ff, 0 4px 8px rgba(0,0,0,0.4);
+}
+
+/* Game Screen */
+.game-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#gameCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Health Bar */
+#healthBarContainer {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 10;
+    transition: filter 0.4s ease;
+}
+
+#healthBar {
+    height: 30px;
+    background: #2c003d;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: inset 0 4px 8px rgba(255,0,255,0.3), 0 2px 4px rgba(255,0,255,0.2);
+}
+
+#healthFill {
+    height: 100%;
+    width: 50%;
+    background: linear-gradient(90deg, #ff00ff, #ff77ff);
+    border-radius: 0;
+    transition: width 0.3s ease-out, background 0.3s;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+}
+
+#healthFill.limbo {
+    background: linear-gradient(90deg, #777, #999);
+}
+
+#healthFill.normal {
+    background: linear-gradient(90deg, #ff00ff, #ff77ff);
+}
+
+#healthFill.hyper {
+    background: linear-gradient(90deg, #ff6edb, #ff00ff, #ff77ff, #ff33ff, #ff00cc);
+    background-size: 200% 100%;
+    animation: rainbowShift 1s linear infinite;
+}
+
+#healthFill.ultra {
+    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff, #ff00ff);
+    background-size: 300% 100%;
+    animation: rainbowShift 0.8s linear infinite;
+}
+
+@keyframes rainbowShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+/* Score Display */
+#scoreDisplay {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 10;
+    transition: filter 0.4s ease;
+}
+
+#scoreIcon {
+    height: 28px;
+    width: auto;
+    image-rendering: auto;
+}
+
+#scoreValue {
+    font-family: 'Fjalla One', sans-serif;
+    color: #ff77ff;
+    font-size: clamp(18px, 5vw, 28px);
+    font-weight: bold;
+    text-shadow: 2px 2px 4px #000;
+}
+
+/* State Name Header */
+#stateNameHeader {
+    position: absolute;
+    top: 62px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Teko', sans-serif;
+    font-weight: 700;
+    font-size: clamp(16px, 4vw, 22px);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    z-index: 10;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    transition: filter 0.4s ease;
+    white-space: nowrap;
+}
+
+/* Pause Button */
+#pauseButton {
+    position: absolute;
+    top: 58px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    color: #ff77ff;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: filter 0.4s ease;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 22px;
+    letter-spacing: -2px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Overlay Text (Ready/Go/Countdown) */
+.overlay-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Teko', sans-serif;
+    font-size: 18vw;
+    font-weight: 700;
+    color: #ff6edb;
+    z-index: 50;
+    text-shadow: 3px 3px 0 #000;
+    text-transform: uppercase;
+    letter-spacing: 6px;
+}
+
+/* State Announcement */
+.state-announcement {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Teko', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    z-index: 45;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.9);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.state-announcement.animate-grow {
+    animation: stateGrowFade var(--fade-duration) ease-out forwards;
+}
+
+.state-announcement.animate-drop {
+    animation: stateDropFade var(--fade-duration) ease-out forwards;
+}
+
+@keyframes stateGrowFade {
+    0% {
+        opacity: 1;
+        font-size: var(--initial-size);
+    }
+    100% {
+        opacity: 0;
+        font-size: var(--final-size);
+    }
+}
+
+@keyframes stateDropFade {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(60px);
+    }
+}
+
+/* Modals */
+.modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(20,0,40,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+}
+
+.modal-content {
+    background: linear-gradient(180deg, #330066 0%, #440077 100%);
+    padding: 40px;
+    border-radius: 0;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(255,0,255,0.3);
+    border: 2px solid #ff6edb;
+}
+
+.modal-content h2 {
+    font-family: 'Lilita One', cursive;
+    color: #ff77ff;
+    font-size: clamp(28px, 8vw, 42px);
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.modal-content p,
+.modal-content .body-text {
+    font-family: 'Raleway', sans-serif;
+}
+
+.final-score {
+    font-family: 'Fjalla One', sans-serif;
+    color: #ff6edb;
+    font-size: clamp(20px, 6vw, 32px);
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+/* Limbo B&W state for UI elements */
+.limbo-ui #healthBarContainer,
+.limbo-ui #scoreDisplay,
+.limbo-ui #stateNameHeader,
+.limbo-ui #pauseButton {
+    filter: grayscale(100%) brightness(0.8);
+}
+
+.limbo-ui #healthBar {
+    background: #333;
+}
+
+.limbo-ui #scoreValue {
+    color: #ccc;
+}
+
+.limbo-ui #pauseButton {
+    color: #ccc;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+###EOF###
+
+###[./js/actionlines.js]###
+
+// ============================================
+// ANIME ACTION LINES (Max Health Effect)
+// ============================================
+
+const ActionLines = {
+    angle: 0,
+    lines: [],
+
+    init() {
+        this.lines = [];
+        for (let i = 0; i < CONFIG.ACTION_LINES_COUNT; i++) {
+            this.lines.push({
+                angle: (i / CONFIG.ACTION_LINES_COUNT) * Math.PI * 2,
+                length: Utils.random(CONFIG.ACTION_LINES_LENGTH_MIN, CONFIG.ACTION_LINES_LENGTH_MAX),
+                hue: (i / CONFIG.ACTION_LINES_COUNT) * 360
+            });
+        }
+    },
+
+    update(deltaTime) {
+        this.angle += (CONFIG.ACTION_LINES_SPEED * Math.PI / 180) * deltaTime;
+        
+        // Update hues
+        this.lines.forEach(line => {
+            line.hue = (line.hue + 180 * deltaTime) % 360;
+        });
+    },
+
+    draw(ctx, screenWidth, screenHeight) {
+        const centerX = screenWidth / 2;
+        const centerY = screenHeight / 2;
+        const maxDimension = Math.max(screenWidth, screenHeight);
+
+        ctx.save();
+        ctx.globalAlpha = CONFIG.ACTION_LINES_OPACITY;
+        ctx.lineWidth = CONFIG.ACTION_LINES_THICKNESS;
+        ctx.lineCap = 'round';
+
+        this.lines.forEach(line => {
+            const angle = line.angle + this.angle;
+            const length = line.length * screenHeight;
+            
+            // Start from edge of screen
+            const startDist = maxDimension * 0.7;
+            const startX = centerX + Math.cos(angle) * startDist;
+            const startY = centerY + Math.sin(angle) * startDist;
+            
+            // End point (toward center)
+            const endX = centerX + Math.cos(angle) * (startDist - length);
+            const endY = centerY + Math.sin(angle) * (startDist - length);
+
+            // Rainbow color
+            const rgb = Utils.hslToRgb(line.hue, 100, 70);
+            ctx.strokeStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+            
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+        });
+
+        ctx.restore();
+    },
+
+    reset() {
+        this.angle = 0;
+        this.init();
+    }
+};
+
+###EOF###
+
+###[./js/game.js]###
+
+// ============================================
+// GAME STATE & MAIN LOOP
+// ============================================
+
+const Game = {
+    running: false,
+    paused: false,
+    gameOver: false,
+    initialized: false,
+    
+    lastTime: 0,
+    gameTime: 0,
+    startTime: 0,
+    
+    score: 0,
+    health: 0,
+    healthState: 1,
+    isMaxHealth: false,
+    
+    countdownActive: false,
+    countdownValue: 0,
+    countdownTime: 0,
+    
+    gameOverPauseTime: 0,
+    gameOverModalShown: false,
+
+    // Track previous state for announcements
+    prevHealthState: 1,
+    prevIsMaxHealth: false,
+
+    init() {
+        UI.init();
+        Renderer.init(document.getElementById('gameCanvas'));
+        Input.init(document.getElementById('gameCanvas'));
+        ActionLines.init();
+        
+        Sprites.load(() => {
+            this.initialized = true;
+            UI.showMainMenu();
+        });
+    },
+
+    start() {
+        this.reset();
+        UI.showGameScreen();
+        
+        Renderer.forceClear();
+        this.renderClearFrame();
+        
+        UI.showReadyText('Ready?');
+        
+        setTimeout(() => {
+            UI.showReadyText('GO!');
+            setTimeout(() => {
+                UI.hideReadyText();
+                this.running = true;
+                this.startTime = performance.now();
+                this.lastTime = this.startTime;
+                requestAnimationFrame((t) => this.loop(t));
+            }, CONFIG.GO_DISPLAY_TIME);
+        }, CONFIG.READY_GO_DELAY);
+    },
+
+    renderClearFrame() {
+        Renderer.setBackground(this.healthState);
+        Renderer.clear();
+        Renderer.drawBackground();
+    },
+
+    reset() {
+        this.running = false;
+        this.paused = false;
+        this.gameOver = false;
+        this.gameTime = 0;
+        this.score = 0;
+        this.healthState = CONFIG.STARTING_STATE;
+        this.health = CONFIG.MAX_HEALTH * CONFIG.STARTING_HEALTH_PCT;
+        this.isMaxHealth = false;
+        this.countdownActive = false;
+        this.gameOverPauseTime = 0;
+        this.gameOverModalShown = false;
+        this.prevHealthState = CONFIG.STARTING_STATE;
+        this.prevIsMaxHealth = false;
+
+        const screen = Renderer.getScreen();
+        Player.init(screen.width);
+        Input.reset(screen.width);
+        BreadManager.clear();
+        ParticleSystem.clear();
+        SpeedLines.clear();
+        FloatingTextSystem.clear();
+        DamageFlash.reset();
+        ActionLines.reset();
+        Renderer.resetState();
+        Renderer.setBackground(this.healthState);
+
+        UI.updateScore(0);
+        UI.updateHealthBar(this.health, CONFIG.MAX_HEALTH, this.healthState, false);
+        UI.hideGameOverModal();
+        UI.hideCountdown();
+    },
+
+    pause() {
+        if (this.gameOver) return;
+        this.paused = true;
+        UI.showPauseModal();
+    },
+
+    resume() {
+        UI.hidePauseModal();
+        this.countdownActive = true;
+        this.countdownValue = CONFIG.RESUME_COUNTDOWN_SECONDS;
+        this.countdownTime = 0;
+        UI.showCountdown(this.countdownValue);
+    },
+
+    quit() {
+        UI.updateHighScore(this.score);
+        this.running = false;
+        UI.showMainMenu();
+    },
+
+    restart() {
+        UI.hideGameOverModal();
+        this.start();
+    },
+
+    getCurrentSpeed() {
+        const elapsed = (performance.now() - this.startTime) / 1000;
+        const progress = Math.min(elapsed / CONFIG.SPEED_RAMP_TIME, 1);
+        return {
+            travelTime: Utils.lerp(CONFIG.BREAD_TRAVEL_TIME, CONFIG.MIN_TRAVEL_TIME, progress),
+            spawnInterval: Utils.lerp(CONFIG.INITIAL_SPAWN_INTERVAL, CONFIG.FINAL_SPAWN_INTERVAL, progress),
+            animSpeedMult: Utils.lerp(CONFIG.ANIM_SPEED_MULT_START, CONFIG.ANIM_SPEED_MULT_END, progress)
+        };
+    },
+
+    getParticleColors() {
+        if (this.isMaxHealth) {
+            return CONFIG.PARTICLE_COLORS_ULTRA;
+        }
+        switch (this.healthState) {
+            case 0: return CONFIG.PARTICLE_COLORS_LIMBO;
+            case 2: return CONFIG.PARTICLE_COLORS_HYPER;
+            default: return CONFIG.PARTICLE_COLORS_NORMAL;
+        }
+    },
+
+    handleCollision(bread) {
+        const screen = Renderer.getScreen();
+        const playerStep = Player.getStep(screen);
+        const breadPos = bread.getScreenPosition(screen);
+
+        // Simple step-based collision: compare lane indices
+        const stepDiff = Math.abs(bread.step - playerStep);
+        const isHit = stepDiff <= CONFIG.COLLISION_STEP_MARGIN;
+
+        // Get tier-specific health values
+        const tier = BreadManager.currentTier;
+        let healthGain, healthLoss;
+        switch (tier) {
+            case 2:
+                healthGain = CONFIG.TIER_2_HEALTH_GAIN;
+                healthLoss = CONFIG.TIER_2_HEALTH_LOSS;
+                break;
+            case 3:
+                healthGain = CONFIG.TIER_3_HEALTH_GAIN;
+                healthLoss = CONFIG.TIER_3_HEALTH_LOSS;
+                break;
+            default:
+                healthGain = CONFIG.TIER_1_HEALTH_GAIN;
+                healthLoss = CONFIG.TIER_1_HEALTH_LOSS;
+        }
+
+        if (isHit) {
+            bread.collect();
+            this.score++;
+            this.addHealth(healthGain);
+
+            const particleColors = this.getParticleColors();
+            ParticleSystem.spawn(breadPos.x, breadPos.y, CONFIG.PARTICLE_COUNT, this.isMaxHealth, particleColors);
+
+            if (this.isMaxHealth && Math.random() < 0.25) {
+                FloatingTextSystem.spawnMaxHealthText(
+                    Player.x,
+                    screen.height * CONFIG.BOTTOM_LINE_Y_PCT
+                );
+            }
+        } else {
+            bread.miss();
+            this.removeHealth(healthLoss);
+            Player.triggerDamage();
+            DamageFlash.trigger();
+            FloatingTextSystem.spawnDamageText(
+                Player.x,
+                screen.height * CONFIG.BOTTOM_LINE_Y_PCT
+            );
+        }
+
+        UI.updateScore(this.score);
+    },
+
+    checkStateChange() {
+        const stateChanged = (this.healthState !== this.prevHealthState) || 
+                            (this.isMaxHealth !== this.prevIsMaxHealth);
+        
+        if (stateChanged) {
+            UI.updateStateDisplay(this.healthState, this.isMaxHealth);
+            this.prevHealthState = this.healthState;
+            this.prevIsMaxHealth = this.isMaxHealth;
+        }
+    },
+
+    addHealth(amount) {
+        if (this.isMaxHealth) return;
+        
+        this.health += amount;
+        
+        if (this.health >= CONFIG.MAX_HEALTH) {
+            if (this.healthState < 2) {
+                this.healthState++;
+                this.health = this.health - CONFIG.MAX_HEALTH;
+                Renderer.setBackground(this.healthState);
+                
+                if (this.healthState === 2 && this.health >= CONFIG.MAX_HEALTH) {
+                    this.health = CONFIG.MAX_HEALTH;
+                    this.isMaxHealth = true;
+                }
+            } else {
+                this.health = CONFIG.MAX_HEALTH;
+                this.isMaxHealth = true;
+            }
+        }
+        
+        UI.updateHealthBar(this.health, CONFIG.MAX_HEALTH, this.healthState, this.isMaxHealth);
+        this.checkStateChange();
+    },
+
+    removeHealth(amount) {
+        if (this.isMaxHealth) {
+            this.isMaxHealth = false;
+        }
+        
+        this.health -= amount;
+        
+        if (this.health <= 0) {
+            if (this.healthState > 0) {
+                this.healthState--;
+                this.health = CONFIG.MAX_HEALTH + this.health;
+                Renderer.setBackground(this.healthState);
+            } else {
+                this.health = 0;
+                this.triggerGameOver();
+            }
+        }
+        
+        UI.updateHealthBar(this.health, CONFIG.MAX_HEALTH, this.healthState, this.isMaxHealth);
+        this.checkStateChange();
+    },
+
+    triggerGameOver() {
+        this.gameOver = true;
+        this.gameOverPauseTime = 0;
+        this.gameOverModalShown = false;
+        Player.triggerGameOver();
+        UI.updateHighScore(this.score);
+    },
+
+    update(deltaTime) {
+        if (this.countdownActive) {
+            this.countdownTime += deltaTime * 1000;
+            if (this.countdownTime >= 1000) {
+                this.countdownTime -= 1000;
+                this.countdownValue--;
+                if (this.countdownValue > 0) {
+                    UI.showCountdown(this.countdownValue);
+                } else {
+                    UI.hideCountdown();
+                    this.countdownActive = false;
+                    this.paused = false;
+                }
+            }
+            return;
+        }
+
+        if (this.gameOver) {
+            this.gameOverPauseTime += deltaTime * 1000;
+            Player.update(deltaTime);
+            FloatingTextSystem.update(deltaTime);
+            DamageFlash.update(deltaTime);
+            
+            if (!this.gameOverModalShown && this.gameOverPauseTime >= CONFIG.GAME_OVER_PAUSE_TIME) {
+                this.gameOverModalShown = true;
+                UI.showGameOverModal(this.score);
+            }
+            return;
+        }
+
+        if (this.paused) return;
+
+        this.gameTime += deltaTime;
+        const speed = this.getCurrentSpeed();
+
+        Player.setTargetX(Input.getX());
+        Player.update(deltaTime);
+
+        const collisions = BreadManager.update(
+            deltaTime, this.gameTime,
+            speed.travelTime, speed.spawnInterval, speed.animSpeedMult,
+            this.score
+        );
+        collisions.forEach(bread => this.handleCollision(bread));
+
+        ParticleSystem.update(deltaTime);
+        SpeedLines.update(deltaTime, Renderer.getScreen().width, Renderer.getScreen().height, speed.animSpeedMult, this.healthState);
+        FloatingTextSystem.update(deltaTime);
+        DamageFlash.update(deltaTime);
+        Renderer.updateBackgroundFade(deltaTime);
+        Renderer.updateDiscoAnimation(deltaTime);
+        Renderer.updateDiscoRainbow(deltaTime, this.isMaxHealth);
+        
+        if (this.isMaxHealth) {
+            Renderer.updateFunnyGifs(deltaTime);
+            ActionLines.update(deltaTime);
+        }
+    },
+
+    loop(timestamp) {
+        if (!this.running) return;
+
+        const deltaTime = Math.min((timestamp - this.lastTime) / 1000, 0.1);
+        this.lastTime = timestamp;
+
+        this.update(deltaTime);
+
+        Renderer.render({
+            healthState: this.healthState,
+            isMaxHealth: this.isMaxHealth,
+            playerX: Player.x,
+            score: this.score,
+            health: this.health,
+            isPaused: this.paused,
+            isGameOver: this.gameOver
+        });
+
+        requestAnimationFrame((t) => this.loop(t));
+    }
+};
+
+###EOF###
+
+###[./js/renderer.js]###
+
+// ============================================
+// RENDERING
+// ============================================
+
+const Renderer = {
+    canvas: null,
+    ctx: null,
+    screen: { width: 0, height: 0 },
+    
+    currentBg: null,
+    targetBg: null,
+    bgFadeProgress: 1,
+    bgFadeTime: 0,
+    
+    discoFrame: 0,
+    discoAnimTime: 0,
+    discoFlashOpacity: 0,
+    discoFlashTime: 0,
+    discoHue: 0,
+
+    gifFrames: { 'cat-fu': 0, 'cheetah': 0, 'dancing-cat': 0 },
+    gifAnimTimes: { 'cat-fu': 0, 'cheetah': 0, 'dancing-cat': 0 },
+
+    init(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+    },
+
+    resize() {
+        const container = document.getElementById('gameContainer');
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        let gameWidth, gameHeight;
+        
+        if (windowWidth < windowHeight) {
+            gameWidth = windowWidth;
+            gameHeight = windowHeight;
+        } else {
+            gameHeight = windowHeight;
+            gameWidth = Math.min(gameHeight * CONFIG.PORTRAIT_ASPECT_RATIO, CONFIG.MAX_GAME_WIDTH);
+        }
+        
+        container.style.width = `${gameWidth}px`;
+        container.style.height = `${gameHeight}px`;
+        
+        this.canvas.width = gameWidth;
+        this.canvas.height = gameHeight;
+        this.screen = { width: gameWidth, height: gameHeight };
+    },
+
+    getScreen() {
+        return this.screen;
+    },
+
+    setBackground(healthState) {
+        let newBg;
+        switch (healthState) {
+            case 0: newBg = 'bg-limbo'; break;
+            case 2: newBg = 'bg-hyper'; break;
+            default: newBg = 'bg-normal';
+        }
+
+        if (newBg !== this.targetBg) {
+            this.currentBg = this.targetBg || newBg;
+            this.targetBg = newBg;
+            this.bgFadeProgress = 0;
+            this.bgFadeTime = 0;
+            this.discoFlashOpacity = CONFIG.DISCO_FLASH_OPACITY;
+            this.discoFlashTime = 0;
+        }
+    },
+
+    updateBackgroundFade(deltaTime) {
+        if (this.bgFadeProgress < 1) {
+            this.bgFadeTime += deltaTime * 1000;
+            this.bgFadeProgress = Math.min(this.bgFadeTime / CONFIG.BG_CROSSFADE_TIME, 1);
+        }
+        
+        if (this.discoFlashOpacity > 0) {
+            this.discoFlashTime += deltaTime * 1000;
+            this.discoFlashOpacity = CONFIG.DISCO_FLASH_OPACITY * 
+                (1 - this.discoFlashTime / CONFIG.DISCO_FLASH_FADE_TIME);
+            if (this.discoFlashOpacity < 0) this.discoFlashOpacity = 0;
+        }
+    },
+
+    updateDiscoRainbow(deltaTime, isMaxHealth) {
+        if (isMaxHealth) {
+            this.discoHue = (this.discoHue + CONFIG.DISCO_RAINBOW_SPEED * deltaTime) % 360;
+        }
+    },
+
+    drawBackground() {
+        const ctx = this.ctx;
+        const { width, height } = this.screen;
+
+        if (this.currentBg) {
+            const img = Sprites.get(this.currentBg);
+            if (img) {
+                ctx.globalAlpha = 1 - this.bgFadeProgress;
+                ctx.drawImage(img, 0, 0, width, height);
+            }
+        }
+
+        if (this.targetBg) {
+            const img = Sprites.get(this.targetBg);
+            if (img) {
+                ctx.globalAlpha = this.bgFadeProgress;
+                ctx.drawImage(img, 0, 0, width, height);
+            }
+        }
+
+        ctx.globalAlpha = 1;
+    },
+
+    updateDiscoAnimation(deltaTime) {
+        this.discoAnimTime += deltaTime;
+        const frameTime = 1 / CONFIG.DISCO_ANIM_FPS;
+        if (this.discoAnimTime >= frameTime) {
+            this.discoAnimTime -= frameTime;
+            this.discoFrame += CONFIG.DISCO_ANIM_DIRECTION;
+            if (this.discoFrame >= CONFIG.DISCO_TOTAL_FRAMES) {
+                this.discoFrame = 0;
+            } else if (this.discoFrame < 0) {
+                this.discoFrame = CONFIG.DISCO_TOTAL_FRAMES - 1;
+            }
+        }
+    },
+
+    drawDiscoBall(playerX, healthState, isMaxHealth) {
+        const ctx = this.ctx;
+        const { height } = this.screen;
+        
+        const x = playerX + CONFIG.DISCO_OFFSET_X;
+        const y = height - (height * CONFIG.DISCO_OFFSET_Y_PCT);
+
+        let spriteName;
+        switch (healthState) {
+            case 0: spriteName = 'disco-ball-limbo'; break;
+            case 2: spriteName = 'disco-ball-hyper'; break;
+            default: spriteName = 'disco-ball-normal';
+        }
+
+        const img = Sprites.get(spriteName);
+        if (!img) return { x, y };
+
+        const frameWidth = img.width / CONFIG.DISCO_COLS;
+        const frameHeight = img.height / CONFIG.DISCO_ROWS;
+        const col = this.discoFrame % CONFIG.DISCO_COLS;
+        const row = Math.floor(this.discoFrame / CONFIG.DISCO_COLS);
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(CONFIG.DISCO_ROTATION_DEG * Math.PI / 180);
+
+        if (isMaxHealth) {
+            ctx.filter = `hue-rotate(${this.discoHue}deg)`;
+        }
+
+        ctx.drawImage(
+            img,
+            col * frameWidth, row * frameHeight,
+            frameWidth, frameHeight,
+            -frameWidth * CONFIG.DISCO_SCALE / 2, -frameHeight * CONFIG.DISCO_SCALE / 2,
+            frameWidth * CONFIG.DISCO_SCALE, frameHeight * CONFIG.DISCO_SCALE
+        );
+
+        ctx.restore();
+        return { x, y };
+    },
+
+    updateFunnyGifs(deltaTime) {
+        const gifs = [
+            { key: 'cat-fu', config: CONFIG.GIF_CAT_FU },
+            { key: 'cheetah', config: CONFIG.GIF_CHEETAH },
+            { key: 'dancing-cat', config: CONFIG.GIF_DANCING_CAT }
+        ];
+
+        gifs.forEach(gif => {
+            this.gifAnimTimes[gif.key] += deltaTime;
+            const frameTime = 1 / gif.config.fps;
+            if (this.gifAnimTimes[gif.key] >= frameTime) {
+                this.gifAnimTimes[gif.key] -= frameTime;
+                this.gifFrames[gif.key] = (this.gifFrames[gif.key] + 1) % gif.config.frames;
+            }
+        });
+    },
+
+    drawFunnyGifs() {
+        const ctx = this.ctx;
+        const { width, height } = this.screen;
+
+        const gifs = [
+            { key: 'cat-fu', sprite: 'gif-cat-fu', config: CONFIG.GIF_CAT_FU },
+            { key: 'cheetah', sprite: 'gif-cheetah', config: CONFIG.GIF_CHEETAH },
+            { key: 'dancing-cat', sprite: 'gif-dancing-cat', config: CONFIG.GIF_DANCING_CAT }
+        ];
+
+        gifs.forEach(gif => {
+            const x = width * gif.config.x;
+            const y = height * (1 - gif.config.y);
+            Sprites.drawFrame(
+                ctx, gif.sprite,
+                this.gifFrames[gif.key],
+                x, y,
+                gif.config.cols, gif.config.rows,
+                gif.config.scale
+            );
+        });
+    },
+
+    drawDebugInfo(screen, playerStep, playerX) {
+        if (!CONFIG.DEBUG_MODE) return;
+
+        const ctx = this.ctx;
+        const stepBoundaries = Utils.getStepBoundaries(screen);
+        const collisionY = screen.height * CONFIG.BOTTOM_LINE_Y_PCT;
+        const minSpawnStep = CONFIG.MARGIN_STEPS;
+        const maxSpawnStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+
+        ctx.save();
+        
+        // Draw collision line
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, collisionY);
+        ctx.lineTo(screen.width, collisionY);
+        ctx.stroke();
+
+        // Draw all lanes
+        stepBoundaries.forEach((step, i) => {
+            const isMargin = i < minSpawnStep || i > maxSpawnStep;
+            
+            // Lane boundary rectangles
+            ctx.strokeStyle = isMargin ? 'rgba(255, 100, 0, 0.7)' : 'rgba(0, 200, 255, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(step.left, collisionY - 20, step.right - step.left, 40);
+            
+            // Shade margin lanes across full height
+            if (isMargin) {
+                ctx.fillStyle = 'rgba(255, 100, 0, 0.1)';
+                ctx.fillRect(step.left, 0, step.right - step.left, screen.height);
+            }
+            
+            // Highlight collision margin around player
+            const margin = CONFIG.COLLISION_STEP_MARGIN;
+            if (i >= playerStep - margin && i <= playerStep + margin) {
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.25)';
+                ctx.fillRect(step.left, collisionY - 20, step.right - step.left, 40);
+            }
+            
+            // Lane numbers
+            ctx.fillStyle = isMargin ? '#ff8800' : '#00ccff';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(i.toString(), step.center, collisionY + 35);
+        });
+
+        // Draw bread positions near collision line
+        BreadManager.breads.forEach(bread => {
+            if (bread.z >= 0.9) {
+                const pos = bread.getScreenPosition(screen);
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Show bread step number
+                ctx.fillStyle = 'yellow';
+                ctx.font = '9px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`s${bread.step}`, pos.x, pos.y - 10);
+            }
+        });
+
+        // Draw player position
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+        ctx.beginPath();
+        ctx.arc(playerX, collisionY, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Player step label
+        ctx.fillStyle = '#00ff00';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Step: ${playerStep}`, playerX, collisionY - 15);
+
+        // Draw spawnable range indicator at top
+        const spawnLeft = stepBoundaries[minSpawnStep].left;
+        const spawnRight = stepBoundaries[maxSpawnStep].right;
+        ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(spawnLeft, 5, spawnRight - spawnLeft, 15);
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+        ctx.font = '9px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Spawn: ${minSpawnStep}-${maxSpawnStep}`, (spawnLeft + spawnRight) / 2, 16);
+
+        ctx.restore();
+    },
+
+    clear() {
+        this.ctx.clearRect(0, 0, this.screen.width, this.screen.height);
+    },
+
+    render(gameState) {
+        this.clear();
+
+        const { healthState, isMaxHealth, playerX, isPaused, isGameOver } = gameState;
+
+        this.drawBackground();
+
+        if (isMaxHealth) {
+            this.drawFunnyGifs();
+            ActionLines.draw(this.ctx, this.screen.width, this.screen.height);
+        }
+
+        SpeedLines.draw(this.ctx, this.screen.width, this.screen.height, healthState);
+        BreadManager.draw(this.ctx, this.screen, healthState);
+
+        const discoPos = this.drawDiscoBall(playerX, healthState, isMaxHealth);
+        Player.draw(this.ctx, this.screen, healthState, discoPos.x, discoPos.y);
+
+        ParticleSystem.draw(this.ctx);
+        FloatingTextSystem.draw(this.ctx);
+        DamageFlash.draw(this.ctx, this.screen.width, this.screen.height);
+
+        const playerStep = Player.getStep(this.screen);
+        this.drawDebugInfo(this.screen, playerStep, playerX);
+    },
+
+    resetState() {
+        this.currentBg = null;
+        this.targetBg = null;
+        this.bgFadeProgress = 1;
+        this.discoFrame = 0;
+        this.discoFlashOpacity = 0;
+        this.discoHue = 0;
+        
+        Object.keys(this.gifFrames).forEach(key => {
+            this.gifFrames[key] = 0;
+            this.gifAnimTimes[key] = 0;
+        });
+    },
+
+    forceClear() {
+        this.clear();
+        this.resetState();
+    }
+};
+
+###EOF###
+
+###[./js/ui.js]###
+
+// ============================================
+// UI MANAGEMENT
+// ============================================
+
+const UI = {
+    elements: {},
+    highScore: 0,
+    tiltEnabled: false,
+    currentDisplayState: 'normal',
+    previousDisplayState: 'normal',
+
+    init() {
+        this.elements = {
+            mainMenu: document.getElementById('mainMenu'),
+            gameScreen: document.getElementById('gameScreen'),
+            pauseModal: document.getElementById('pauseModal'),
+            gameOverModal: document.getElementById('gameOverModal'),
+            healthFill: document.getElementById('healthFill'),
+            healthBarContainer: document.getElementById('healthBarContainer'),
+            scoreDisplay: document.getElementById('scoreDisplay'),
+            scoreValue: document.getElementById('scoreValue'),
+            highScoreDisplay: document.getElementById('highScoreDisplay'),
+            readyText: document.getElementById('readyText'),
+            countdownText: document.getElementById('countdownText'),
+            finalScore: document.getElementById('finalScore'),
+            startButton: document.getElementById('startButton'),
+            pauseButton: document.getElementById('pauseButton'),
+            resumeButton: document.getElementById('resumeButton'),
+            quitButton: document.getElementById('quitButton'),
+            tryAgainButton: document.getElementById('tryAgainButton'),
+            gameOverQuitButton: document.getElementById('gameOverQuitButton'),
+            stateNameHeader: document.getElementById('stateNameHeader'),
+            stateAnnouncement: document.getElementById('stateAnnouncement')
+        };
+
+        this.highScore = parseInt(localStorage.getItem('breadHighScore')) || 0;
+        this.updateHighScoreDisplay();
+        this.setupButtons();
+        this.showTiltDialog();
+    },
+
+    setupButtons() {
+        this.elements.startButton.addEventListener('click', () => Game.start());
+        this.elements.pauseButton.addEventListener('click', () => Game.pause());
+        this.elements.resumeButton.addEventListener('click', () => Game.resume());
+        this.elements.quitButton.addEventListener('click', () => Game.quit());
+        this.elements.tryAgainButton.addEventListener('click', () => Game.restart());
+        this.elements.gameOverQuitButton.addEventListener('click', () => Game.quit());
+    },
+
+    showTiltDialog() {
+        const overlay = document.createElement('div');
+        overlay.id = 'tiltDialog';
+        overlay.className = 'modal';
+        overlay.style.background = 'rgba(0,0,0,0.9)';
+        overlay.style.zIndex = 300;
+
+        const box = document.createElement('div');
+        box.className = 'modal-content';
+        box.style.background = 'linear-gradient(180deg, #ff77ff, #77ffff)';
+        box.style.padding = '30px';
+        box.style.textAlign = 'center';
+
+        const title = document.createElement('h2');
+        title.textContent = 'Tilt Your Phone to Collect Toast!';
+        title.style.color = '#fff';
+        title.style.marginBottom = '20px';
+        title.style.fontFamily = CONFIG.FONT_HEADER;
+        box.appendChild(title);
+
+        const button = document.createElement('button');
+        button.textContent = 'GET THE BREAD';
+        button.className = 'menu-button';
+        button.style.background = 'linear-gradient(180deg, #ff88ff, #88ffcc)';
+        button.style.color = '#000';
+        button.addEventListener('click', async () => {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try {
+                    const response = await DeviceMotionEvent.requestPermission();
+                    if (response === 'granted') {
+                        Input.enableTilt();
+                        this.tiltEnabled = true;
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            } else {
+                Input.enableTilt();
+                this.tiltEnabled = true;
+            }
+            overlay.remove();
+        });
+
+        box.appendChild(button);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    },
+
+    getDisplayState(healthState, isMaxHealth) {
+        if (isMaxHealth) return 'ultra';
+        switch (healthState) {
+            case 0: return 'limbo';
+            case 2: return 'hyper';
+            default: return 'normal';
+        }
+    },
+
+    updateStateDisplay(healthState, isMaxHealth) {
+        const newState = this.getDisplayState(healthState, isMaxHealth);
+        const oldState = this.currentDisplayState;
+
+        // Update header
+        this.updateStateNameHeader(newState);
+
+        // Check for announcement trigger
+        if (newState !== oldState) {
+            this.previousDisplayState = oldState;
+            this.currentDisplayState = newState;
+
+            // Determine if we should show announcement
+            let showAnnouncement = false;
+            let isGoingUp = false;
+
+            const stateOrder = ['limbo', 'normal', 'hyper', 'ultra'];
+            const oldIndex = stateOrder.indexOf(oldState);
+            const newIndex = stateOrder.indexOf(newState);
+
+            if (newIndex > oldIndex) {
+                isGoingUp = true;
+                // Only show for hyper and ultra going UP
+                if (newState === 'hyper' || newState === 'ultra') {
+                    showAnnouncement = true;
+                }
+            } else {
+                isGoingUp = false;
+                // Only show for limbo going DOWN
+                if (newState === 'limbo') {
+                    showAnnouncement = true;
+                }
+            }
+
+            if (showAnnouncement) {
+                this.showStateAnnouncement(newState, isGoingUp);
+            }
+
+            // Toggle limbo B&W
+            if (newState === 'limbo') {
+                this.elements.gameScreen.classList.add('limbo-ui');
+            } else {
+                this.elements.gameScreen.classList.remove('limbo-ui');
+            }
+        }
+    },
+
+    updateStateNameHeader(state) {
+        const header = this.elements.stateNameHeader;
+        header.innerHTML = '';
+
+        if (state === 'ultra') {
+            const letters = 'ULTRA'.split('');
+            const colors = CONFIG.STATE_NAME_COLORS.ultra;
+            letters.forEach((letter, i) => {
+                const span = document.createElement('span');
+                span.textContent = letter;
+                span.style.color = colors[i % colors.length];
+                header.appendChild(span);
+            });
+        } else {
+            header.textContent = state.toUpperCase();
+            header.style.color = CONFIG.STATE_NAME_COLORS[state] || '#fff';
+        }
+    },
+
+    showStateAnnouncement(state, isGoingUp) {
+        const el = this.elements.stateAnnouncement;
+        
+        // Remove previous animations
+        el.classList.remove('animate-grow', 'animate-drop', 'hidden');
+        el.innerHTML = '';
+
+        // Set position
+        el.style.top = `${CONFIG.STATE_ANNOUNCE_VERTICAL_OFFSET_PCT * 100}%`;
+
+        // Set CSS custom properties
+        el.style.setProperty('--initial-size', CONFIG.STATE_ANNOUNCE_INITIAL_SIZE + 'px');
+        el.style.setProperty('--final-size', CONFIG.STATE_ANNOUNCE_FINAL_SIZE + 'px');
+        el.style.setProperty('--fade-duration', CONFIG.STATE_ANNOUNCE_FADE_TIME + 'ms');
+
+        // Set content with colors
+        if (state === 'ultra') {
+            const letters = 'ULTRA'.split('');
+            const colors = CONFIG.STATE_NAME_COLORS.ultra;
+            letters.forEach((letter, i) => {
+                const span = document.createElement('span');
+                span.textContent = letter;
+                span.style.color = colors[i % colors.length];
+                el.appendChild(span);
+            });
+        } else {
+            el.textContent = state.toUpperCase();
+            el.style.color = CONFIG.STATE_NAME_COLORS[state] || '#fff';
+        }
+
+        el.style.fontSize = CONFIG.STATE_ANNOUNCE_INITIAL_SIZE + 'px';
+
+        // Force reflow
+        void el.offsetWidth;
+
+        // Apply animation
+        if (state === 'limbo') {
+            el.classList.add('animate-drop');
+        } else {
+            el.classList.add('animate-grow');
+        }
+
+        // Hide after animation
+        setTimeout(() => {
+            el.classList.add('hidden');
+            el.classList.remove('animate-grow', 'animate-drop');
+        }, CONFIG.STATE_ANNOUNCE_FADE_TIME);
+    },
+
+    showMainMenu() {
+        this.elements.mainMenu.classList.remove('hidden');
+        this.elements.gameScreen.classList.add('hidden');
+        this.elements.pauseModal.classList.add('hidden');
+        this.elements.gameOverModal.classList.add('hidden');
+        this.updateHighScoreDisplay();
+    },
+
+    showGameScreen() {
+        this.elements.mainMenu.classList.add('hidden');
+        this.elements.gameScreen.classList.remove('hidden');
+        this.elements.pauseModal.classList.add('hidden');
+        this.elements.gameOverModal.classList.add('hidden');
+        this.elements.gameScreen.classList.remove('limbo-ui');
+        this.currentDisplayState = 'normal';
+        this.previousDisplayState = 'normal';
+        this.updateStateNameHeader('normal');
+    },
+
+    showPauseModal() {
+        this.elements.pauseModal.classList.remove('hidden');
+    },
+
+    hidePauseModal() {
+        this.elements.pauseModal.classList.add('hidden');
+    },
+
+    showGameOverModal(score) {
+        this.elements.finalScore.textContent = `Score: ${score}`;
+        this.elements.gameOverModal.classList.remove('hidden');
+    },
+
+    hideGameOverModal() {
+        this.elements.gameOverModal.classList.add('hidden');
+    },
+
+    showReadyText(text) {
+        this.elements.readyText.textContent = text;
+        this.elements.readyText.classList.remove('hidden');
+    },
+
+    hideReadyText() {
+        this.elements.readyText.classList.add('hidden');
+    },
+
+    showCountdown(number) {
+        this.elements.countdownText.textContent = number;
+        this.elements.countdownText.classList.remove('hidden');
+    },
+
+    hideCountdown() {
+        this.elements.countdownText.classList.add('hidden');
+    },
+
+    updateScore(score) {
+        this.elements.scoreValue.textContent = score;
+    },
+
+    updateHealthBar(health, maxHealth, healthState, isMaxed) {
+        const percentage = isMaxed ? 100 : (health / maxHealth) * 100;
+        this.elements.healthFill.style.width = `${percentage}%`;
+        this.elements.healthFill.classList.remove('limbo', 'normal', 'hyper', 'ultra');
+        if (isMaxed) {
+            this.elements.healthFill.classList.add('ultra');
+        } else {
+            switch (healthState) {
+                case 0: this.elements.healthFill.classList.add('limbo'); break;
+                case 1: this.elements.healthFill.classList.add('normal'); break;
+                case 2: this.elements.healthFill.classList.add('hyper'); break;
+            }
+        }
+    },
+
+    updateHighScore(score) {
+        if (score > this.highScore) {
+            this.highScore = score;
+            localStorage.setItem('breadHighScore', this.highScore);
+        }
+    },
+
+    updateHighScoreDisplay() {
+        this.elements.highScoreDisplay.textContent = `High Score: ${this.highScore}`;
+    }
+};
+
+###EOF###
+
+###[./js/speedlines.js]###
+
+// ============================================
+// SPEED LINES OVERLAY EFFECT
+// ============================================
+
+class SpeedLine {
+    constructor(y, screenHeight) {
+        this.y = y;
+        this.screenHeight = screenHeight;
+        this.startY = y;
+        this.alive = true;
+    }
+
+    update(deltaTime, speed, animSpeedMult) {
+        // Accelerate as it moves down
+        const progress = (this.y - this.startY) / (this.screenHeight - this.startY);
+        const acceleration = Math.pow(progress + 0.1, CONFIG.SPEEDLINE_ACCEL_POWER);
+        this.y += speed * acceleration * deltaTime * animSpeedMult;
+
+        // Die when off screen
+        if (this.y > this.screenHeight) {
+            this.alive = false;
+        }
+    }
+
+    draw(ctx, screenWidth, screenHeight, healthState) {
+        if (!this.alive) return;
+
+        // Get state-specific colors
+        let colorConfig;
+        switch (healthState) {
+            case 0: colorConfig = CONFIG.SPEEDLINE_LIMBO; break;
+            case 2: colorConfig = CONFIG.SPEEDLINE_HYPER; break;
+            default: colorConfig = CONFIG.SPEEDLINE_NORMAL;
+        }
+
+        // Calculate progress (0 at spawn, 1 at bottom)
+        const totalDistance = screenHeight - this.startY;
+        const traveled = this.y - this.startY;
+        const progress = Utils.clamp(traveled / totalDistance, 0, 1);
+
+        // Interpolate color
+        const r = Utils.lerp(colorConfig.startColor[0], colorConfig.endColor[0], progress);
+        const g = Utils.lerp(colorConfig.startColor[1], colorConfig.endColor[1], progress);
+        const b = Utils.lerp(colorConfig.startColor[2], colorConfig.endColor[2], progress);
+        const alpha = Utils.lerp(colorConfig.startOpacity, colorConfig.endOpacity, progress);
+
+        // Interpolate thickness
+        const thickness = Utils.lerp(CONFIG.SPEEDLINE_INITIAL_THICKNESS, CONFIG.SPEEDLINE_FINAL_THICKNESS, progress);
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter'; // Additive blend
+        ctx.strokeStyle = `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha})`;
+        ctx.lineWidth = thickness;
+        ctx.beginPath();
+        ctx.moveTo(0, this.y);
+        ctx.lineTo(screenWidth, this.y);
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+const SpeedLines = {
+    lines: [],
+    lastSpawnY: 0,
+    initialized: false,
+
+    init(screenHeight) {
+        this.lines = [];
+        this.lastSpawnY = screenHeight * (1 - CONFIG.SPEEDLINE_SPAWN_Y_PCT);
+        this.initialized = true;
+    },
+
+    update(deltaTime, screenWidth, screenHeight, animSpeedMult, healthState) {
+        if (!this.initialized) {
+            this.init(screenHeight);
+        }
+
+        const speed = CONFIG.SPEEDLINE_BASE_SPEED;
+        const spawnY = screenHeight * (1 - CONFIG.SPEEDLINE_SPAWN_Y_PCT);
+
+        // Update existing lines
+        for (let i = this.lines.length - 1; i >= 0; i--) {
+            this.lines[i].update(deltaTime, speed, animSpeedMult);
+            if (!this.lines[i].alive) {
+                this.lines.splice(i, 1);
+            }
+        }
+
+        // Check if we need to spawn a new line
+        let highestLineY = screenHeight;
+        this.lines.forEach(line => {
+            if (line.y < highestLineY) {
+                highestLineY = line.y;
+            }
+        });
+
+        // Spawn new line if the highest one has moved enough
+        if (highestLineY > spawnY + CONFIG.SPEEDLINE_SPAWN_DISTANCE || this.lines.length === 0) {
+            this.lines.push(new SpeedLine(spawnY, screenHeight));
+        }
+    },
+
+    draw(ctx, screenWidth, screenHeight, healthState) {
+        this.lines.forEach(line => line.draw(ctx, screenWidth, screenHeight, healthState));
+    },
+
+    clear() {
+        this.lines = [];
+        this.initialized = false;
+    }
+};
+
+###EOF###
+
+###[./js/damageflash.js]###
+
+// ============================================
+// DAMAGE FLASH EFFECT
+// ============================================
+
+const DamageFlash = {
+    active: false,
+    time: 0,
+    duration: CONFIG.DAMAGE_FLASH_DURATION,
+
+    trigger() {
+        this.active = true;
+        this.time = 0;
+    },
+
+    update(deltaTime) {
+        if (!this.active) return;
+        
+        this.time += deltaTime * 1000;
+        if (this.time >= this.duration) {
+            this.active = false;
+        }
+    },
+
+    draw(ctx, screenWidth, screenHeight) {
+        if (!this.active) return;
+
+        const progress = this.time / this.duration;
+        const currentOpacity = Utils.lerp(CONFIG.DAMAGE_FLASH_MAX_OPACITY, 0, progress);
+        
+        if (currentOpacity <= 0) return;
+
+        const gradientHeight = screenHeight * CONFIG.DAMAGE_FLASH_HEIGHT_PCT;
+        const gradientY = screenHeight - gradientHeight;
+
+        const gradient = ctx.createLinearGradient(0, screenHeight, 0, gradientY);
+        const [r, g, b] = CONFIG.DAMAGE_FLASH_COLOR;
+        
+        gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${currentOpacity})`);
+        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, ${CONFIG.DAMAGE_FLASH_MIN_OPACITY * currentOpacity})`);
+
+        ctx.save();
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, gradientY, screenWidth, gradientHeight);
+        ctx.restore();
+    },
+
+    reset() {
+        this.active = false;
+        this.time = 0;
+    }
+};
+
+###EOF###
+
+###[./js/config.js]###
+
+const CONFIG = {
+    // ==========================================
+    // DEBUG MODE
+    // ==========================================
+    DEBUG_MODE: true,
+    
+    // ==========================================
+    // GAME SPEED
+    // ==========================================
+    INITIAL_SPAWN_INTERVAL: 1.2,
+    FINAL_SPAWN_INTERVAL: 0.12,
+    SPEED_RAMP_TIME: 120,
+    
+    // Thresholds based on spawn interval (lower = faster)
+    TIER_2_SPAWN_THRESHOLD: 0.6,
+    TIER_3_SPAWN_THRESHOLD: 0.2,
+
+    // ==========================================
+    // DISTANCE PROGRESSION TIERS
+    // After reaching these scores, TIER_3_MAX_COLUMN_DISTANCE increases
+    // ==========================================
+    DISTANCE_TIERS: [
+        { score: 1000, maxColumnDistance: 4 },
+        { score: 1500, maxColumnDistance: 5 },
+        { score: 3000, maxColumnDistance: 6 }
+    ],
+
+    // ==========================================
+    // FONTS
+    // ==========================================
+    FONT_TITLE: "'Lilita One', cursive",
+    FONT_BUTTON: "'Archivo Black', sans-serif",
+    FONT_BODY: "'Raleway', sans-serif",
+    FONT_HEADER: "'Fjalla One', sans-serif",
+    FONT_READY_GO: "'Teko', sans-serif",
+    FONT_REACTION: "'Lilita One', cursive",
+    FONT_DEFAULT: "'Raleway', sans-serif",
+
+    // Title styling (applied via JS)
+    TITLE_FONT: "'Lilita One', cursive",
+    TITLE_SIZE: 64, // pixels
+
+    // Ready/Go text size (as percentage of screen width)
+    READY_GO_SIZE_VW: 18,
+
+    // ==========================================
+    // SCREEN & PLAY FIELD
+    // NUM_STEPS lanes span the full screen width edge-to-edge.
+    // MARGIN_STEPS lanes on each side cannot spawn bread.
+    // Example: NUM_STEPS=14, MARGIN_STEPS=2 → bread spawns in lanes 2-11
+    // ==========================================
+    NUM_STEPS: 14,
+    MARGIN_STEPS: 2,
+    PORTRAIT_ASPECT_RATIO: 9 / 16,
+    MAX_GAME_WIDTH: 450,
+
+    // ==========================================
+    // TOP LINE (FAR)
+    // ==========================================
+    TOP_LINE_WIDTH_PCT: 0.35,
+    TOP_LINE_Y_PCT: 0,
+
+    // ==========================================
+    // BOTTOM LINE (CLOSE)
+    // ==========================================
+    BOTTOM_LINE_Y_PCT: 0.82,
+
+    // ==========================================
+    // DEPTH SCALE
+    // ==========================================
+    SCALE_FAR: 0.4,
+    SCALE_NEAR: 1.6,
+    SCALE_POWER: 1.8,
+
+    // ==========================================
+    // MOVEMENT EASING
+    // ==========================================
+    Z_EASE_POWER: 2.2,
+    BREAD_TRAVEL_TIME: 5.0,
+    MIN_TRAVEL_TIME: 0.8,
+
+    // ==========================================
+    // COLLISION
+    // ==========================================
+    COLLISION_Z: 1.0,
+    COLLISION_STEP_MARGIN: 3,
+
+    // ==========================================
+    // ANIMATION SPEED MULTIPLIER
+    // ==========================================
+    ANIM_SPEED_MULT_START: 1.0,
+    ANIM_SPEED_MULT_END: 1.6,
+
+    // ==========================================
+    // HEALTH SYSTEM
+    // ==========================================
+    MAX_HEALTH: 300,
+    HEALTH_LOSS_PER_MISS: 150,
+    HEALTH_GAIN_PER_COLLECT: 5,
+    
+    // Per-tier health values
+    TIER_1_HEALTH_GAIN: 5,
+    TIER_1_HEALTH_LOSS: 150,
+    TIER_2_HEALTH_GAIN: 3,
+    TIER_2_HEALTH_LOSS: 160,
+    TIER_3_HEALTH_GAIN: 1,
+    TIER_3_HEALTH_LOSS: 170,
+
+    // ==========================================
+    // HEALTH STATES
+    // ==========================================
+    STARTING_STATE: 1,
+    STARTING_HEALTH_PCT: 0.5,
+
+    // ==========================================
+    // STATE NAME DISPLAY
+    // ==========================================
+    STATE_NAME_COLORS: {
+        limbo: '#888888',
+        normal: '#ff77ff',
+        hyper: '#ff00ff',
+        ultra: ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#4488FF']
+    },
+
+    // State announcement (middle of screen)
+    STATE_ANNOUNCE_VERTICAL_OFFSET_PCT: 0.38,
+    STATE_ANNOUNCE_INITIAL_SIZE: 72,
+    STATE_ANNOUNCE_FINAL_SIZE: 95,
+    STATE_ANNOUNCE_FADE_TIME: 2500,
+    STATE_ANNOUNCE_LIMBO_DROP_DISTANCE: 40,
+
+    // ==========================================
+    // BACKGROUND
+    // ==========================================
+    BG_CROSSFADE_TIME: 400,
+
+    // ==========================================
+    // SPEED LINES OVERLAY
+    // ==========================================
+    SPEEDLINE_SPAWN_Y_PCT: 0.589,
+    SPEEDLINE_INITIAL_THICKNESS: 1.5,
+    SPEEDLINE_FINAL_THICKNESS: 6,
+    SPEEDLINE_SPAWN_DISTANCE: 8,
+    SPEEDLINE_ACCEL_POWER: 1.6,
+    SPEEDLINE_BASE_SPEED: 800,
+
+    SPEEDLINE_LIMBO: {
+        startColor: [150, 150, 150],
+        startOpacity: 0.3,
+        endColor: [100, 100, 100],
+        endOpacity: 0.6
+    },
+    SPEEDLINE_NORMAL: {
+        startColor: [255, 255, 255],
+        startOpacity: 0.5,
+        endColor: [200, 220, 255],
+        endOpacity: 1.0
+    },
+    SPEEDLINE_HYPER: {
+        startColor: [255, 100, 100],
+        startOpacity: 0.6,
+        endColor: [255, 50, 255],
+        endOpacity: 1.0
+    },
+
+    // ==========================================
+    // PARTICLE COLORS BY STATE
+    // ==========================================
+    PARTICLE_COLORS_LIMBO: ['#333333', '#444444', '#555555', '#666666'],
+    PARTICLE_COLORS_NORMAL: ['#87CEEB', '#ADD8E6', '#B0E0E6', '#AFEEEE'],
+    PARTICLE_COLORS_HYPER: ['#FFD700', '#FFA500', '#FF6347', '#FFFF00'],
+    PARTICLE_COLORS_ULTRA: ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#8B00FF', '#FF00FF'],
+
+    // ==========================================
+    // BREAD SPRITES
+    // ==========================================
+    BREAD_TOTAL_FRAMES: 13,
+    BREAD_COLS: 5,
+    BREAD_ROWS: 3,
+    BREAD_ANIM_FPS: 14,
+    BREAD_MISS_ANIM_FPS: 28,
+    BREAD_SHAKE_TIME: 250,
+    BREAD_SHAKE_INTENSITY: 8,
+
+    // ==========================================
+    // BREAD PATTERN TIERS
+    // ==========================================
+
+    // Tier 1 patterns: sequential, zigzag, clusters, random burst
+    TIER_1_PATTERN_MIN_LENGTH: 20,
+    TIER_1_PATTERN_MAX_LENGTH: 40,
+    TIER_1_ZIGZAG_STEP: 2,
+    TIER_1_CLUSTER_SIZE: 3,
+    TIER_1_RANDOM_BURST_LENGTH: 5,
+
+    // Tier 2 patterns: sequential, stepping clusters
+    TIER_2_PATTERN_MIN_LENGTH: 20,
+    TIER_2_PATTERN_MAX_LENGTH: 40,
+    TIER_2_CLUSTER_LENGTH: 5,
+    TIER_2_CLUSTER_STEP: 1,
+
+    // Tier 3 patterns: sequential w/ 2-lane jumps, clusters
+    TIER_3_PATTERN_MIN_LENGTH: 20,
+    TIER_3_PATTERN_MAX_LENGTH: 40,
+    TIER_3_MAX_COLUMN_DISTANCE: 3,      // Base max lanes between subsequent breads
+    TIER_3_WIDE_JUMP_CHANCE: 0.5,
+    TIER_3_WIDE_JUMP_SIZE: 2,
+    TIER_3_CLUSTER_SIZE: 3,
+    TIER_3_CLUSTER_MIN_CENTER: 2,
+    TIER_3_CLUSTER_MAX_CENTER_OFFSET: 3,
+
+    // ==========================================
+    // DISCO BALL
+    // ==========================================
+    DISCO_ROTATION_DEG: 90,
+    DISCO_OFFSET_X: 0,
+    DISCO_OFFSET_Y_PCT: 0.13,
+    DISCO_COLS: 4,
+    DISCO_ROWS: 3,
+    DISCO_TOTAL_FRAMES: 12,
+    DISCO_ANIM_FPS: 24,
+    DISCO_ANIM_DIRECTION: 1,
+    DISCO_FLASH_OPACITY: 0.85,
+    DISCO_FLASH_FADE_TIME: 350,
+    DISCO_SCALE: 0.8,
+    DISCO_RAINBOW_SPEED: 180,
+
+    // ==========================================
+    // PLAYER SPRITES
+    // ==========================================
+    PLAYER_UNIVERSAL_OFFSET_X: 0,
+    PLAYER_UNIVERSAL_OFFSET_Y_PCT: -0.22,
+
+    PLAYER_RUN_OFFSET_X: 0,
+    PLAYER_RUN_OFFSET_Y: 60,
+    PLAYER_RUN_FRAMES: 8,
+    PLAYER_RUN_FPS: 12,
+
+    PLAYER_DAMAGE_HOLD_OFFSET_X: 0,
+    PLAYER_DAMAGE_HOLD_OFFSET_Y: 60,
+    PLAYER_DAMAGE_HOLD_FRAMES: 8,
+    PLAYER_DAMAGE_HOLD_FPS: 14,
+    PLAYER_DAMAGE_HOLD_LOOPS: 2,
+
+    PLAYER_DAMAGE_RECOVER_OFFSET_X: 0,
+    PLAYER_DAMAGE_RECOVER_OFFSET_Y: 60,
+    PLAYER_DAMAGE_RECOVER_FRAMES: 8,
+    PLAYER_DAMAGE_RECOVER_FPS: 14,
+
+    PLAYER_DEFEAT_KNEE_OFFSET_X: 0,
+    PLAYER_DEFEAT_KNEE_OFFSET_Y: 60,
+    PLAYER_DEFEAT_KNEE_FRAMES: 11,
+    PLAYER_DEFEAT_KNEE_FPS: 10,
+
+    PLAYER_SCALE: 0.8,
+
+    // ==========================================
+    // FUNNY GIFS
+    // ==========================================
+    GIF_CAT_FU: {
+        x: 0.12, y: 0.45,
+        cols: 5, rows: 4, frames: 20, fps: 15, scale: 1.4
+    },
+    GIF_CHEETAH: {
+        x: 0.5, y: 0.35,
+        cols: 2, rows: 3, frames: 6, fps: 10, scale: 1.6
+    },
+    GIF_DANCING_CAT: {
+        x: 0.85, y: 0.45,
+        cols: 6, rows: 3, frames: 18, fps: 12, scale: 0.7
+    },
+
+    // ==========================================
+    // ANIME ACTION LINES
+    // ==========================================
+    ACTION_LINES_COUNT: 24,
+    ACTION_LINES_LENGTH_MIN: 0.08,
+    ACTION_LINES_LENGTH_MAX: 0.18,
+    ACTION_LINES_THICKNESS: 3,
+    ACTION_LINES_SPEED: 400,
+    ACTION_LINES_OPACITY: 0.9,
+
+    // ==========================================
+    // PARTICLES
+    // ==========================================
+    PARTICLE_COUNT: 12,
+    PARTICLE_SPEED_MIN: 100,
+    PARTICLE_SPEED_MAX: 250,
+    PARTICLE_LIFETIME: 0.6,
+    PARTICLE_SIZE_MIN: 4,
+    PARTICLE_SIZE_MAX: 10,
+
+    // ==========================================
+    // DAMAGE FLASH EFFECT
+    // ==========================================
+    DAMAGE_FLASH_COLOR: [255, 0, 0],
+    DAMAGE_FLASH_MAX_OPACITY: 0.5,
+    DAMAGE_FLASH_MIN_OPACITY: 0.0,
+    DAMAGE_FLASH_HEIGHT_PCT: 0.4,
+    DAMAGE_FLASH_DURATION: 400,
+
+    // ==========================================
+    // FLOATING TEXT
+    // ==========================================
+    FLOAT_TEXT_DAMAGE_TEXTS: ['OUCH!', 'YIKES!'],
+    FLOAT_TEXT_DAMAGE_COLOR: '#FF4444',
+    FLOAT_TEXT_DAMAGE_FONT_SIZE: 32,
+    FLOAT_TEXT_DAMAGE_RISE_DISTANCE: 80,
+    FLOAT_TEXT_DAMAGE_DURATION: 800,
+    FLOAT_TEXT_DAMAGE_OFFSET_Y: -50,
+
+    FLOAT_TEXT_MAX_TEXTS: ['BREAD!', 'WOW!', 'YUM!', 'EPIC!', 'NICE!'],
+    FLOAT_TEXT_MAX_FONT_SIZE: 36,
+    FLOAT_TEXT_MAX_RISE_DISTANCE: 100,
+    FLOAT_TEXT_MAX_DURATION: 1000,
+    FLOAT_TEXT_MAX_OFFSET_Y: -60,
+    FLOAT_TEXT_MAX_RAINBOW_SPEED: 360,
+
+    // ==========================================
+    // UI & TIMING
+    // ==========================================
+    GAME_OVER_PAUSE_TIME: 2500,
+    RESUME_COUNTDOWN_SECONDS: 3,
+    READY_GO_DELAY: 1000,
+    GO_DISPLAY_TIME: 500,
+};
+
+###EOF###
+
+###[./js/main.js]###
+
+// ============================================
+// ENTRY POINT
+// ============================================
+
+window.addEventListener('DOMContentLoaded', () => {
+    Game.init();
+});
+
+###EOF###
+
+###[./js/sprites.js]###
+
+// ============================================
+// SPRITE MANAGEMENT
+// ============================================
+
+const Sprites = {
+    images: {},
+    loaded: false,
+    loadCount: 0,
+    totalCount: 0,
+
+    manifest: {
+        // Backgrounds
+        'bg-limbo': 'assets/bg-limbo.png',
+        'bg-normal': 'assets/bg-normal.png',
+        'bg-hyper': 'assets/bg-hyper.png',
+        
+        // Bread spritesheets
+        'bread-limbo': 'assets/bread-limbo-3x5.png',
+        'bread-normal': 'assets/bread-normal-3x5.png',
+        'bread-hyper': 'assets/bread-hyper-3x5.png',
+        
+        // Disco ball spritesheets
+        'disco-ball-limbo': 'assets/disco-ball-limbo-3x4.png',
+        'disco-ball-normal': 'assets/disco-ball-normal-3x4.png',
+        'disco-ball-hyper': 'assets/disco-ball-hyper-3x4.png',
+        
+        // Funny GIFs
+        'gif-cat-fu': 'assets/gif-cat-fu-4x5.png',
+        'gif-cheetah': 'assets/gif-cheetah-3x2.png',
+        'gif-dancing-cat': 'assets/gif-dancing-cat-3x6.png',
+        
+        // Player spritesheets
+        'player-run': 'assets/player-run-1x8.png',
+        'player-damage-hold': 'assets/player-damage-hold-1x8.png',
+        'player-damage-recover': 'assets/player-damage-recover-1x8.png',
+        'player-defeat-knee': 'assets/player-defeat-knee-1x11.png'
+    },
+
+    load(onComplete) {
+        const keys = Object.keys(this.manifest);
+        this.totalCount = keys.length;
+        this.loadCount = 0;
+
+        if (keys.length === 0) {
+            this.loaded = true;
+            onComplete && onComplete();
+            return;
+        }
+
+        keys.forEach(key => {
+            const img = new Image();
+            img.onload = () => {
+                this.images[key] = img;
+                this.loadCount++;
+                if (this.loadCount >= this.totalCount) {
+                    this.loaded = true;
+                    onComplete && onComplete();
+                }
+            };
+            img.onerror = () => {
+                console.warn(`Failed to load sprite: ${key}`);
+                this.loadCount++;
+                if (this.loadCount >= this.totalCount) {
+                    this.loaded = true;
+                    onComplete && onComplete();
+                }
+            };
+            img.src = this.manifest[key];
+        });
+    },
+
+    get(name) {
+        return this.images[name] || null;
+    },
+
+    /**
+     * Draw a frame from a spritesheet
+     */
+    drawFrame(ctx, spriteName, frame, x, y, cols, rows, scale = 1, rotation = 0) {
+        const img = this.get(spriteName);
+        if (!img) return;
+
+        const frameWidth = img.width / cols;
+        const frameHeight = img.height / rows;
+        const col = frame % cols;
+        const row = Math.floor(frame / cols);
+
+        ctx.save();
+        ctx.translate(x, y);
+        if (rotation !== 0) {
+            ctx.rotate(rotation * Math.PI / 180);
+        }
+        ctx.drawImage(
+            img,
+            col * frameWidth, row * frameHeight,
+            frameWidth, frameHeight,
+            -frameWidth * scale / 2, -frameHeight * scale / 2,
+            frameWidth * scale, frameHeight * scale
+        );
+        ctx.restore();
+    },
+
+    /**
+     * Get frame dimensions
+     */
+    getFrameSize(spriteName, cols, rows) {
+        const img = this.get(spriteName);
+        if (!img) return { width: 0, height: 0 };
+        return {
+            width: img.width / cols,
+            height: img.height / rows
+        };
+    }
+};
+
+###EOF###
+
+###[./js/bread.js]###
+
+// ============================================
+// BREAD ENTITY
+// ============================================
+
+class Bread {
+    constructor(step) {
+        this.step = step;
+        this.u = Utils.stepToU(step);
+        this.z = 0;
+        this.travelTime = 0;
+        this.alive = true;
+        this.collected = false;
+        this.missed = false;
+        this.collisionChecked = false;
+        
+        this.animFrame = 0;
+        this.animTime = 0;
+        
+        this.shakeTime = 0;
+        this.shakeOffset = { x: 0, y: 0 };
+    }
+
+    update(deltaTime, travelDuration, animSpeedMult) {
+        if (!this.alive) return false;
+
+        this.travelTime += deltaTime;
+        const rawProgress = this.travelTime / travelDuration;
+        this.z = Utils.easeIn(Math.min(rawProgress, 1), CONFIG.Z_EASE_POWER);
+
+        const fps = this.missed ? CONFIG.BREAD_MISS_ANIM_FPS : CONFIG.BREAD_ANIM_FPS;
+        const effectiveFps = fps * animSpeedMult;
+        this.animTime += deltaTime;
+        if (this.animTime >= 1 / effectiveFps) {
+            this.animTime -= 1 / effectiveFps;
+            this.animFrame = (this.animFrame + 1) % CONFIG.BREAD_TOTAL_FRAMES;
+        }
+
+        if (this.missed) {
+            this.shakeTime += deltaTime * 1000;
+            if (this.shakeTime < CONFIG.BREAD_SHAKE_TIME) {
+                const intensity = CONFIG.BREAD_SHAKE_INTENSITY * (1 - this.shakeTime / CONFIG.BREAD_SHAKE_TIME);
+                this.shakeOffset.x = (Math.random() - 0.5) * 2 * intensity;
+                this.shakeOffset.y = (Math.random() - 0.5) * 2 * intensity;
+            } else {
+                this.alive = false;
+            }
+        }
+
+        if (this.z >= CONFIG.COLLISION_Z && !this.collected && !this.missed && !this.collisionChecked) {
+            this.collisionChecked = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    getScreenPosition(screen) {
+        const x = Utils.uToScreenX(this.u, this.z, screen) + this.shakeOffset.x;
+        const y = Utils.zToScreenY(this.z, screen) + this.shakeOffset.y;
+        return { x, y };
+    }
+
+    getScale() {
+        return Utils.getScaleAtZ(this.z);
+    }
+
+    collect() {
+        this.collected = true;
+        this.alive = false;
+    }
+
+    miss() {
+        this.missed = true;
+        this.shakeTime = 0;
+    }
+
+    draw(ctx, screen, healthState) {
+        if (!this.alive) return;
+
+        const pos = this.getScreenPosition(screen);
+        const scale = this.getScale();
+
+        let spriteName;
+        switch (healthState) {
+            case 0: spriteName = 'bread-limbo'; break;
+            case 2: spriteName = 'bread-hyper'; break;
+            default: spriteName = 'bread-normal';
+        }
+
+        Sprites.drawFrame(
+            ctx, spriteName, this.animFrame,
+            pos.x, pos.y,
+            CONFIG.BREAD_COLS, CONFIG.BREAD_ROWS, scale
+        );
+    }
+}
+
+const BreadManager = {
+    breads: [],
+    spawnTimer: 0,
+    currentPattern: [],
+    patternIndex: 0,
+    currentTier: 1,
+    lastSpawnedStep: -1,
+    currentMaxColumnDistance: 3,
+
+    init() {
+        this.breads = [];
+        this.spawnTimer = 0;
+        this.currentTier = 1;
+        this.lastSpawnedStep = -1;
+        this.currentMaxColumnDistance = CONFIG.TIER_3_MAX_COLUMN_DISTANCE;
+        this.generatePattern();
+    },
+
+    getCurrentTier(spawnInterval) {
+        if (spawnInterval >= CONFIG.TIER_2_SPAWN_THRESHOLD) return 1;
+        if (spawnInterval >= CONFIG.TIER_3_SPAWN_THRESHOLD) return 2;
+        return 3;
+    },
+
+    updateMaxColumnDistance(score) {
+        // Start with base distance
+        let maxDist = CONFIG.TIER_3_MAX_COLUMN_DISTANCE;
+        // Check distance tiers from highest to lowest
+        for (let i = CONFIG.DISTANCE_TIERS.length - 1; i >= 0; i--) {
+            if (score >= CONFIG.DISTANCE_TIERS[i].score) {
+                maxDist = CONFIG.DISTANCE_TIERS[i].maxColumnDistance;
+                break;
+            }
+        }
+        this.currentMaxColumnDistance = maxDist;
+    },
+
+    generatePattern(tier) {
+        tier = tier || this.currentTier;
+        this.currentPattern = [];
+
+        switch (tier) {
+            case 1: this.generateTier1Pattern(); break;
+            case 2: this.generateTier2Pattern(); break;
+            case 3: this.generateTier3Pattern(); break;
+            default: this.generateTier1Pattern();
+        }
+
+        this.patternIndex = 0;
+    },
+
+    generateTier1Pattern() {
+        const len = Utils.randomInt(CONFIG.TIER_1_PATTERN_MIN_LENGTH, CONFIG.TIER_1_PATTERN_MAX_LENGTH);
+        const patternType = Utils.randomInt(0, 3);
+
+        switch (patternType) {
+            case 0: this.genSequential(len, 1); break;
+            case 1: this.genZigzag(len, CONFIG.TIER_1_ZIGZAG_STEP); break;
+            case 2: this.genClusters(len, CONFIG.TIER_1_CLUSTER_SIZE); break;
+            case 3: this.genRandomBurst(CONFIG.TIER_1_RANDOM_BURST_LENGTH); break;
+        }
+    },
+
+    generateTier2Pattern() {
+        const len = Utils.randomInt(CONFIG.TIER_2_PATTERN_MIN_LENGTH, CONFIG.TIER_2_PATTERN_MAX_LENGTH);
+        const patternType = Utils.randomInt(0, 1);
+
+        switch (patternType) {
+            case 0: this.genSequential(len, 1); break;
+            case 1: this.genSteppingClusters(len, CONFIG.TIER_2_CLUSTER_LENGTH, CONFIG.TIER_2_CLUSTER_STEP); break;
+        }
+    },
+
+    generateTier3Pattern() {
+        const len = Utils.randomInt(CONFIG.TIER_3_PATTERN_MIN_LENGTH, CONFIG.TIER_3_PATTERN_MAX_LENGTH);
+        const patternType = Utils.randomInt(0, 1);
+
+        switch (patternType) {
+            case 0: this.genSequentialWideJump(len); break;
+            case 1: this.genClusters(len, CONFIG.TIER_3_CLUSTER_SIZE); break;
+        }
+    },
+
+    // === Pattern generators ===
+    // All generators produce steps within spawnable range: [MARGIN_STEPS, NUM_STEPS - MARGIN_STEPS - 1]
+
+    genSequential(length, stepSize) {
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+        let pos = Utils.randomInt(minStep + 1, maxStep - 1);
+        let dir = Math.random() < 0.5 ? 1 : -1;
+        for (let i = 0; i < length; i++) {
+            this.currentPattern.push(pos);
+            pos += dir * stepSize;
+            if (pos < minStep || pos > maxStep) {
+                dir = -dir;
+                pos += dir * stepSize * 2;
+            }
+            pos = Utils.clamp(pos, minStep, maxStep);
+        }
+    },
+
+    genZigzag(length, stepSize) {
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+        let col = Utils.randomInt(minStep + stepSize, maxStep - stepSize);
+        let dir = Math.random() < 0.5 ? 1 : -1;
+        for (let i = 0; i < length; i++) {
+            this.currentPattern.push(col);
+            col += dir * stepSize;
+            if (col <= minStep) {
+                col = minStep;
+                dir = 1;
+            } else if (col >= maxStep) {
+                col = maxStep;
+                dir = -1;
+            }
+        }
+    },
+
+    genClusters(totalLength, clusterSize) {
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+        let count = 0;
+        while (count < totalLength) {
+            const halfSize = Math.floor(clusterSize / 2);
+            const center = Utils.randomInt(
+                Math.max(minStep, minStep + halfSize),
+                Math.min(maxStep, maxStep - halfSize)
+            );
+            for (let j = -halfSize; j <= halfSize && count < totalLength; j++) {
+                const step = Utils.clamp(center + j, minStep, maxStep);
+                this.currentPattern.push(step);
+                count++;
+            }
+        }
+    },
+
+    genRandomBurst(length) {
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+        for (let i = 0; i < length; i++) {
+            this.currentPattern.push(Utils.randomInt(minStep, maxStep));
+        }
+    },
+
+    genSteppingClusters(totalLength, clusterLength, clusterStep) {
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+        let count = 0;
+        while (count < totalLength) {
+            let pos = Utils.randomInt(minStep + 2, maxStep - 2);
+            let dir = Math.random() < 0.5 ? 1 : -1;
+            for (let i = 0; i < clusterLength && count < totalLength; i++) {
+                if (pos + dir * clusterStep < minStep || pos + dir * clusterStep > maxStep) {
+                    dir = -dir;
+                }
+                this.currentPattern.push(pos);
+                pos += dir * clusterStep;
+                pos = Utils.clamp(pos, minStep, maxStep);
+                count++;
+            }
+        }
+    },
+
+    genSequentialWideJump(length) {
+        const minStep = CONFIG.MARGIN_STEPS;
+        const maxStep = CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1;
+        let pos = Utils.randomInt(minStep + 2, maxStep - 2);
+        let dir = Math.random() < 0.5 ? 1 : -1;
+        let useWideJump = false;
+
+        for (let i = 0; i < length; i++) {
+            this.currentPattern.push(pos);
+
+            let stepSize = useWideJump ? CONFIG.TIER_3_WIDE_JUMP_SIZE : 1;
+            let nextPos = pos + dir * stepSize;
+
+            if (nextPos < minStep || nextPos > maxStep) {
+                dir = -dir;
+                useWideJump = Math.random() < CONFIG.TIER_3_WIDE_JUMP_CHANCE;
+                stepSize = useWideJump ? CONFIG.TIER_3_WIDE_JUMP_SIZE : 1;
+                nextPos = pos + dir * stepSize;
+            }
+
+            // Enforce max column distance within pattern
+            const dist = Math.abs(nextPos - pos);
+            if (dist > this.currentMaxColumnDistance) {
+                nextPos = pos + dir * this.currentMaxColumnDistance;
+            }
+
+            nextPos = Utils.clamp(nextPos, minStep, maxStep);
+            pos = nextPos;
+        }
+    },
+
+    getNextStep(spawnInterval, score) {
+        const tier = this.getCurrentTier(spawnInterval);
+        if (tier !== this.currentTier) {
+            this.currentTier = tier;
+            this.generatePattern(tier);
+        }
+        if (this.patternIndex >= this.currentPattern.length) {
+            this.generatePattern(tier);
+        }
+        
+        let step = this.currentPattern[this.patternIndex++];
+
+        // TIER 3: Globally enforce max column distance between ANY two adjacent breads
+        if (tier === 3 && this.lastSpawnedStep !== -1) {
+            this.updateMaxColumnDistance(score);
+            const maxDist = this.currentMaxColumnDistance;
+            const minStep = Math.max(CONFIG.MARGIN_STEPS, this.lastSpawnedStep - maxDist);
+            const maxStep = Math.min(CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1, this.lastSpawnedStep + maxDist);
+            step = Utils.clamp(step, minStep, maxStep);
+        }
+
+        // Final safety clamp to spawnable range
+        step = Utils.clamp(step, CONFIG.MARGIN_STEPS, CONFIG.NUM_STEPS - CONFIG.MARGIN_STEPS - 1);
+
+        this.lastSpawnedStep = step;
+        return step;
+    },
+
+    update(deltaTime, gameTime, travelDuration, spawnInterval, animSpeedMult, score) {
+        this.spawnTimer += deltaTime;
+        if (this.spawnTimer >= spawnInterval) {
+            this.spawnTimer -= spawnInterval;
+            const step = this.getNextStep(spawnInterval, score);
+            this.breads.push(new Bread(step));
+        }
+
+        const collisions = [];
+        for (let i = this.breads.length - 1; i >= 0; i--) {
+            const bread = this.breads[i];
+            const needsCollisionCheck = bread.update(deltaTime, travelDuration, animSpeedMult);
+            
+            if (needsCollisionCheck) {
+                collisions.push(bread);
+            }
+            
+            if (!bread.alive) {
+                this.breads.splice(i, 1);
+            }
+        }
+
+        return collisions;
+    },
+
+    draw(ctx, screen, healthState) {
+        const sorted = [...this.breads].sort((a, b) => a.z - b.z);
+        sorted.forEach(bread => bread.draw(ctx, screen, healthState));
+    },
+
+    clear() {
+        this.breads = [];
+        this.spawnTimer = 0;
+        this.patternIndex = 0;
+        this.currentPattern = [];
+        this.currentTier = 1;
+        this.lastSpawnedStep = -1;
+        this.currentMaxColumnDistance = CONFIG.TIER_3_MAX_COLUMN_DISTANCE;
+    }
+};
+
+###EOF###
+
+###[./js/player.js]###
+
+// ============================================
+// PLAYER STATE & ANIMATION
+// ============================================
+
+const Player = {
+    x: 0,
+    targetX: 0,
+    
+    // Animation state
+    state: 'run',
+    animFrame: 0,
+    animTime: 0,
+    damageLoopCount: 0,
+    damageLoopsCompleted: 0,
+    
+    // State flags
+    isGameOver: false,
+    
+    init(screenWidth) {
+        this.x = screenWidth / 2;
+        this.targetX = this.x;
+        this.state = 'run';
+        this.animFrame = 0;
+        this.animTime = 0;
+        this.damageLoopCount = 0;
+        this.damageLoopsCompleted = 0;
+        this.isGameOver = false;
+    },
+
+    setTargetX(x) {
+        this.targetX = x;
+    },
+
+    update(deltaTime) {
+        // Smooth movement toward target
+        const smoothing = 0.15;
+        this.x += (this.targetX - this.x) * smoothing;
+
+        // Update animation
+        this.updateAnimation(deltaTime);
+    },
+
+    updateAnimation(deltaTime) {
+        let fps, totalFrames;
+        
+        switch (this.state) {
+            case 'run':
+                fps = CONFIG.PLAYER_RUN_FPS;
+                totalFrames = CONFIG.PLAYER_RUN_FRAMES;
+                break;
+            case 'damage-hold':
+                fps = CONFIG.PLAYER_DAMAGE_HOLD_FPS;
+                totalFrames = CONFIG.PLAYER_DAMAGE_HOLD_FRAMES;
+                break;
+            case 'damage-recover':
+                fps = CONFIG.PLAYER_DAMAGE_RECOVER_FPS;
+                totalFrames = CONFIG.PLAYER_DAMAGE_RECOVER_FRAMES;
+                break;
+            case 'defeat':
+                fps = CONFIG.PLAYER_DEFEAT_KNEE_FPS;
+                totalFrames = CONFIG.PLAYER_DEFEAT_KNEE_FRAMES;
+                break;
+            default:
+                return;
+        }
+
+        this.animTime += deltaTime;
+        const frameTime = 1 / fps;
+        
+        while (this.animTime >= frameTime) {
+            this.animTime -= frameTime;
+            this.animFrame++;
+
+            // Handle animation completion/looping
+            if (this.animFrame >= totalFrames) {
+                switch (this.state) {
+                    case 'run':
+                        this.animFrame = 0;
+                        break;
+                    case 'damage-hold':
+                        this.damageLoopsCompleted++;
+                        if (this.damageLoopsCompleted >= CONFIG.PLAYER_DAMAGE_HOLD_LOOPS) {
+                            // Switch to recover animation
+                            this.state = 'damage-recover';
+                            this.animFrame = 0;
+                            this.animTime = 0;
+                            this.damageLoopsCompleted = 0;
+                        } else {
+                            this.animFrame = 0;
+                        }
+                        break;
+                    case 'damage-recover':
+                        // Return to run
+                        this.state = 'run';
+                        this.animFrame = 0;
+                        this.animTime = 0;
+                        break;
+                    case 'defeat':
+                        this.animFrame = totalFrames - 1; // Hold on last frame
+                        break;
+                }
+            }
+        }
+    },
+
+    triggerDamage() {
+        if (this.state === 'defeat') return;
+        
+        if (this.state === 'damage-hold') {
+            // Reset loop counter if already in damage
+            this.damageLoopsCompleted = 0;
+        } else {
+            // Start damage hold animation
+            this.state = 'damage-hold';
+            this.animFrame = 0;
+            this.animTime = 0;
+            this.damageLoopsCompleted = 0;
+        }
+    },
+
+    triggerGameOver() {
+        this.isGameOver = true;
+        this.state = 'defeat';
+        this.animFrame = 0;
+        this.animTime = 0;
+    },
+
+    getStep(screen) {
+        return Utils.screenXToStep(this.x, screen);
+    },
+
+    isInOOB(screen) {
+        return Utils.isInOOBZone(this.x, screen);
+    },
+
+    draw(ctx, screen, healthState, discoX, discoY) {
+        let spriteName, offsetX, offsetY, cols, rows;
+        
+        switch (this.state) {
+            case 'run':
+                spriteName = 'player-run';
+                offsetX = CONFIG.PLAYER_RUN_OFFSET_X;
+                offsetY = CONFIG.PLAYER_RUN_OFFSET_Y;
+                cols = 8; rows = 1;
+                break;
+            case 'damage-hold':
+                spriteName = 'player-damage-hold';
+                offsetX = CONFIG.PLAYER_DAMAGE_HOLD_OFFSET_X;
+                offsetY = CONFIG.PLAYER_DAMAGE_HOLD_OFFSET_Y;
+                cols = 8; rows = 1;
+                break;
+            case 'damage-recover':
+                spriteName = 'player-damage-recover';
+                offsetX = CONFIG.PLAYER_DAMAGE_RECOVER_OFFSET_X;
+                offsetY = CONFIG.PLAYER_DAMAGE_RECOVER_OFFSET_Y;
+                cols = 8; rows = 1;
+                break;
+            case 'defeat':
+                spriteName = 'player-defeat-knee';
+                offsetX = CONFIG.PLAYER_DEFEAT_KNEE_OFFSET_X;
+                offsetY = CONFIG.PLAYER_DEFEAT_KNEE_OFFSET_Y;
+                cols = 11; rows = 1;
+                break;
+        }
+
+        const x = discoX + CONFIG.PLAYER_UNIVERSAL_OFFSET_X + offsetX;
+        const y = discoY + screen.height * CONFIG.PLAYER_UNIVERSAL_OFFSET_Y_PCT + offsetY;
+
+        Sprites.drawFrame(
+            ctx,
+            spriteName,
+            this.animFrame,
+            x, y,
+            cols, rows,
+            CONFIG.PLAYER_SCALE
+        );
+    }
+};
+
+###EOF###
+
+###[./js/utils.js]###
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+const Utils = {
+    /**
+     * Linear interpolation
+     */
+    lerp(a, b, t) {
+        return a + (b - a) * t;
+    },
+
+    /**
+     * Clamp value between min and max
+     */
+    clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    },
+
+    /**
+     * Ease-in function (power-based)
+     */
+    easeIn(t, power = 2) {
+        return Math.pow(t, power);
+    },
+
+    /**
+     * Ease-out function (power-based)
+     */
+    easeOut(t, power = 2) {
+        return 1 - Math.pow(1 - t, power);
+    },
+
+    /**
+     * Ease-in-out function
+     */
+    easeInOut(t, power = 2) {
+        return t < 0.5 
+            ? Math.pow(2, power - 1) * Math.pow(t, power)
+            : 1 - Math.pow(-2 * t + 2, power) / 2;
+    },
+
+    /**
+     * Get screen dimensions accounting for mobile address bar
+     */
+    getScreenDimensions() {
+        const container = document.getElementById('gameContainer');
+        return {
+            width: container.offsetWidth,
+            height: container.offsetHeight
+        };
+    },
+
+    /**
+     * Calculate play field boundaries
+     */
+    getPlayField() {
+        const screen = this.getScreenDimensions();
+        const playableSteps = CONFIG.NUM_STEPS - (2 * CONFIG.MARGIN_STEPS);
+        const stepWidth = screen.width / CONFIG.NUM_STEPS;
+        const marginX = stepWidth * CONFIG.MARGIN_STEPS;
+        
+        return {
+            left: marginX,
+            right: screen.width - marginX,
+            width: screen.width - 2 * marginX,
+            screenWidth: screen.width,
+            screenHeight: screen.height
+        };
+    },
+
+    /**
+     * Convert normalized u (0-1) to screen X at a given z depth
+     */
+    uToScreenX(u, z, screen) {
+        const stepWidth = screen.width / CONFIG.NUM_STEPS;
+        const marginX = stepWidth * CONFIG.MARGIN_STEPS;
+        
+        // Top line (far)
+        const topWidth = screen.width * CONFIG.TOP_LINE_WIDTH_PCT;
+        const topLeft = (screen.width - topWidth) / 2;
+        const topRight = topLeft + topWidth;
+        const xTop = this.lerp(topLeft, topRight, u);
+
+        // Bottom line (close)
+        const bottomLeft = marginX;
+        const bottomRight = screen.width - marginX;
+        const xBottom = this.lerp(bottomLeft, bottomRight, u);
+
+        return this.lerp(xTop, xBottom, z);
+    },
+
+    /**
+     * Convert z to screen Y
+     */
+    zToScreenY(z, screen) {
+        const topY = screen.height * CONFIG.TOP_LINE_Y_PCT;
+        const bottomY = screen.height * CONFIG.BOTTOM_LINE_Y_PCT;
+        return this.lerp(topY, bottomY, z);
+    },
+
+    /**
+     * Get scale factor at given z depth
+     */
+    getScaleAtZ(z) {
+        const t = Math.pow(z, CONFIG.SCALE_POWER);
+        return this.lerp(CONFIG.SCALE_FAR, CONFIG.SCALE_NEAR, t);
+    },
+
+    /**
+     * Convert step index to normalized u value
+     */
+    stepToU(step) {
+        return (step + 0.5) / CONFIG.NUM_STEPS;
+    },
+
+    /**
+     * Convert screen X to step index
+     */
+    screenXToStep(x, screen) {
+        const stepWidth = screen.width / CONFIG.NUM_STEPS;
+        const marginX = stepWidth * CONFIG.MARGIN_STEPS;
+        const playWidth = screen.width - 2 * marginX;
+        const relativeX = x - marginX;
+        const u = relativeX / playWidth;
+        return Math.floor(Utils.clamp(u, 0, 0.9999) * (CONFIG.NUM_STEPS - 2 * CONFIG.MARGIN_STEPS));
+    },
+
+    /**
+     * Check if screen X is in OOB zone
+     */
+    isInOOBZone(x, screen) {
+        const stepWidth = screen.width / CONFIG.NUM_STEPS;
+        const marginX = stepWidth * CONFIG.MARGIN_STEPS;
+        return x < marginX || x > screen.width - marginX;
+    },
+
+    /**
+     * Convert continuous player X to normalized u (0-1)
+     */
+    screenXToU(x, screen) {
+        const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
+        const playWidth = screen.width - 2 * marginX;
+        const relativeX = x - marginX;
+        return Utils.clamp(relativeX / playWidth, 0, 1);
+    },
+
+    /**
+     * Get step boundaries for collision line
+     */
+    getStepBoundaries(screen) {
+        const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
+        const playWidth = screen.width - 2 * marginX;
+        const stepWidth = playWidth / CONFIG.NUM_STEPS;
+        const y = screen.height * CONFIG.BOTTOM_LINE_Y_PCT;
+        
+        const steps = [];
+        for (let i = 0; i < CONFIG.NUM_STEPS; i++) {
+            steps.push({
+                left: marginX + i * stepWidth,
+                right: marginX + (i + 1) * stepWidth,
+                center: marginX + (i + 0.5) * stepWidth,
+                y: y
+            });
+        }
+        return steps;
+    },
+
+    /**
+     * Random number in range
+     */
+    random(min, max) {
+        return min + Math.random() * (max - min);
+    },
+
+    /**
+     * Random integer in range (inclusive)
+     */
+    randomInt(min, max) {
+        return Math.floor(this.random(min, max + 1));
+    },
+
+    /**
+     * Pick random element from array
+     */
+    randomPick(array) {
+        return array[Math.floor(Math.random() * array.length)];
+    },
+
+    /**
+     * HSL to RGB conversion
+     */
+    hslToRgb(h, s, l) {
+        h = h / 360;
+        s = s / 100;
+        l = l / 100;
+        
+        let r, g, b;
+        if (s === 0) {
+            r = g = b = l;
+        } else {
+            const hue2rgb = (p, q, t) => {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1/6) return p + (q - p) * 6 * t;
+                if (t < 1/2) return q;
+                if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                return p;
+            };
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1/3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1/3);
+        }
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
+};
+
+###EOF###
+
+###[./js/particles.js]###
+
+class Particle {
+    constructor(x, y, color, isRainbow = false) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.isRainbow = isRainbow;
+        this.hue = Math.random() * 360;
+        this.size = Utils.random(CONFIG.PARTICLE_SIZE_MIN, CONFIG.PARTICLE_SIZE_MAX);
+        
+        const angle = Utils.random(0, Math.PI * 2);
+        const speed = Utils.random(CONFIG.PARTICLE_SPEED_MIN, CONFIG.PARTICLE_SPEED_MAX);
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        
+        this.lifetime = CONFIG.PARTICLE_LIFETIME;
+        this.age = 0;
+        this.alive = true;
+        this.currentSize = this.size;
+    }
+
+    update(deltaTime) {
+        this.age += deltaTime;
+        if (this.age >= this.lifetime) {
+            this.alive = false;
+            return;
+        }
+
+        this.x += this.vx * deltaTime;
+        this.y += this.vy * deltaTime;
+        this.vy += 300 * deltaTime;
+        
+        const progress = this.age / this.lifetime;
+        this.currentSize = this.size * (1 - progress);
+        
+        if (this.isRainbow) {
+            this.hue = (this.hue + 720 * deltaTime) % 360;
+        }
+    }
+
+    draw(ctx) {
+        if (!this.alive) return;
+
+        const alpha = 1 - (this.age / this.lifetime);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        
+        if (this.isRainbow) {
+            const rgb = Utils.hslToRgb(this.hue, 100, 60);
+            ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+            ctx.shadowColor = `hsl(${this.hue}, 100%, 50%)`;
+            ctx.shadowBlur = 10;
+        } else {
+            ctx.fillStyle = this.color;
+        }
+        
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.currentSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+const ParticleSystem = {
+    particles: [],
+
+    spawn(x, y, count = CONFIG.PARTICLE_COUNT, isRainbow = false, colors = null) {
+        const colorArray = colors || (isRainbow ? CONFIG.PARTICLE_COLORS_ULTRA : CONFIG.PARTICLE_COLORS_NORMAL);
+        for (let i = 0; i < count; i++) {
+            const color = Utils.randomPick(colorArray);
+            this.particles.push(new Particle(x, y, color, isRainbow));
+        }
+    },
+
+    update(deltaTime) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            this.particles[i].update(deltaTime);
+            if (!this.particles[i].alive) {
+                this.particles.splice(i, 1);
+            }
+        }
+    },
+
+    draw(ctx) {
+        this.particles.forEach(p => p.draw(ctx));
+    },
+
+    clear() {
+        this.particles = [];
+    }
+};
+
+###EOF###
+
+###[./js/floatingtext.js]###
+
+// ============================================
+// FLOATING TEXT SYSTEM
+// ============================================
+
+class FloatingText {
+    constructor(x, y, text, config) {
+        this.x = x;
+        this.startY = y;
+        this.y = y;
+        this.text = text;
+        this.color = config.color || '#FFFFFF';
+        this.fontSize = config.fontSize || 32;
+        this.riseDistance = config.riseDistance || 80;
+        this.duration = config.duration || 800;
+        this.isRainbow = config.isRainbow || false;
+        this.rainbowSpeed = config.rainbowSpeed || 360;
+        this.fontFamily = config.fontFamily || CONFIG.FONT_REACTION;
+        
+        this.age = 0;
+        this.alive = true;
+        this.hue = Math.random() * 360;
+    }
+
+    update(deltaTime) {
+        this.age += deltaTime * 1000;
+        
+        if (this.age >= this.duration) {
+            this.alive = false;
+            return;
+        }
+
+        const progress = this.age / this.duration;
+        this.y = this.startY - (this.riseDistance * progress);
+        
+        if (this.isRainbow) {
+            this.hue = (this.hue + this.rainbowSpeed * deltaTime) % 360;
+        }
+    }
+
+    draw(ctx) {
+		if (!this.alive) return;
+	
+		const progress = this.age / this.duration;
+		const alpha = 1 - Utils.easeIn(progress, 2);
+	
+		ctx.save();
+		ctx.globalAlpha = alpha;
+		ctx.font = `bold ${this.fontSize}px ${this.fontFamily}`;
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		
+		if (this.isRainbow) {
+			const rgb = Utils.hslToRgb(this.hue, 100, 60);
+			ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+			// Reduced shadow blur from 15 to 5
+			ctx.shadowColor = `hsl(${this.hue}, 100%, 50%)`;
+			ctx.shadowBlur = 5;
+			ctx.fillText(this.text, this.x, this.y);
+		} else {
+			ctx.fillStyle = this.color;
+			// Add subtle shadow for non-rainbow text
+			ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+			ctx.shadowBlur = 3;
+			ctx.fillText(this.text, this.x, this.y);
+		}
+		
+		ctx.restore();
+	}
+}
+
+const FloatingTextSystem = {
+    texts: [],
+
+    spawnDamageText(x, y) {
+        const text = Utils.randomPick(CONFIG.FLOAT_TEXT_DAMAGE_TEXTS);
+        this.texts.push(new FloatingText(x, y + CONFIG.FLOAT_TEXT_DAMAGE_OFFSET_Y, text, {
+            color: CONFIG.FLOAT_TEXT_DAMAGE_COLOR,
+            fontSize: CONFIG.FLOAT_TEXT_DAMAGE_FONT_SIZE,
+            riseDistance: CONFIG.FLOAT_TEXT_DAMAGE_RISE_DISTANCE,
+            duration: CONFIG.FLOAT_TEXT_DAMAGE_DURATION,
+            isRainbow: false,
+            fontFamily: CONFIG.FONT_REACTION
+        }));
+    },
+
+    spawnMaxHealthText(x, y) {
+        const text = Utils.randomPick(CONFIG.FLOAT_TEXT_MAX_TEXTS);
+        this.texts.push(new FloatingText(x, y + CONFIG.FLOAT_TEXT_MAX_OFFSET_Y, text, {
+            fontSize: CONFIG.FLOAT_TEXT_MAX_FONT_SIZE,
+            riseDistance: CONFIG.FLOAT_TEXT_MAX_RISE_DISTANCE,
+            duration: CONFIG.FLOAT_TEXT_MAX_DURATION,
+            isRainbow: true,
+            rainbowSpeed: CONFIG.FLOAT_TEXT_MAX_RAINBOW_SPEED,
+            fontFamily: CONFIG.FONT_REACTION
+        }));
+    },
+
+    update(deltaTime) {
+        for (let i = this.texts.length - 1; i >= 0; i--) {
+            this.texts[i].update(deltaTime);
+            if (!this.texts[i].alive) {
+                this.texts.splice(i, 1);
+            }
+        }
+    },
+
+    draw(ctx) {
+        this.texts.forEach(t => t.draw(ctx));
+    },
+
+    clear() {
+        this.texts = [];
+    }
+};
+
+###EOF###
+
+###[./js/input.js]###
+
+// ============================================
+// INPUT HANDLING (Mouse, Touch, Tilt)
+// ============================================
+
+const Input = {
+    currentX: 0,
+    isActive: false,
+    canvas: null,
+    tiltEnabled: false,
+    maxTilt: 9, // max degrees left/right mapped to screen edges
+
+    init(canvas) {
+        this.canvas = canvas;
+        this.reset(canvas.width);
+
+        // Mouse events
+        canvas.addEventListener('mousemove', (e) => this.handleMove(e.clientX));
+        canvas.addEventListener('mouseenter', () => this.isActive = true);
+        canvas.addEventListener('mouseleave', () => this.isActive = false);
+
+        // Touch events
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.isActive = true;
+            if (e.touches.length > 0) {
+                this.handleMove(e.touches[0].clientX);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length > 0) {
+                this.handleMove(e.touches[0].clientX);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            // keep last position
+        }, { passive: false });
+    },
+
+    handleMove(clientX) {
+        const rect = this.canvas.getBoundingClientRect();
+        this.currentX = clientX - rect.left;
+        this.isActive = true;
+    },
+
+    getX() {
+        return this.currentX;
+    },
+
+    reset(screenWidth) {
+        this.currentX = screenWidth / 2;
+        this.isActive = false;
+    },
+
+    // Called from UI's "Enable Tilt" button
+    enableTilt() {
+        if (this.tiltEnabled) return;
+        this.tiltEnabled = true;
+
+        window.addEventListener('deviceorientation', (e) => {
+            if (!this.tiltEnabled) return;
+
+            // gamma = left/right tilt, map -maxTilt..maxTilt to canvas width
+            const gamma = e.gamma || 0; 
+            const rect = this.canvas.getBoundingClientRect();
+            const clamped = Math.max(-this.maxTilt, Math.min(this.maxTilt, gamma));
+            const pct = (clamped + this.maxTilt) / (this.maxTilt * 2);
+            this.currentX = pct * rect.width;
+        }, true);
+    }
+};
+
+
+###EOF###
+
