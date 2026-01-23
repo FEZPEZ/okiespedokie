@@ -44,7 +44,7 @@ html, body {
     font-family: 'Geo', cursive;
     color: #ffffff;
 
-    font-size: clamp(4.5rem, 16vmin, 8rem);
+    font-size: clamp(6rem, 20vh, 11rem);
     line-height: 0.75;
     letter-spacing: 0.03em;
 
@@ -243,7 +243,7 @@ html, body {
     font-family: 'Teko', sans-serif;
 
     /* Mobile-safe sizing */
-    font-size: clamp(3rem, 10vmin, 7rem);
+    font-size: clamp(3rem, 12vh, 8rem);
 
     font-weight: 700;
     color: #fff;
