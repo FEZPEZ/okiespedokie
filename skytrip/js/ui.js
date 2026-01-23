@@ -62,7 +62,7 @@ const UI = {
         box.style.textAlign = 'center';
 
         const title = document.createElement('h2');
-        title.textContent = 'Tilt Your Phone to Collect Toast!';
+        title.textContent = 'Tilt the Phone to Collect Bread!';
         title.style.color = '#fff';
         title.style.marginBottom = '20px';
         title.style.fontFamily = CONFIG.FONT_HEADER;

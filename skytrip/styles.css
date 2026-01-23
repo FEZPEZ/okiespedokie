@@ -68,9 +68,9 @@ html, body {
 }
 
 .high-score {
-    font-family: 'Raleway', sans-serif;
-    color: #ff77ff;
-    font-size: clamp(16px, 4vw, 24px);
+    font-family: 'Geo', sans-serif;
+    color: #ffffff;
+    font-size: clamp(24px, 6vw, 30px);
     margin-bottom: 40px;
     text-shadow: 2px 2px 0 #000;
     font-weight: 600;
