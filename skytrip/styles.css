@@ -328,7 +328,7 @@ html, body {
 .modal-content h2 {
     font-family: 'Geo', cursive;
     color: #ff77ff;
-    font-size: clamp(28px, 8vw, 42px);
+    font-size: clamp(42px, 12vw, 54px);
     margin-bottom: 20px;
     text-shadow: 2px 2px 0 #000;
 }
