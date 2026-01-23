@@ -41,13 +41,12 @@ html, body {
 }
 
 .game-title {
-    font-family: 'Honk', cursive;
+    font-family: 'Geo', cursive;
+    color: #ffffff;
 
-    /* Responsive size: scales with screen, capped for sanity */
-    font-size: clamp(4rem, 12vw, 8rem);
-
-    letter-spacing: 0.03em;
+    font-size: clamp(4.5rem, 16vmin, 8rem);
     line-height: 0.75;
+    letter-spacing: 0.03em;
 
     width: 80%;
     max-width: 320px;
@@ -56,7 +55,6 @@ html, body {
     display: flex;
     flex-direction: column;
 }
-
 
 
 .title-sky {
@@ -236,21 +234,28 @@ html, body {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
-/* Overlay Text (Ready/Go/Countdown) */
 .overlay-text {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+
     font-family: 'Teko', sans-serif;
-    font-size: 8vw;
+
+    /* Mobile-safe sizing */
+    font-size: clamp(3rem, 10vmin, 7rem);
+
     font-weight: 700;
-    color: #ffffff;
+    color: #fff;
     z-index: 50;
+
     text-shadow: 3px 3px 0 #000;
     text-transform: uppercase;
-    letter-spacing: 6px;
+
+    /* Scale spacing with font size */
+    letter-spacing: 0.15em;
 }
+
 
 /* State Announcement */
 .state-announcement {
