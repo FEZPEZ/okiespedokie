@@ -326,7 +326,7 @@ html, body {
 }
 
 .modal-content h2 {
-    font-family: 'Lilita One', cursive;
+    font-family: 'Geo', cursive;
     color: #ff77ff;
     font-size: clamp(28px, 8vw, 42px);
     margin-bottom: 20px;
@@ -335,11 +335,11 @@ html, body {
 
 .modal-content p,
 .modal-content .body-text {
-    font-family: 'Raleway', sans-serif;
+    font-family: 'Geo', sans-serif;
 }
 
 .final-score {
-    font-family: 'Fjalla One', sans-serif;
+    font-family: 'Geo', sans-serif;
     color: #ff6edb;
     font-size: clamp(20px, 6vw, 32px);
     margin-bottom: 30px;
