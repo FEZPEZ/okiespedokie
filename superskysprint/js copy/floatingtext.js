@@ -14,7 +14,6 @@ class FloatingText {
         this.duration = config.duration || 800;
         this.isRainbow = config.isRainbow || false;
         this.rainbowSpeed = config.rainbowSpeed || 360;
-        this.fontFamily = config.fontFamily || CONFIG.FONT_REACTION;
         
         this.age = 0;
         this.alive = true;
@@ -45,18 +44,24 @@ class FloatingText {
 
         ctx.save();
         ctx.globalAlpha = alpha;
-        ctx.font = `bold ${this.fontSize}px ${this.fontFamily}`;
+        ctx.font = `bold ${this.fontSize}px Arial Black, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
         if (this.isRainbow) {
+            // Rainbow effect with glow
             const rgb = Utils.hslToRgb(this.hue, 100, 60);
             ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
             ctx.shadowColor = `hsl(${this.hue}, 100%, 50%)`;
             ctx.shadowBlur = 15;
+            
+            // Draw multiple times for extra glow
             ctx.fillText(this.text, this.x, this.y);
             ctx.fillText(this.text, this.x, this.y);
         } else {
+            // Normal text with outline
+            
+            ctx.strokeText(this.text, this.x, this.y);
             ctx.fillStyle = this.color;
             ctx.fillText(this.text, this.x, this.y);
         }
@@ -75,8 +80,7 @@ const FloatingTextSystem = {
             fontSize: CONFIG.FLOAT_TEXT_DAMAGE_FONT_SIZE,
             riseDistance: CONFIG.FLOAT_TEXT_DAMAGE_RISE_DISTANCE,
             duration: CONFIG.FLOAT_TEXT_DAMAGE_DURATION,
-            isRainbow: false,
-            fontFamily: CONFIG.FONT_REACTION
+            isRainbow: false
         }));
     },
 
@@ -87,8 +91,7 @@ const FloatingTextSystem = {
             riseDistance: CONFIG.FLOAT_TEXT_MAX_RISE_DISTANCE,
             duration: CONFIG.FLOAT_TEXT_MAX_DURATION,
             isRainbow: true,
-            rainbowSpeed: CONFIG.FLOAT_TEXT_MAX_RAINBOW_SPEED,
-            fontFamily: CONFIG.FONT_REACTION
+            rainbowSpeed: CONFIG.FLOAT_TEXT_MAX_RAINBOW_SPEED
         }));
     },
 

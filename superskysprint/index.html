@@ -6,6 +6,7 @@
     <title>Super Sky Sprint</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Fjalla+One&family=Lilita+One&family=Raleway:ital,wght@0,100..900;1,100..900&family=Teko:wght@300..700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="gameContainer">
@@ -28,16 +29,25 @@
             </div>
             
             <!-- Score Display -->
-            <div id="scoreDisplay">Score: 0</div>
+            <div id="scoreDisplay">
+                <img src="favicon.png" id="scoreIcon" alt="">
+                <span id="scoreValue">0</span>
+            </div>
+
+            <!-- State Name Header -->
+            <div id="stateNameHeader"></div>
             
             <!-- Pause Button -->
-            <button id="pauseButton">⏸</button>
+            <button id="pauseButton">II</button>
             
             <!-- Ready/Go Text -->
             <div id="readyText" class="overlay-text hidden"></div>
             
             <!-- Countdown Text -->
             <div id="countdownText" class="overlay-text hidden"></div>
+
+            <!-- State Announcement (center screen) -->
+            <div id="stateAnnouncement" class="state-announcement hidden"></div>
         </div>
 
         <!-- Pause Modal -->
@@ -60,7 +70,7 @@
         </div>
     </div>
 
-    <!-- Scripts (order matters) -->
+    <!-- Scripts -->
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/sprites.js"></script>

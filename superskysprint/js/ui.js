@@ -5,7 +5,9 @@
 const UI = {
     elements: {},
     highScore: 0,
-    tiltEnabled: false, // Tracks whether tilt is active
+    tiltEnabled: false,
+    currentDisplayState: 'normal',
+    previousDisplayState: 'normal',
 
     init() {
         this.elements = {
@@ -14,7 +16,9 @@ const UI = {
             pauseModal: document.getElementById('pauseModal'),
             gameOverModal: document.getElementById('gameOverModal'),
             healthFill: document.getElementById('healthFill'),
+            healthBarContainer: document.getElementById('healthBarContainer'),
             scoreDisplay: document.getElementById('scoreDisplay'),
+            scoreValue: document.getElementById('scoreValue'),
             highScoreDisplay: document.getElementById('highScoreDisplay'),
             readyText: document.getElementById('readyText'),
             countdownText: document.getElementById('countdownText'),
@@ -24,24 +28,19 @@ const UI = {
             resumeButton: document.getElementById('resumeButton'),
             quitButton: document.getElementById('quitButton'),
             tryAgainButton: document.getElementById('tryAgainButton'),
-            gameOverQuitButton: document.getElementById('gameOverQuitButton')
+            gameOverQuitButton: document.getElementById('gameOverQuitButton'),
+            stateNameHeader: document.getElementById('stateNameHeader'),
+            stateAnnouncement: document.getElementById('stateAnnouncement')
         };
 
-        // Load high score
         this.highScore = parseInt(localStorage.getItem('breadHighScore')) || 0;
         this.updateHighScoreDisplay();
-
-        // Setup button handlers
         this.setupButtons();
-
-        // Show initial tilt dialogue
         this.showTiltDialog();
     },
 
     setupButtons() {
-        this.elements.startButton.addEventListener('click', () => {
-            Game.start();
-        });
+        this.elements.startButton.addEventListener('click', () => Game.start());
         this.elements.pauseButton.addEventListener('click', () => Game.pause());
         this.elements.resumeButton.addEventListener('click', () => Game.resume());
         this.elements.quitButton.addEventListener('click', () => Game.quit());
@@ -49,21 +48,15 @@ const UI = {
         this.elements.gameOverQuitButton.addEventListener('click', () => Game.quit());
     },
 
-    // =============================
-    // Tilt Dialog
-    // =============================
     showTiltDialog() {
-        // Create overlay
         const overlay = document.createElement('div');
         overlay.id = 'tiltDialog';
         overlay.className = 'modal';
         overlay.style.background = 'rgba(0,0,0,0.9)';
         overlay.style.zIndex = 300;
 
-        // Content box
         const box = document.createElement('div');
         box.className = 'modal-content';
-        box.style.borderRadius = '0'; // Bauhaus square edges
         box.style.background = 'linear-gradient(180deg, #ff77ff, #77ffff)';
         box.style.padding = '30px';
         box.style.textAlign = 'center';
@@ -72,48 +65,161 @@ const UI = {
         title.textContent = 'Tilt Your Phone to Collect Toast!';
         title.style.color = '#fff';
         title.style.marginBottom = '20px';
-        title.style.fontFamily = "'Arial Black', sans-serif";
+        title.style.fontFamily = CONFIG.FONT_HEADER;
         box.appendChild(title);
 
         const button = document.createElement('button');
         button.textContent = 'GET THE BREAD';
         button.className = 'menu-button';
-        button.style.borderRadius = '0';
         button.style.background = 'linear-gradient(180deg, #ff88ff, #88ffcc)';
         button.style.color = '#000';
-        button.style.fontWeight = 'bold';
-        button.style.fontSize = 'clamp(18px,5vw,28px)';
         button.addEventListener('click', async () => {
-    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-        try {
-            const response = await DeviceMotionEvent.requestPermission();
-            if (response === 'granted') {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try {
+                    const response = await DeviceMotionEvent.requestPermission();
+                    if (response === 'granted') {
+                        Input.enableTilt();
+                        this.tiltEnabled = true;
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            } else {
                 Input.enableTilt();
                 this.tiltEnabled = true;
-            } else {
-                alert('Tilt permission denied.');
             }
-        } catch (err) {
-            console.error(err);
-            alert('Tilt permission request failed.');
-        }
-    } else {
-        // Non-iOS or old devices
-        Input.enableTilt();
-        this.tiltEnabled = true;
-    }
-    overlay.remove();
-});
+            overlay.remove();
+        });
 
         box.appendChild(button);
-
         overlay.appendChild(box);
         document.body.appendChild(overlay);
     },
 
-    // =============================
-    // Existing functions (menus, score, health)
-    // =============================
+    getDisplayState(healthState, isMaxHealth) {
+        if (isMaxHealth) return 'ultra';
+        switch (healthState) {
+            case 0: return 'limbo';
+            case 2: return 'hyper';
+            default: return 'normal';
+        }
+    },
+
+    updateStateDisplay(healthState, isMaxHealth) {
+        const newState = this.getDisplayState(healthState, isMaxHealth);
+        const oldState = this.currentDisplayState;
+
+        // Update header
+        this.updateStateNameHeader(newState);
+
+        // Check for announcement trigger
+        if (newState !== oldState) {
+            this.previousDisplayState = oldState;
+            this.currentDisplayState = newState;
+
+            // Determine if we should show announcement
+            let showAnnouncement = false;
+            let isGoingUp = false;
+
+            const stateOrder = ['limbo', 'normal', 'hyper', 'ultra'];
+            const oldIndex = stateOrder.indexOf(oldState);
+            const newIndex = stateOrder.indexOf(newState);
+
+            if (newIndex > oldIndex) {
+                isGoingUp = true;
+                // Only show for hyper and ultra going UP
+                if (newState === 'hyper' || newState === 'ultra') {
+                    showAnnouncement = true;
+                }
+            } else {
+                isGoingUp = false;
+                // Only show for limbo going DOWN
+                if (newState === 'limbo') {
+                    showAnnouncement = true;
+                }
+            }
+
+            if (showAnnouncement) {
+                this.showStateAnnouncement(newState, isGoingUp);
+            }
+
+            // Toggle limbo B&W
+            if (newState === 'limbo') {
+                this.elements.gameScreen.classList.add('limbo-ui');
+            } else {
+                this.elements.gameScreen.classList.remove('limbo-ui');
+            }
+        }
+    },
+
+    updateStateNameHeader(state) {
+        const header = this.elements.stateNameHeader;
+        header.innerHTML = '';
+
+        if (state === 'ultra') {
+            const letters = 'ULTRA'.split('');
+            const colors = CONFIG.STATE_NAME_COLORS.ultra;
+            letters.forEach((letter, i) => {
+                const span = document.createElement('span');
+                span.textContent = letter;
+                span.style.color = colors[i % colors.length];
+                header.appendChild(span);
+            });
+        } else {
+            header.textContent = state.toUpperCase();
+            header.style.color = CONFIG.STATE_NAME_COLORS[state] || '#fff';
+        }
+    },
+
+    showStateAnnouncement(state, isGoingUp) {
+        const el = this.elements.stateAnnouncement;
+        
+        // Remove previous animations
+        el.classList.remove('animate-grow', 'animate-drop', 'hidden');
+        el.innerHTML = '';
+
+        // Set position
+        el.style.top = `${CONFIG.STATE_ANNOUNCE_VERTICAL_OFFSET_PCT * 100}%`;
+
+        // Set CSS custom properties
+        el.style.setProperty('--initial-size', CONFIG.STATE_ANNOUNCE_INITIAL_SIZE + 'px');
+        el.style.setProperty('--final-size', CONFIG.STATE_ANNOUNCE_FINAL_SIZE + 'px');
+        el.style.setProperty('--fade-duration', CONFIG.STATE_ANNOUNCE_FADE_TIME + 'ms');
+
+        // Set content with colors
+        if (state === 'ultra') {
+            const letters = 'ULTRA'.split('');
+            const colors = CONFIG.STATE_NAME_COLORS.ultra;
+            letters.forEach((letter, i) => {
+                const span = document.createElement('span');
+                span.textContent = letter;
+                span.style.color = colors[i % colors.length];
+                el.appendChild(span);
+            });
+        } else {
+            el.textContent = state.toUpperCase();
+            el.style.color = CONFIG.STATE_NAME_COLORS[state] || '#fff';
+        }
+
+        el.style.fontSize = CONFIG.STATE_ANNOUNCE_INITIAL_SIZE + 'px';
+
+        // Force reflow
+        void el.offsetWidth;
+
+        // Apply animation
+        if (state === 'limbo') {
+            el.classList.add('animate-drop');
+        } else {
+            el.classList.add('animate-grow');
+        }
+
+        // Hide after animation
+        setTimeout(() => {
+            el.classList.add('hidden');
+            el.classList.remove('animate-grow', 'animate-drop');
+        }, CONFIG.STATE_ANNOUNCE_FADE_TIME);
+    },
+
     showMainMenu() {
         this.elements.mainMenu.classList.remove('hidden');
         this.elements.gameScreen.classList.add('hidden');
@@ -127,6 +233,10 @@ const UI = {
         this.elements.gameScreen.classList.remove('hidden');
         this.elements.pauseModal.classList.add('hidden');
         this.elements.gameOverModal.classList.add('hidden');
+        this.elements.gameScreen.classList.remove('limbo-ui');
+        this.currentDisplayState = 'normal';
+        this.previousDisplayState = 'normal';
+        this.updateStateNameHeader('normal');
     },
 
     showPauseModal() {
@@ -165,17 +275,21 @@ const UI = {
     },
 
     updateScore(score) {
-        this.elements.scoreDisplay.textContent = `Score: ${score}`;
+        this.elements.scoreValue.textContent = score;
     },
 
     updateHealthBar(health, maxHealth, healthState, isMaxed) {
         const percentage = isMaxed ? 100 : (health / maxHealth) * 100;
         this.elements.healthFill.style.width = `${percentage}%`;
-        this.elements.healthFill.classList.remove('limbo', 'normal', 'hyper');
-        switch (healthState) {
-            case 0: this.elements.healthFill.classList.add('limbo'); break;
-            case 1: this.elements.healthFill.classList.add('normal'); break;
-            case 2: this.elements.healthFill.classList.add('hyper'); break;
+        this.elements.healthFill.classList.remove('limbo', 'normal', 'hyper', 'ultra');
+        if (isMaxed) {
+            this.elements.healthFill.classList.add('ultra');
+        } else {
+            switch (healthState) {
+                case 0: this.elements.healthFill.classList.add('limbo'); break;
+                case 1: this.elements.healthFill.classList.add('normal'); break;
+                case 2: this.elements.healthFill.classList.add('hyper'); break;
+            }
         }
     },
 

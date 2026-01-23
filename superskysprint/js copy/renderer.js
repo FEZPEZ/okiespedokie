@@ -7,19 +7,30 @@ const Renderer = {
     ctx: null,
     screen: { width: 0, height: 0 },
     
+    // Background crossfade state
     currentBg: null,
     targetBg: null,
     bgFadeProgress: 1,
     bgFadeTime: 0,
     
+    // Disco ball state
     discoFrame: 0,
     discoAnimTime: 0,
     discoFlashOpacity: 0,
     discoFlashTime: 0,
     discoHue: 0,
 
-    gifFrames: { 'cat-fu': 0, 'cheetah': 0, 'dancing-cat': 0 },
-    gifAnimTimes: { 'cat-fu': 0, 'cheetah': 0, 'dancing-cat': 0 },
+    // Funny GIF state
+    gifFrames: {
+        'cat-fu': 0,
+        'cheetah': 0,
+        'dancing-cat': 0
+    },
+    gifAnimTimes: {
+        'cat-fu': 0,
+        'cheetah': 0,
+        'dancing-cat': 0
+    },
 
     init(canvas) {
         this.canvas = canvas;
@@ -33,22 +44,30 @@ const Renderer = {
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
         
+        // Calculate portrait dimensions
         let gameWidth, gameHeight;
         
+        // On mobile (portrait), use full screen
         if (windowWidth < windowHeight) {
             gameWidth = windowWidth;
             gameHeight = windowHeight;
         } else {
+            // On desktop/landscape, constrain to portrait aspect ratio
             gameHeight = windowHeight;
             gameWidth = Math.min(gameHeight * CONFIG.PORTRAIT_ASPECT_RATIO, CONFIG.MAX_GAME_WIDTH);
         }
         
+        // Apply dimensions to container
         container.style.width = `${gameWidth}px`;
         container.style.height = `${gameHeight}px`;
         
+        // Set canvas dimensions
         this.canvas.width = gameWidth;
         this.canvas.height = gameHeight;
-        this.screen = { width: gameWidth, height: gameHeight };
+        this.screen = {
+            width: gameWidth,
+            height: gameHeight
+        };
     },
 
     getScreen() {
@@ -68,6 +87,8 @@ const Renderer = {
             this.targetBg = newBg;
             this.bgFadeProgress = 0;
             this.bgFadeTime = 0;
+            
+            // Trigger disco ball flash
             this.discoFlashOpacity = CONFIG.DISCO_FLASH_OPACITY;
             this.discoFlashTime = 0;
         }
@@ -79,6 +100,7 @@ const Renderer = {
             this.bgFadeProgress = Math.min(this.bgFadeTime / CONFIG.BG_CROSSFADE_TIME, 1);
         }
         
+        // Update disco flash
         if (this.discoFlashOpacity > 0) {
             this.discoFlashTime += deltaTime * 1000;
             this.discoFlashOpacity = CONFIG.DISCO_FLASH_OPACITY * 
@@ -97,6 +119,7 @@ const Renderer = {
         const ctx = this.ctx;
         const { width, height } = this.screen;
 
+        // Draw current background
         if (this.currentBg) {
             const img = Sprites.get(this.currentBg);
             if (img) {
@@ -105,6 +128,7 @@ const Renderer = {
             }
         }
 
+        // Draw target background
         if (this.targetBg) {
             const img = Sprites.get(this.targetBg);
             if (img) {
@@ -156,6 +180,7 @@ const Renderer = {
         ctx.translate(x, y);
         ctx.rotate(CONFIG.DISCO_ROTATION_DEG * Math.PI / 180);
 
+        // Apply rainbow hue rotation if max health
         if (isMaxHealth) {
             ctx.filter = `hue-rotate(${this.discoHue}deg)`;
         }
@@ -169,6 +194,7 @@ const Renderer = {
         );
 
         ctx.restore();
+
         return { x, y };
     },
 
@@ -202,8 +228,10 @@ const Renderer = {
         gifs.forEach(gif => {
             const x = width * gif.config.x;
             const y = height * (1 - gif.config.y);
+
             Sprites.drawFrame(
-                ctx, gif.sprite,
+                ctx,
+                gif.sprite,
                 this.gifFrames[gif.key],
                 x, y,
                 gif.config.cols, gif.config.rows,
@@ -221,6 +249,7 @@ const Renderer = {
 
         ctx.save();
         
+        // Draw collision line
         ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -228,23 +257,28 @@ const Renderer = {
         ctx.lineTo(screen.width, collisionY);
         ctx.stroke();
 
+        // Draw step boundaries at collision line
         stepBoundaries.forEach((step, i) => {
+            // Draw step box
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
             ctx.lineWidth = 1;
             ctx.strokeRect(step.left, collisionY - 20, step.right - step.left, 40);
             
+            // Highlight player step and margin steps
             const margin = CONFIG.COLLISION_STEP_MARGIN;
             if (i >= playerStep - margin && i <= playerStep + margin && !playerInOOB) {
                 ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
                 ctx.fillRect(step.left, collisionY - 20, step.right - step.left, 40);
             }
             
+            // Draw step number
             ctx.fillStyle = 'red';
             ctx.font = '10px Arial';
             ctx.textAlign = 'center';
             ctx.fillText(i.toString(), step.center, collisionY + 35);
         });
 
+        // Draw bread centers at collision line
         BreadManager.breads.forEach(bread => {
             if (bread.z >= 0.9) {
                 const pos = bread.getScreenPosition(screen);
@@ -255,11 +289,13 @@ const Renderer = {
             }
         });
 
+        // Draw player position indicator
         ctx.fillStyle = playerInOOB ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 255, 0, 0.8)';
         ctx.beginPath();
         ctx.arc(playerX, collisionY, 8, 0, Math.PI * 2);
         ctx.fill();
 
+        // Draw OOB zones
         const marginX = screen.width * CONFIG.OOB_MARGIN_PERCENT;
         ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
         ctx.fillRect(0, 0, marginX, screen.height);
@@ -277,23 +313,41 @@ const Renderer = {
 
         const { healthState, isMaxHealth, playerX, isPaused, isGameOver } = gameState;
 
+        // Draw background
         this.drawBackground();
 
+        // Draw funny GIFs if at max health
         if (isMaxHealth) {
             this.drawFunnyGifs();
+        }
+
+        // Draw action lines if at max health
+        if (isMaxHealth) {
             ActionLines.draw(this.ctx, this.screen.width, this.screen.height);
         }
 
+        // Draw speed lines
         SpeedLines.draw(this.ctx, this.screen.width, this.screen.height, healthState);
+
+        // Draw breads
         BreadManager.draw(this.ctx, this.screen, healthState);
 
+        // Draw disco ball and get position
         const discoPos = this.drawDiscoBall(playerX, healthState, isMaxHealth);
+
+        // Draw player
         Player.draw(this.ctx, this.screen, healthState, discoPos.x, discoPos.y);
 
+        // Draw particles
         ParticleSystem.draw(this.ctx);
+
+        // Draw floating text
         FloatingTextSystem.draw(this.ctx);
+
+        // Draw damage flash
         DamageFlash.draw(this.ctx, this.screen.width, this.screen.height);
 
+        // Draw debug info
         const playerStep = Player.getStep(this.screen);
         const playerInOOB = Player.isInOOB(this.screen);
         this.drawDebugInfo(this.screen, playerStep, playerX, playerInOOB);
@@ -313,6 +367,7 @@ const Renderer = {
         });
     },
 
+    // Force clear everything (for game reset)
     forceClear() {
         this.clear();
         this.resetState();

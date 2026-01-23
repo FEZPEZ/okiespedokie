@@ -3,30 +3,31 @@
 // ============================================
 
 const Game = {
+    // State
     running: false,
     paused: false,
     gameOver: false,
     initialized: false,
     
+    // Timing
     lastTime: 0,
     gameTime: 0,
     startTime: 0,
     
+    // Score & Health
     score: 0,
     health: 0,
     healthState: 1,
     isMaxHealth: false,
     
+    // Countdown state
     countdownActive: false,
     countdownValue: 0,
     countdownTime: 0,
     
+    // Game over state
     gameOverPauseTime: 0,
     gameOverModalShown: false,
-
-    // Track previous state for announcements
-    prevHealthState: 1,
-    prevIsMaxHealth: false,
 
     init() {
         UI.init();
@@ -34,6 +35,7 @@ const Game = {
         Input.init(document.getElementById('gameCanvas'));
         ActionLines.init();
         
+        // Load sprites then show menu
         Sprites.load(() => {
             this.initialized = true;
             UI.showMainMenu();
@@ -44,9 +46,11 @@ const Game = {
         this.reset();
         UI.showGameScreen();
         
+        // Force clear the canvas before showing Ready
         Renderer.forceClear();
         this.renderClearFrame();
         
+        // Show "Ready?"
         UI.showReadyText('Ready?');
         
         setTimeout(() => {
@@ -62,6 +66,7 @@ const Game = {
     },
 
     renderClearFrame() {
+        // Render just the background with no game elements
         Renderer.setBackground(this.healthState);
         Renderer.clear();
         Renderer.drawBackground();
@@ -79,8 +84,6 @@ const Game = {
         this.countdownActive = false;
         this.gameOverPauseTime = 0;
         this.gameOverModalShown = false;
-        this.prevHealthState = CONFIG.STARTING_STATE;
-        this.prevIsMaxHealth = false;
 
         const screen = Renderer.getScreen();
         Player.init(screen.width);
@@ -136,111 +139,104 @@ const Game = {
     },
 
     handleCollision(bread) {
-        const screen = Renderer.getScreen();
-        const playerStep = Player.getStep(screen);
-        const playerInOOB = Player.isInOOB(screen);
-        const breadPos = bread.getScreenPosition(screen);
+    const screen = Renderer.getScreen();
+    const playerStep = Player.getStep(screen);
+    const playerInOOB = Player.isInOOB(screen);
 
-        const stepBoundaries = Utils.getStepBoundaries(screen);
-        const totalSteps = stepBoundaries.length;
-        const EDGE_BUFFER_STEPS = 3;
-        const leftEdgeMaxStep = EDGE_BUFFER_STEPS - 1;
-        const rightEdgeMinStep = totalSteps - EDGE_BUFFER_STEPS;
+    // Get bread position for particles/text
+    const breadPos = bread.getScreenPosition(screen);
 
-        let isHit = false;
+    const stepBoundaries = Utils.getStepBoundaries(screen);
+    const totalSteps = stepBoundaries.length;
 
-        if (!playerInOOB) {
-            const stepDiff = Math.abs(bread.step - playerStep);
-            isHit = stepDiff <= CONFIG.COLLISION_STEP_MARGIN;
+    // === EDGE BUFFER (number of steps auto-collected in margins) ===
+    const EDGE_BUFFER_STEPS = 3; // change this value as needed
+
+    const leftEdgeMaxStep = EDGE_BUFFER_STEPS - 1;
+    const rightEdgeMinStep = totalSteps - EDGE_BUFFER_STEPS;
+
+    let isHit = false;
+
+    if (!playerInOOB) {
+        // Normal in-bounds collision
+        const stepDiff = Math.abs(bread.step - playerStep);
+        isHit = stepDiff <= CONFIG.COLLISION_STEP_MARGIN;
+    } else {
+        // Margin behavior with buffer
+        if (playerStep < 0) {
+            // Left margin → collect leftmost N breads
+            isHit = bread.step <= leftEdgeMaxStep;
         } else {
-            if (playerStep < 0) {
-                isHit = bread.step <= leftEdgeMaxStep;
-            } else {
-                isHit = bread.step >= rightEdgeMinStep;
-            }
+            // Right margin → collect rightmost N breads
+            isHit = bread.step >= rightEdgeMinStep;
         }
+    }
 
-        // Get tier-specific health values
-        const tier = BreadManager.currentTier;
-        let healthGain, healthLoss;
-        switch (tier) {
-            case 2:
-                healthGain = CONFIG.TIER_2_HEALTH_GAIN;
-                healthLoss = CONFIG.TIER_2_HEALTH_LOSS;
-                break;
-            case 3:
-                healthGain = CONFIG.TIER_3_HEALTH_GAIN;
-                healthLoss = CONFIG.TIER_3_HEALTH_LOSS;
-                break;
-            default:
-                healthGain = CONFIG.TIER_1_HEALTH_GAIN;
-                healthLoss = CONFIG.TIER_1_HEALTH_LOSS;
-        }
+    if (isHit) {
+        // Collect!
+        bread.collect();
+        this.score++;
+        this.addHealth(CONFIG.HEALTH_GAIN_PER_COLLECT);
 
-        if (isHit) {
-            bread.collect();
-            this.score++;
-            this.addHealth(healthGain);
+        ParticleSystem.spawn(
+            breadPos.x,
+            breadPos.y,
+            CONFIG.PARTICLE_COUNT,
+            this.isMaxHealth
+        );
 
-            ParticleSystem.spawn(breadPos.x, breadPos.y, CONFIG.PARTICLE_COUNT, this.isMaxHealth);
+        if (this.isMaxHealth && Math.random() < 0.25) {
+			FloatingTextSystem.spawnMaxHealthText(
+				Player.x,
+				screen.height * CONFIG.BOTTOM_LINE_Y_PCT
+			);
+		}
 
-            if (this.isMaxHealth && Math.random() < 0.25) {
-                FloatingTextSystem.spawnMaxHealthText(
-                    Player.x,
-                    screen.height * CONFIG.BOTTOM_LINE_Y_PCT
-                );
-            }
-        } else {
-            bread.miss();
-            this.removeHealth(healthLoss);
-            Player.triggerDamage();
-            DamageFlash.trigger();
-            FloatingTextSystem.spawnDamageText(
-                Player.x,
-                screen.height * CONFIG.BOTTOM_LINE_Y_PCT
-            );
-        }
+    } else {
+        // Miss!
+        bread.miss();
+        this.removeHealth(CONFIG.HEALTH_LOSS_PER_MISS);
+        Player.triggerDamage();
+        DamageFlash.trigger();
+        FloatingTextSystem.spawnDamageText(
+            Player.x,
+            screen.height * CONFIG.BOTTOM_LINE_Y_PCT
+        );
+    }
 
-        UI.updateScore(this.score);
-    },
-
-    checkStateChange() {
-        const stateChanged = (this.healthState !== this.prevHealthState) || 
-                            (this.isMaxHealth !== this.prevIsMaxHealth);
-        
-        if (stateChanged) {
-            UI.updateStateDisplay(this.healthState, this.isMaxHealth);
-            this.prevHealthState = this.healthState;
-            this.prevIsMaxHealth = this.isMaxHealth;
-        }
-    },
+    UI.updateScore(this.score);
+},
 
     addHealth(amount) {
+        // Don't add health if already at max
         if (this.isMaxHealth) return;
         
         this.health += amount;
         
         if (this.health >= CONFIG.MAX_HEALTH) {
             if (this.healthState < 2) {
+                // Level up
                 this.healthState++;
                 this.health = this.health - CONFIG.MAX_HEALTH;
                 Renderer.setBackground(this.healthState);
                 
+                // Check if now at max state with full health
                 if (this.healthState === 2 && this.health >= CONFIG.MAX_HEALTH) {
                     this.health = CONFIG.MAX_HEALTH;
                     this.isMaxHealth = true;
                 }
             } else {
+                // At max state - cap health and set max flag
                 this.health = CONFIG.MAX_HEALTH;
                 this.isMaxHealth = true;
             }
         }
         
         UI.updateHealthBar(this.health, CONFIG.MAX_HEALTH, this.healthState, this.isMaxHealth);
-        this.checkStateChange();
     },
 
     removeHealth(amount) {
+        // If at max health, remove the max flag first
         if (this.isMaxHealth) {
             this.isMaxHealth = false;
         }
@@ -249,17 +245,18 @@ const Game = {
         
         if (this.health <= 0) {
             if (this.healthState > 0) {
+                // Level down
                 this.healthState--;
                 this.health = CONFIG.MAX_HEALTH + this.health;
                 Renderer.setBackground(this.healthState);
             } else {
+                // Game over
                 this.health = 0;
                 this.triggerGameOver();
             }
         }
         
         UI.updateHealthBar(this.health, CONFIG.MAX_HEALTH, this.healthState, this.isMaxHealth);
-        this.checkStateChange();
     },
 
     triggerGameOver() {
@@ -271,6 +268,7 @@ const Game = {
     },
 
     update(deltaTime) {
+        // Handle countdown
         if (this.countdownActive) {
             this.countdownTime += deltaTime * 1000;
             if (this.countdownTime >= 1000) {
@@ -287,6 +285,7 @@ const Game = {
             return;
         }
 
+        // Handle game over delay
         if (this.gameOver) {
             this.gameOverPauseTime += deltaTime * 1000;
             Player.update(deltaTime);
@@ -302,18 +301,27 @@ const Game = {
 
         if (this.paused) return;
 
+        // Update game time
         this.gameTime += deltaTime;
+
+        // Get current speed
         const speed = this.getCurrentSpeed();
 
+        // Update player input
         Player.setTargetX(Input.getX());
         Player.update(deltaTime);
 
+        // Update bread
         const collisions = BreadManager.update(
-            deltaTime, this.gameTime,
-            speed.travelTime, speed.spawnInterval, speed.animSpeedMult
+            deltaTime, 
+            this.gameTime, 
+            speed.travelTime, 
+            speed.spawnInterval,
+            speed.animSpeedMult
         );
         collisions.forEach(bread => this.handleCollision(bread));
 
+        // Update effects
         ParticleSystem.update(deltaTime);
         SpeedLines.update(deltaTime, Renderer.getScreen().width, Renderer.getScreen().height, speed.animSpeedMult, this.healthState);
         FloatingTextSystem.update(deltaTime);

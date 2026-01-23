@@ -13,7 +13,7 @@ html, body {
     height: 100dvh;
     overflow: hidden;
     background: #0d0d0d;
-    font-family: 'Arial Black', sans-serif;
+    font-family: 'Raleway', sans-serif;
 }
 
 #gameContainer {
@@ -41,6 +41,7 @@ html, body {
 }
 
 .game-title {
+    font-family: 'Lilita One', cursive;
     color: #ff6edb;
     font-size: clamp(36px, 10vw, 64px);
     text-align: center;
@@ -50,13 +51,16 @@ html, body {
 }
 
 .high-score {
+    font-family: 'Raleway', sans-serif;
     color: #ff77ff;
     font-size: clamp(16px, 4vw, 24px);
     margin-bottom: 40px;
     text-shadow: 2px 2px 0 #000;
+    font-weight: 600;
 }
 
 .menu-button {
+    font-family: 'Archivo Black', sans-serif;
     width: clamp(180px, 50vw, 260px);
     padding: 15px 30px;
     margin: 10px;
@@ -65,7 +69,7 @@ html, body {
     background: linear-gradient(180deg, #ff00ff 0%, #ff77ff 100%);
     color: #fff;
     border: 3px solid #ff6edb;
-    border-radius: 0; /* square edges */
+    border-radius: 0;
     cursor: pointer;
     box-shadow: 0 6px 0 #9c00ff, 0 8px 15px rgba(0,0,0,0.4);
     text-transform: uppercase;
@@ -102,12 +106,13 @@ html, body {
     left: 20px;
     right: 20px;
     z-index: 10;
+    transition: filter 0.4s ease;
 }
 
 #healthBar {
     height: 30px;
     background: #2c003d;
-    border-radius: 0; /* square */
+    border-radius: 0;
     overflow: hidden;
     box-shadow: inset 0 4px 8px rgba(255,0,255,0.3), 0 2px 4px rgba(255,0,255,0.2);
 }
@@ -116,13 +121,13 @@ html, body {
     height: 100%;
     width: 50%;
     background: linear-gradient(90deg, #ff00ff, #ff77ff);
-    border-radius: 0; /* square */
+    border-radius: 0;
     transition: width 0.3s ease-out, background 0.3s;
     box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
 }
 
 #healthFill.limbo {
-    background: linear-gradient(90deg, #aa00aa, #bb33bb);
+    background: linear-gradient(90deg, #777, #999);
 }
 
 #healthFill.normal {
@@ -135,6 +140,12 @@ html, body {
     animation: rainbowShift 1s linear infinite;
 }
 
+#healthFill.ultra {
+    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff, #ff00ff);
+    background-size: 300% 100%;
+    animation: rainbowShift 0.8s linear infinite;
+}
+
 @keyframes rainbowShift {
     0% { background-position: 0% 50%; }
     100% { background-position: 200% 50%; }
@@ -145,27 +156,65 @@ html, body {
     position: absolute;
     top: 60px;
     left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 10;
+    transition: filter 0.4s ease;
+}
+
+#scoreIcon {
+    height: 28px;
+    width: auto;
+    image-rendering: auto;
+}
+
+#scoreValue {
+    font-family: 'Fjalla One', sans-serif;
     color: #ff77ff;
     font-size: clamp(18px, 5vw, 28px);
     font-weight: bold;
-    z-index: 10;
     text-shadow: 2px 2px 4px #000;
+}
+
+/* State Name Header */
+#stateNameHeader {
+    position: absolute;
+    top: 62px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Teko', sans-serif; /* Changed from Fjalla One */
+    font-weight: 700;
+    font-size: clamp(16px, 4vw, 22px);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    z-index: 10;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    transition: filter 0.4s ease;
+    white-space: nowrap;
 }
 
 /* Pause Button */
 #pauseButton {
     position: absolute;
-    top: 60px;
+    top: 58px;
     right: 20px;
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
-    background: rgba(50,0,50,0.7);
+    width: 44px;
+    height: 44px;
+    background: transparent;
     color: #ff77ff;
-    border: 2px solid #ff6edb;
-    border-radius: 0; /* square edges */
+    border: none;
     cursor: pointer;
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: filter 0.4s ease;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 22px;
+    letter-spacing: -2px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
 /* Overlay Text */
@@ -174,13 +223,59 @@ html, body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: clamp(48px, 15vw, 80px);
+    font-family: 'Teko', sans-serif;
+    font-size: 18vw;
+    font-weight: 700;
     color: #ff6edb;
-    font-weight: bold;
     z-index: 50;
     text-shadow: 4px 4px 0 #000, 0 0 30px rgba(255,110,219,0.5);
     text-transform: uppercase;
     letter-spacing: 6px;
+}
+
+/* State Announcement */
+.state-announcement {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Teko', sans-serif; /* Changed from Fjalla One */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    z-index: 45;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.9);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.state-announcement.animate-grow {
+    animation: stateGrowFade var(--fade-duration) ease-out forwards;
+}
+
+.state-announcement.animate-drop {
+    animation: stateDropFade var(--fade-duration) ease-out forwards;
+}
+
+@keyframes stateGrowFade {
+    0% {
+        opacity: 1;
+        font-size: var(--initial-size);
+    }
+    100% {
+        opacity: 0;
+        font-size: var(--final-size);
+    }
+}
+
+@keyframes stateDropFade {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(60px);
+    }
 }
 
 /* Modals */
@@ -200,24 +295,51 @@ html, body {
 .modal-content {
     background: linear-gradient(180deg, #330066 0%, #440077 100%);
     padding: 40px;
-    border-radius: 0; /* square edges */
+    border-radius: 0;
     text-align: center;
     box-shadow: 0 10px 40px rgba(255,0,255,0.3);
     border: 2px solid #ff6edb;
 }
 
 .modal-content h2 {
+    font-family: 'Lilita One', cursive;
     color: #ff77ff;
     font-size: clamp(28px, 8vw, 42px);
     margin-bottom: 20px;
     text-shadow: 2px 2px 0 #000;
 }
 
+.modal-content p,
+.modal-content .body-text {
+    font-family: 'Raleway', sans-serif;
+}
+
 .final-score {
+    font-family: 'Fjalla One', sans-serif;
     color: #ff6edb;
     font-size: clamp(20px, 6vw, 32px);
     margin-bottom: 30px;
     text-shadow: 2px 2px 0 #000;
+}
+
+/* Limbo B&W state for UI elements */
+.limbo-ui #healthBarContainer,
+.limbo-ui #scoreDisplay,
+.limbo-ui #stateNameHeader,
+.limbo-ui #pauseButton {
+    filter: grayscale(100%) brightness(0.8);
+}
+
+.limbo-ui #healthBar {
+    background: #333;
+}
+
+.limbo-ui #scoreValue {
+    color: #ccc;
+}
+
+.limbo-ui #pauseButton {
+    color: #ccc;
 }
 
 /* Utility Classes */
