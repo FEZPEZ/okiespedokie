@@ -40,26 +40,28 @@ const Game = {
         });
     },
 
-    start() {
-        this.reset();
-        UI.showGameScreen();
-        
-        Renderer.forceClear();
-        this.renderClearFrame();
-        
-        UI.showReadyText('Ready?');
-        
-        setTimeout(() => {
-            UI.showReadyText('GO!');
-            setTimeout(() => {
-                UI.hideReadyText();
-                this.running = true;
-                this.startTime = performance.now();
-                this.lastTime = this.startTime;
-                requestAnimationFrame((t) => this.loop(t));
-            }, CONFIG.GO_DISPLAY_TIME);
-        }, CONFIG.READY_GO_DELAY);
-    },
+    async start() {
+		this.reset();
+		UI.showGameScreen();
+	
+		Renderer.forceClear();
+		this.renderClearFrame();
+	
+		await document.fonts.load("700 8rem Teko");
+	
+		UI.showReadyText('Ready?');
+	
+		setTimeout(() => {
+			UI.showReadyText('GO!');
+			setTimeout(() => {
+				UI.hideReadyText();
+				this.running = true;
+				this.startTime = performance.now();
+				this.lastTime = this.startTime;
+				requestAnimationFrame(t => this.loop(t));
+			}, CONFIG.GO_DISPLAY_TIME);
+		}, CONFIG.READY_GO_DELAY);
+	},
 
     renderClearFrame() {
         Renderer.setBackground(this.healthState);
