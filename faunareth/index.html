@@ -143,7 +143,7 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
         SUCCESS_DURATION: 5000
     };
 
-    const REQUIRED_SUCCESS_COUNT = 1;
+    const REQUIRED_SUCCESS_COUNT = 2;
     const gameContainer = document.getElementById("gameContainer");
 
     function initApp() {
@@ -224,16 +224,21 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     }
 
     function spawnParticle() {
-        const p = document.createElement("div");
-        p.className = "particle";
-        const size = Math.random() * (CONFIG.PARTICLE_MAX_SIZE - CONFIG.PARTICLE_MIN_SIZE) + CONFIG.PARTICLE_MIN_SIZE;
-        p.style.width = size + "px";
-        p.style.height = size + "px";
-        p.style.left = Math.random() * window.innerWidth + "px";
-        p.style.top = Math.random() * window.innerHeight + "px";
-        document.getElementById("bgLayer").appendChild(p);
-        setTimeout(() => p.remove(), 1000);
-    }
+		const p = document.createElement("div");
+		p.className = "particle";
+	
+		const size = Math.random() * (CONFIG.PARTICLE_MAX_SIZE - CONFIG.PARTICLE_MIN_SIZE) + CONFIG.PARTICLE_MIN_SIZE;
+		p.style.width = size + "px";
+		p.style.height = size + "px";
+	
+		const rect = document.getElementById("bgLayer").getBoundingClientRect();
+	
+		p.style.left = Math.random() * rect.width + "px";
+		p.style.top = Math.random() * rect.height + "px";
+	
+		document.getElementById("bgLayer").appendChild(p);
+		setTimeout(() => p.remove(), 1000);
+	}
 
     function particleLoop() {
         spawnParticle();
