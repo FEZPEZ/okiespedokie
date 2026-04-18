@@ -2,8 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <title>Multi-Device Puzzle</title>
 
@@ -16,53 +15,40 @@
     font-family: "Oswald", sans-serif;
     background: #111;
     color: white;
-    text-align: center;
     overflow: hidden;
-    touch-action: none;
     user-select: none;
-    -webkit-user-select: none;
+    touch-action: none;
+    overscroll-behavior: none;
   }
 
-  h2 {
-    margin-top: 20px;
-  }
+  #infoWrap { text-align: center; margin-top: 18px; }
+  #status { font-size: 28px; }
+  #sub { font-size: 16px; opacity: 0.7; margin-top: -4px; }
 
   /* MAIN BUTTON */
   #mainBtn {
+    --offset: 14px;
     width: 220px;
     height: 220px;
-    margin: 60px auto;
-    display: none;
-    position: relative;
-
-    border-radius: 0;
+    position: absolute;
+    /* Center the block including the shadow offset */
+    left: 50%;
+    top: 45%;
+    transform: translate(calc(-50% - var(--offset)/2), calc(-50% - var(--offset)/2));
+    
     border: none;
-
-    font-size: 22px;
-    color: white;
-
-    box-shadow: 10px 10px 0 rgba(0,0,0,0.6);
+    display: none;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
+    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.08);
   }
 
   #mainBtn.pressed {
-    transform: translate(8px, 8px);
-    box-shadow: 0px 0px 0 rgba(0,0,0,0.6);
+    /* Move back to true center when shadow is gone */
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 rgba(255,255,255,0.08);
   }
 
-  #holdIcon {
-    position: absolute;
-    top: -35px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: none;
-  }
-
-  #mainBtn.pressed #holdIcon {
-    display: block;
-  }
-
-  /* BOTTOM BUTTONS */
+  /* BOTTOM SELECTORS */
   #bottom {
     position: fixed;
     bottom: 0;
@@ -74,15 +60,29 @@
   .colorBtn {
     height: 90px;
     border: none;
-    border-radius: 0;
-    transition: transform 0.12s ease, outline 0.12s ease;
+    margin: 0;
+    transition: transform 0.12s ease;
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  .colorBtn.active {
-    transform: translateY(-10px);
-    outline: 2px solid white;
-    outline-offset: -4px;
+  .colorBtn svg {
+    display: none;
+    width: 26px;
+    height: 26px;
+    color: white;
+  }
+
+  .colorBtn.active { transform: translateY(-10px); }
+  .colorBtn.active svg { display: block; }
+  .colorBtn.active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 2px solid white;
+    pointer-events: none;
   }
 
   /* BACKGROUND LINES */
@@ -92,7 +92,7 @@
     width: 100%;
     height: 2px;
     background: rgba(255,255,255,0.08);
-    animation: grow 1.2s ease-out forwards;
+    animation: grow 1s ease-out forwards;
     pointer-events: none;
   }
 
@@ -101,24 +101,17 @@
     30% { opacity: 1; }
     100% { transform: scaleY(6); opacity: 0; }
   }
-
-  #status {
-    font-size: 22px;
-    margin-top: 10px;
-  }
 </style>
 </head>
 
 <body>
 
-<h2>Select a color</h2>
-
-<div id="mainBtn">
-  <div id="holdIcon" data-lucide="user-round"></div>
-  HOLD
+<div id="infoWrap">
+  <div id="status">0 / 7</div>
+  <div id="sub">buttons pressed</div>
 </div>
 
-<div id="status">0 / 7</div>
+<button id="mainBtn"></button>
 
 <div id="bottom"></div>
 
@@ -126,7 +119,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-/* FIREBASE */
+document.addEventListener("gesturestart", e => e.preventDefault());
+document.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
+
 const firebaseConfig = {
   apiKey: "AIzaSyBadLM5gvODvZnVSoMm-GPE_sBXB8nvLyQ",
   authDomain: "kercher-animal-puzzle.firebaseapp.com",
@@ -142,107 +137,107 @@ const db = getDatabase(app);
 
 const room = "default";
 const deviceId = Math.random().toString(36).substring(2, 10);
-
-/* PALETTE */
-const colors = [
-  "#cd5955",
-  "#ce846c",
-  "#d3b48d",
-  "#96a188",
-  "#709ead",
-  "#6c839e",
-  "#79708d"
-];
+const colors = ["#cd5955","#ce846c","#d3b48d","#96a188","#709ead","#6c839e","#79708d"];
 
 const bottom = document.getElementById("bottom");
 const mainBtn = document.getElementById("mainBtn");
 const status = document.getElementById("status");
-const h2 = document.querySelector("h2");
 
 let selectedColor = null;
 let isHolding = false;
 
-/* BUILD BUTTONS */
-colors.forEach((c, i) => {
+/* BUILD COLOR BUTTONS */
+colors.forEach(c => {
   const b = document.createElement("button");
   b.className = "colorBtn";
   b.style.background = c;
+  b.innerHTML = '<i data-lucide="user-round"></i>';
 
   b.addEventListener("click", () => {
     selectedColor = c;
+
     mainBtn.style.display = "block";
     mainBtn.style.background = c;
-    h2.style.display = "none";
 
     document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
     b.classList.add("active");
+
+    lucide.createIcons();
   });
 
   bottom.appendChild(b);
 });
 
-/* STATE HELPERS */
-function setColorState(color, state) {
-  set(ref(db, `rooms/${room}/${deviceId}/${color}`), state);
+/* FIREBASE STATE */
+function setState(val) {
+  if (!selectedColor) return;
+  set(ref(db, `rooms/${room}/${deviceId}`), val);
 }
 
+/* MAIN BUTTON INTERACTION */
 mainBtn.addEventListener("pointerdown", () => {
   if (!selectedColor) return;
+
   isHolding = true;
   mainBtn.classList.add("pressed");
-  setColorState(selectedColor, true);
+
+  setState({
+    color: selectedColor,
+    holding: true
+  });
 });
 
 function release() {
   if (!isHolding) return;
+
   isHolding = false;
   mainBtn.classList.remove("pressed");
-  setColorState(selectedColor, false);
+
+  setState({
+    color: selectedColor,
+    holding: false
+  });
 }
 
 mainBtn.addEventListener("pointerup", release);
 mainBtn.addEventListener("pointercancel", release);
 mainBtn.addEventListener("pointerleave", release);
 
-/* GLOBAL STATE */
-onValue(ref(db, `rooms/${room}`), (snap) => {
+/* GLOBAL COUNT UPDATER */
+onValue(ref(db, `rooms/${room}`), snap => {
   const data = snap.val() || {};
 
-  const allColors = new Set();
+  let count = 0;
 
-  for (const dev of Object.values(data)) {
-    for (const [color, val] of Object.entries(dev || {})) {
-      if (val) allColors.add(color);
+  Object.values(data).forEach(device => {
+    if (device?.holding === true) {
+      count++;
     }
-  }
+  });
 
-  const count = allColors.size;
   status.textContent = `${count} / 7`;
 
-  spawnLines(count);
+  if (count > 0) spawnLines(count);
 
   if (count >= 7) {
-    document.body.innerHTML = "<h1 style='margin-top:40vh'>SUCCESS</h1>";
+    document.body.innerHTML =
+      "<h1 style='text-align:center; margin-top:40vh'>SUCCESS</h1>";
   }
 });
 
 /* BACKGROUND EFFECT */
 function spawnLines(intensity) {
-  const lines = Math.max(1, intensity);
-
-  for (let i = 0; i < lines; i++) {
+  const n = Math.max(1, intensity);
+  for (let i = 0; i < n; i++) {
     const d = document.createElement("div");
     d.className = "line";
     d.style.top = Math.random() * 100 + "%";
-    d.style.animationDuration = (1.2 - intensity * 0.1) + "s";
-
+    d.style.animationDuration = (1 - intensity * 0.05) + "s";
     document.body.appendChild(d);
-
-    setTimeout(() => d.remove(), 1200);
+    setTimeout(() => d.remove(), 1000);
   }
 }
 
-/* CLEANUP */
 window.addEventListener("beforeunload", () => {
   remove(ref(db, `rooms/${room}/${deviceId}`));
 });
