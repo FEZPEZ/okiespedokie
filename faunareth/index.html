@@ -10,26 +10,23 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
-:root {
-    --glow-radius: 25px;
-}
+:root { --glow-radius: 25px; }
+
+/* Hide both by default to prevent FOUC */
+#gameContainer, #desktopFallback { display: none; }
 
 * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 body, button { -webkit-user-select: none; user-select: none; touch-action: none; }
-html, body { margin: 0; padding: 0; height: 100%; width: 100%; overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
-body { 
-    margin: 0; font-family: "Oswald", sans-serif; background: #111; color: white; 
-    overflow: hidden; touch-action: none; overscroll-behavior: none; 
-}
+html, body { margin: 0; padding: 0; height: 100%; width: 100%; overscroll-behavior: none; -webkit-text-size-adjust: 100%; background: #111; }
+body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
 
-/* Fallback for Desktop */
+/* Desktop Fallback */
 #desktopFallback {
-    display: none;
     position: fixed; inset: 0; z-index: 9999;
     background: #111;
     justify-content: center; align-items: center;
 }
-#desktopFallback i { width: 80px; height: 80px; }
+#desktopFallback i { width: 80px; height: 80px; color: white; }
 
 #gameContainer { transition: filter 0.5s ease; height: 100%; width: 100%; }
 #gameContainer.invert-mode { filter: grayscale(1) invert(1); }
@@ -123,19 +120,20 @@ body {
 
 <div id="bgFade"></div>
 
+<script>
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+        document.getElementById("gameContainer").style.display = "block";
+    } else {
+        document.getElementById("desktopFallback").style.display = "flex";
+    }
+</script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Check if device is mobile
-const isMobile = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-if (!isMobile()) {
-    document.getElementById("gameContainer").style.display = "none";
-    document.getElementById("desktopFallback").style.display = "flex";
-    lucide.createIcons();
-} else {
-    // START GAME LOGIC
+// Only run game logic if on mobile
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     const CONFIG = {
         PARTICLE_MIN_SIZE: 30,
         PARTICLE_MAX_SIZE: 60,
@@ -145,7 +143,7 @@ if (!isMobile()) {
         SUCCESS_DURATION: 5000
     };
 
-    const REQUIRED_SUCCESS_COUNT = 2;
+    const REQUIRED_SUCCESS_COUNT = 1;
     const gameContainer = document.getElementById("gameContainer");
 
     function initApp() {
@@ -191,8 +189,6 @@ if (!isMobile()) {
     let magInterval = null;
     let particleTimeout = null;
     let startTime = null;
-
-    const SPAWN_RATES = { 1: 800, 2: 600, 3: 450, 4: 350, 5: 250, 6: 150, 7: 80 };
 
     /* BUILD UI */
     colors.forEach((c, i) => {
@@ -324,8 +320,10 @@ if (!isMobile()) {
     });
 
     window.addEventListener("beforeunload", () => { remove(ref(db, `rooms/${room}/${deviceId}`)); });
-    lucide.createIcons();
 }
+
+// Ensure icons render regardless of state
+lucide.createIcons();
 </script>
 </body>
 </html>
