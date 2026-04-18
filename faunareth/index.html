@@ -62,18 +62,20 @@ body, button {
     position: absolute;
     left: 50%;
     top: 45%;
-    transform: translate(calc(-50% - var(--offset)/2), calc(-50% - var(--offset)/2));
     
+    /* Using will-change to prevent jittering */
+    will-change: transform, box-shadow;
+    
+    /* Unified transition for smoothness */
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    
+    transform: translate(calc(-50% - var(--offset)/2), calc(-50% - var(--offset)/2));
     border: none;
     display: none;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-    /* Increased opacity for white shadow visibility */
-    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.11);
+    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.2);
     
-    /* Remove tap highlight and focus outlines */
     outline: none;
     -webkit-tap-highlight-color: transparent;
-    user-select: none;
   }
 
   #mainBtn.pressed {
