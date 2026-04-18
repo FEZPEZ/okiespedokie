@@ -10,6 +10,27 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
+
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body, button {
+    /* Prevents highlighting/text selection across the board */
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+  }
+  html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
   body {
     margin: 0;
     font-family: "Oswald", sans-serif;
@@ -47,7 +68,7 @@
     display: none;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
     /* Increased opacity for white shadow visibility */
-    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.21);
+    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.11);
     
     /* Remove tap highlight and focus outlines */
     outline: none;
