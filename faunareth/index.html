@@ -16,12 +16,20 @@
     background: #111;
     color: white;
     overflow: hidden;
-    user-select: none;
+    user-select: none; /* Prevents text selection */
     touch-action: none;
     overscroll-behavior: none;
   }
 
-  #infoWrap { text-align: center; margin-top: 18px; }
+  /* Layering: Everything is above the bgLayer */
+  #bgLayer {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  #infoWrap { text-align: center; margin-top: 18px; position: relative; z-index: 1; }
   #status { font-size: 28px; }
   #sub { font-size: 16px; opacity: 0.7; margin-top: -4px; }
 
@@ -31,7 +39,6 @@
     width: 220px;
     height: 220px;
     position: absolute;
-    /* Center the block including the shadow offset */
     left: 50%;
     top: 45%;
     transform: translate(calc(-50% - var(--offset)/2), calc(-50% - var(--offset)/2));
@@ -39,13 +46,18 @@
     border: none;
     display: none;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
-    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.08);
+    /* Increased opacity for white shadow visibility */
+    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.21);
+    
+    /* Remove tap highlight and focus outlines */
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
   #mainBtn.pressed {
-    /* Move back to true center when shadow is gone */
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 0 rgba(255,255,255,0.08);
+    box-shadow: 0 0 0 rgba(255,255,255,0.2);
   }
 
   /* BOTTOM SELECTORS */
@@ -55,6 +67,7 @@
     width: 100%;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    z-index: 1;
   }
 
   .colorBtn {
@@ -66,6 +79,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
   .colorBtn svg {
@@ -93,7 +109,6 @@
     height: 2px;
     background: rgba(255,255,255,0.08);
     animation: grow 1s ease-out forwards;
-    pointer-events: none;
   }
 
   @keyframes grow {
@@ -105,6 +120,8 @@
 </head>
 
 <body>
+
+<div id="bgLayer"></div>
 
 <div id="infoWrap">
   <div id="status">0 / 7</div>
@@ -139,12 +156,25 @@ const room = "default";
 const deviceId = Math.random().toString(36).substring(2, 10);
 const colors = ["#cd5955","#ce846c","#d3b48d","#96a188","#709ead","#6c839e","#79708d"];
 
+const bgLayer = document.getElementById("bgLayer");
 const bottom = document.getElementById("bottom");
 const mainBtn = document.getElementById("mainBtn");
 const status = document.getElementById("status");
 
+// Define spawn rates in ms (Index 0 is unused, 1-7 mapped)
+const SPAWN_RATES = {
+  1: 800,
+  2: 600,
+  3: 450,
+  4: 350,
+  5: 250,
+  6: 150,
+  7: 80
+};
+
 let selectedColor = null;
 let isHolding = false;
+let lineInterval = null; // Store interval ID
 
 /* BUILD COLOR BUTTONS */
 colors.forEach(c => {
@@ -155,13 +185,10 @@ colors.forEach(c => {
 
   b.addEventListener("click", () => {
     selectedColor = c;
-
     mainBtn.style.display = "block";
     mainBtn.style.background = c;
-
     document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
     b.classList.add("active");
-
     lucide.createIcons();
   });
 
@@ -174,41 +201,19 @@ function setState(val) {
   set(ref(db, `rooms/${room}/${deviceId}`), val);
 }
 
-let holdTimer = null;
-let holding = false;
-
-mainBtn.addEventListener("pointerdown", (e) => {
+/* MAIN BUTTON INTERACTION */
+mainBtn.addEventListener("pointerdown", () => {
   if (!selectedColor) return;
-
-  mainBtn.setPointerCapture(e.pointerId);
-
-  holding = false;
-
-  holdTimer = setTimeout(() => {
-    holding = true;
-
-    mainBtn.classList.add("pressed");
-
-    setState({
-      color: selectedColor,
-      holding: true
-    });
-  }, 120); // small delay prevents tap flicker
+  isHolding = true;
+  mainBtn.classList.add("pressed");
+  setState({ color: selectedColor, holding: true });
 });
 
-function release(e) {
-  clearTimeout(holdTimer);
-
+function release() {
+  if (!isHolding) return;
+  isHolding = false;
   mainBtn.classList.remove("pressed");
-
-  if (holding) {
-    setState({
-      color: selectedColor,
-      holding: false
-    });
-  }
-
-  holding = false;
+  setState({ color: selectedColor, holding: false });
 }
 
 mainBtn.addEventListener("pointerup", release);
@@ -218,38 +223,33 @@ mainBtn.addEventListener("pointerleave", release);
 /* GLOBAL COUNT UPDATER */
 onValue(ref(db, `rooms/${room}`), snap => {
   const data = snap.val() || {};
-
   const activeColors = new Set();
-
   Object.values(data).forEach(device => {
-    if (device?.holding && device?.color) {
-      activeColors.add(device.color);
-    }
+    if (device?.holding && device?.color) activeColors.add(device.color);
   });
 
   const count = activeColors.size;
-
   status.textContent = `${count} / 7`;
 
-  if (count > 0) spawnLines(count);
+  // Manage Spawning Interval
+  clearInterval(lineInterval);
+  if (count > 1) {
+    const rate = SPAWN_RATES[count] || 500;
+    lineInterval = setInterval(() => spawnLine(), rate);
+  }
 
   if (count >= 7) {
-    document.body.innerHTML =
-      "<h1 style='text-align:center; margin-top:40vh'>SUCCESS</h1>";
+    document.body.innerHTML = "<h1 style='text-align:center; margin-top:40vh'>SUCCESS</h1>";
   }
 });
 
 /* BACKGROUND EFFECT */
-function spawnLines(intensity) {
-  const n = Math.max(1, intensity);
-  for (let i = 0; i < n; i++) {
-    const d = document.createElement("div");
-    d.className = "line";
-    d.style.top = Math.random() * 100 + "%";
-    d.style.animationDuration = (1 - intensity * 0.05) + "s";
-    document.body.appendChild(d);
-    setTimeout(() => d.remove(), 1000);
-  }
+function spawnLine() {
+  const d = document.createElement("div");
+  d.className = "line";
+  d.style.top = Math.random() * 100 + "%";
+  bgLayer.appendChild(d);
+  setTimeout(() => d.remove(), 1000);
 }
 
 window.addEventListener("beforeunload", () => {
