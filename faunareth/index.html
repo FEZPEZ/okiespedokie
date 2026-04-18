@@ -174,29 +174,41 @@ function setState(val) {
   set(ref(db, `rooms/${room}/${deviceId}`), val);
 }
 
-/* MAIN BUTTON INTERACTION */
-mainBtn.addEventListener("pointerdown", () => {
+let holdTimer = null;
+let holding = false;
+
+mainBtn.addEventListener("pointerdown", (e) => {
   if (!selectedColor) return;
 
-  isHolding = true;
-  mainBtn.classList.add("pressed");
+  mainBtn.setPointerCapture(e.pointerId);
 
-  setState({
-    color: selectedColor,
-    holding: true
-  });
+  holding = false;
+
+  holdTimer = setTimeout(() => {
+    holding = true;
+
+    mainBtn.classList.add("pressed");
+
+    setState({
+      color: selectedColor,
+      holding: true
+    });
+  }, 120); // small delay prevents tap flicker
 });
 
-function release() {
-  if (!isHolding) return;
+function release(e) {
+  clearTimeout(holdTimer);
 
-  isHolding = false;
   mainBtn.classList.remove("pressed");
 
-  setState({
-    color: selectedColor,
-    holding: false
-  });
+  if (holding) {
+    setState({
+      color: selectedColor,
+      holding: false
+    });
+  }
+
+  holding = false;
 }
 
 mainBtn.addEventListener("pointerup", release);
@@ -207,13 +219,15 @@ mainBtn.addEventListener("pointerleave", release);
 onValue(ref(db, `rooms/${room}`), snap => {
   const data = snap.val() || {};
 
-  let count = 0;
+  const activeColors = new Set();
 
   Object.values(data).forEach(device => {
-    if (device?.holding === true) {
-      count++;
+    if (device?.holding && device?.color) {
+      activeColors.add(device.color);
     }
   });
+
+  const count = activeColors.size;
 
   status.textContent = `${count} / 7`;
 
