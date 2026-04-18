@@ -10,281 +10,322 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
-
-* {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+:root {
+    --glow-radius: 25px;
 }
 
-body, button {
-    /* Prevents highlighting/text selection across the board */
-    -webkit-user-select: none;
-    user-select: none;
-    touch-action: none;
-  }
-  html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  overscroll-behavior: none;
-  -webkit-text-size-adjust: 100%;
+* { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+body, button { -webkit-user-select: none; user-select: none; touch-action: none; }
+html, body { margin: 0; padding: 0; height: 100%; width: 100%; overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
+body { 
+    margin: 0; font-family: "Oswald", sans-serif; background: #111; color: white; 
+    overflow: hidden; touch-action: none; overscroll-behavior: none; 
 }
-  body {
-    margin: 0;
-    font-family: "Oswald", sans-serif;
+
+/* Fallback for Desktop */
+#desktopFallback {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
     background: #111;
-    color: white;
-    overflow: hidden;
-    user-select: none; /* Prevents text selection */
-    touch-action: none;
-    overscroll-behavior: none;
-  }
+    justify-content: center; align-items: center;
+}
+#desktopFallback i { width: 80px; height: 80px; }
 
-  /* Layering: Everything is above the bgLayer */
-  #bgLayer {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
+#gameContainer { transition: filter 0.5s ease; height: 100%; width: 100%; }
+#gameContainer.invert-mode { filter: grayscale(1) invert(1); }
+
+/* Overlays */
+#bgLayer { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+#pulseOverlay { 
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; 
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    opacity: 0;
+}
+#bgFade { 
+    position: fixed; inset: 0; z-index: 100; background: #111; 
+    opacity: 0; pointer-events: none; transition: opacity 2s ease;
+}
+
+#infoWrap { text-align: center; margin-top: 18px; position: relative; z-index: 1; transition: text-shadow 0.2s ease; }
+#infoWrap.glowing { text-shadow: 0 0 var(--glow-radius) #fff; }
+
+#status { font-size: 28px; }
+#sub { font-size: 16px; opacity: 0.7; margin-top: -4px; }
+
+/* MAIN BUTTON */
+#mainBtn {
+  --offset: 14px;
+  width: 220px; height: 220px;
+  position: absolute; left: 50%; top: 45%;
+  will-change: transform, box-shadow, background-color;
+  backface-visibility: hidden;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 4s linear;
+  transform: translate(calc(-50% - var(--offset)/2), calc(-50% - var(--offset)/2));
+  border: none; display: none;
+  box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.11);
+  outline: none; -webkit-tap-highlight-color: transparent;
+}
+
+#mainBtn.pressed {
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 rgba(255,255,255,0.2);
+}
+
+@keyframes pulse {
+  0% { opacity: 0; transform: scale(1); }
+  50% { opacity: 0.4; }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+#pulseOverlay.active { animation: pulse 1.5s infinite ease-in-out; }
+
+/* BOTTOM SELECTORS */
+#bottom { position: fixed; bottom: 0; width: 100%; display: grid; grid-template-columns: repeat(7, 1fr); z-index: 1; }
+.colorBtn { height: 90px; border: none; margin: 0; transition: transform 0.12s ease; position: relative; display: flex; justify-content: center; align-items: center; outline: none; }
+.colorBtn svg { display: none; width: 26px; height: 26px; color: white; }
+.colorBtn.active { transform: translateY(-10px); }
+.colorBtn.active svg { display: block; }
+.colorBtn.active::after { content: ""; position: absolute; inset: 0; border: 2px solid white; pointer-events: none; }
+
+.line { position: absolute; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.08); animation: grow 1s ease-out forwards; }
+@keyframes grow { 0% { transform: scaleY(0.2); opacity: 0; } 30% { opacity: 1; } 100% { transform: scaleY(6); opacity: 0; } }
+
+/* Particle Effect */
+.particle {
+    position: absolute;
+    background: white;
+    opacity: 0.11;
     pointer-events: none;
-  }
-
-  #infoWrap { text-align: center; margin-top: 18px; position: relative; z-index: 1; }
-  #status { font-size: 28px; }
-  #sub { font-size: 16px; opacity: 0.7; margin-top: -4px; }
-
-  /* MAIN BUTTON */
-  #mainBtn {
-    --offset: 14px;
-    width: 220px;
-    height: 220px;
-    position: absolute;
-    left: 50%;
-    top: 45%;
-    
-    /* Hardware acceleration fixes mobile jitter */
-    will-change: transform, box-shadow;
-    backface-visibility: hidden;
-    perspective: 1000px;
-    
-    /* Using separate transition durations can also smooth out rendering */
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-    
-    transform: translate(calc(-50% - var(--offset)/2), calc(-50% - var(--offset)/2));
-    border: none;
-    display: none;
-    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.11);
-    
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-
-  #mainBtn.pressed {
-    /* Use translate3d to force GPU rendering on mobile */
-    transform: translate3d(-50%, -50%, 0);
-    box-shadow: 0 0 0 rgba(255,255,255,0.2);
-  }
-
-  /* BOTTOM SELECTORS */
-  #bottom {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    z-index: 1;
-  }
-
-  .colorBtn {
-    height: 90px;
-    border: none;
-    margin: 0;
-    transition: transform 0.12s ease;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-
-  .colorBtn svg {
-    display: none;
-    width: 26px;
-    height: 26px;
-    color: white;
-  }
-
-  .colorBtn.active { transform: translateY(-10px); }
-  .colorBtn.active svg { display: block; }
-  .colorBtn.active::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border: 2px solid white;
-    pointer-events: none;
-  }
-
-  /* BACKGROUND LINES */
-  .line {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: rgba(255,255,255,0.08);
-    animation: grow 1s ease-out forwards;
-  }
-
-  @keyframes grow {
-    0% { transform: scaleY(0.2); opacity: 0; }
-    30% { opacity: 1; }
-    100% { transform: scaleY(6); opacity: 0; }
-  }
+    animation: fadeGrow 1s forwards;
+}
+@keyframes fadeGrow {
+    0% { transform: scale(1); opacity: 0.11; }
+    100% { transform: scale(2); opacity: 0; }
+}
 </style>
 </head>
 
 <body>
 
-<div id="bgLayer"></div>
-
-<div id="infoWrap">
-  <div id="status">0 / 7</div>
-  <div id="sub">buttons pressed</div>
+<div id="desktopFallback">
+    <i data-lucide="smartphone"></i>
 </div>
 
-<button id="mainBtn"></button>
+<div id="gameContainer">
+    <div id="bgLayer"></div>
+    <div id="pulseOverlay"></div>
+    <div id="infoWrap">
+      <div id="status">0 / 7</div>
+      <div id="sub">buttons pressed</div>
+    </div>
+    <button id="mainBtn"></button>
+    <div id="bottom"></div>
+</div>
 
-<div id="bottom"></div>
+<div id="bgFade"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-document.addEventListener("gesturestart", e => e.preventDefault());
-document.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
+// Check if device is mobile
+const isMobile = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBadLM5gvODvZnVSoMm-GPE_sBXB8nvLyQ",
-  authDomain: "kercher-animal-puzzle.firebaseapp.com",
-  databaseURL: "https://kercher-animal-puzzle-default-rtdb.firebaseio.com",
-  projectId: "kercher-animal-puzzle",
-  storageBucket: "kercher-animal-puzzle.firebasestorage.app",
-  messagingSenderId: "1071779664923",
-  appId: "1:1071779664923:web:2f180579c9d9ae34f454be"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-const room = "default";
-const deviceId = Math.random().toString(36).substring(2, 10);
-const colors = ["#cd5955","#ce846c","#d3b48d","#96a188","#709ead","#6c839e","#79708d"];
-
-const bgLayer = document.getElementById("bgLayer");
-const bottom = document.getElementById("bottom");
-const mainBtn = document.getElementById("mainBtn");
-const status = document.getElementById("status");
-
-// Define spawn rates in ms (Index 0 is unused, 1-7 mapped)
-const SPAWN_RATES = {
-  1: 800,
-  2: 600,
-  3: 450,
-  4: 350,
-  5: 250,
-  6: 150,
-  7: 80
-};
-
-let selectedColor = null;
-let isHolding = false;
-let lineInterval = null; // Store interval ID
-
-/* BUILD COLOR BUTTONS */
-colors.forEach(c => {
-  const b = document.createElement("button");
-  b.className = "colorBtn";
-  b.style.background = c;
-  b.innerHTML = '<i data-lucide="user-round"></i>';
-
-  b.addEventListener("click", () => {
-    selectedColor = c;
-    mainBtn.style.display = "block";
-    mainBtn.style.background = c;
-    document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
-    b.classList.add("active");
+if (!isMobile()) {
+    document.getElementById("gameContainer").style.display = "none";
+    document.getElementById("desktopFallback").style.display = "flex";
     lucide.createIcons();
-  });
+} else {
+    // START GAME LOGIC
+    const CONFIG = {
+        PARTICLE_MIN_SIZE: 30,
+        PARTICLE_MAX_SIZE: 60,
+        INITIAL_SPAWN_DELAY: 200,
+        MIN_SPAWN_DELAY: 20,
+        GLOW_RADIUS: "22px",
+        SUCCESS_DURATION: 5000
+    };
 
-  bottom.appendChild(b);
-});
+    const REQUIRED_SUCCESS_COUNT = 2;
+    const gameContainer = document.getElementById("gameContainer");
 
-/* FIREBASE STATE */
-function setState(val) {
-  if (!selectedColor) return;
-  set(ref(db, `rooms/${room}/${deviceId}`), val);
+    function initApp() {
+        const saved = JSON.parse(localStorage.getItem("gameSuccess"));
+        if (saved?.success) {
+            document.body.innerHTML = `<h1 style="display:flex; height:100vh; justify-content:center; align-items:center; color:white; font-size: 5rem;">${saved.color}</h1>`;
+            return; 
+        }
+    }
+    initApp();
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBadLM5gvODvZnVSoMm-GPE_sBXB8nvLyQ",
+      authDomain: "kercher-animal-puzzle.firebaseapp.com",
+      databaseURL: "https://kercher-animal-puzzle-default-rtdb.firebaseio.com",
+      projectId: "kercher-animal-puzzle",
+      storageBucket: "kercher-animal-puzzle.firebasestorage.app",
+      messagingSenderId: "1071779664923",
+      appId: "1:1071779664923:web:2f180579c9d9ae34f454be"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const room = "default";
+    const deviceId = Math.random().toString(36).substring(2, 10);
+    const colors = ["#cd5955","#ce846c","#d3b48d","#96a188","#709ead","#6c839e","#79708d"];
+    const colorNames = ["Red", "Orange", "Tan", "Green", "Teal", "Blue", "Purple"];
+
+    const bottom = document.getElementById("bottom");
+    const mainBtn = document.getElementById("mainBtn");
+    const status = document.getElementById("status");
+    const infoWrap = document.getElementById("infoWrap");
+    const pulseOverlay = document.getElementById("pulseOverlay");
+    const bgFade = document.getElementById("bgFade");
+
+    let selectedColor = null;
+    let selectedColorName = null;
+    let isHolding = false;
+    let lineInterval = null;
+    let successTimer = null;
+    let shakeRaf = null;
+    let mag = 20;
+    let magInterval = null;
+    let particleTimeout = null;
+    let startTime = null;
+
+    const SPAWN_RATES = { 1: 800, 2: 600, 3: 450, 4: 350, 5: 250, 6: 150, 7: 80 };
+
+    /* BUILD UI */
+    colors.forEach((c, i) => {
+      const b = document.createElement("button");
+      b.className = "colorBtn";
+      b.style.background = c;
+      b.innerHTML = '<i data-lucide="user-round"></i>';
+      b.addEventListener("click", () => {
+        selectedColor = c;
+        selectedColorName = colorNames[i];
+        mainBtn.style.display = "block";
+        
+        mainBtn.style.transition = "transform 0.12s ease, box-shadow 0.12s ease, background-color 0s";
+        mainBtn.style.background = c;
+        
+        setTimeout(() => {
+            mainBtn.style.transition = "transform 0.12s ease, box-shadow 0.12s ease, background-color 5s linear";
+        }, 50);
+
+        document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        lucide.createIcons();
+      });
+      bottom.appendChild(b);
+    });
+
+    function shakeEffect() {
+        const x = (Math.random() - 0.5) * mag;
+        const y = (Math.random() - 0.5) * mag;
+        const baseTransform = isHolding ? "translate(-50%, -50%)" : "translate(calc(-50% - 7px), calc(-50% - 7px))";
+        mainBtn.style.transform = `${baseTransform} translate(${x}px, ${y}px)`;
+        shakeRaf = requestAnimationFrame(shakeEffect);
+    }
+
+    function spawnParticle() {
+        const p = document.createElement("div");
+        p.className = "particle";
+        const size = Math.random() * (CONFIG.PARTICLE_MAX_SIZE - CONFIG.PARTICLE_MIN_SIZE) + CONFIG.PARTICLE_MIN_SIZE;
+        p.style.width = size + "px";
+        p.style.height = size + "px";
+        p.style.left = Math.random() * window.innerWidth + "px";
+        p.style.top = Math.random() * window.innerHeight + "px";
+        document.getElementById("bgLayer").appendChild(p);
+        setTimeout(() => p.remove(), 1000);
+    }
+
+    function particleLoop() {
+        spawnParticle();
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / CONFIG.SUCCESS_DURATION, 1);
+        const delay = Math.max(CONFIG.MIN_SPAWN_DELAY, CONFIG.INITIAL_SPAWN_DELAY - ((CONFIG.INITIAL_SPAWN_DELAY - CONFIG.MIN_SPAWN_DELAY) * progress));
+        particleTimeout = setTimeout(particleLoop, delay);
+    }
+
+    function startSuccessSequence() {
+        pulseOverlay.classList.add("active");
+        document.documentElement.style.setProperty('--glow-radius', CONFIG.GLOW_RADIUS);
+        infoWrap.classList.add("glowing");
+        mainBtn.style.backgroundColor = "white";
+        startTime = Date.now();
+        particleLoop();
+        mag = 20;
+        shakeEffect();
+        magInterval = setInterval(() => { mag = Math.min(mag + 20, 50); }, 200);
+    }
+
+    function cancelSuccessSequence() {
+        cancelAnimationFrame(shakeRaf);
+        clearInterval(magInterval);
+        clearTimeout(particleTimeout);
+        mainBtn.style.transition = "transform 0.12s ease, box-shadow 0.12s ease, background-color 0s";
+        mainBtn.style.backgroundColor = selectedColor;
+        setTimeout(() => { mainBtn.style.transition = "transform 0.12s ease, box-shadow 0.12s ease, background-color 4s linear"; }, 50);
+        mainBtn.style.transform = isHolding ? "translate(-50%, -50%)" : "translate(calc(-50% - 7px), calc(-50% - 7px))";
+        pulseOverlay.classList.remove("active");
+        infoWrap.classList.remove("glowing");
+        clearTimeout(successTimer);
+        successTimer = null;
+    }
+
+    function runFinalTransition() {
+        gameContainer.classList.add("invert-mode");
+        bgFade.style.opacity = "1";
+        localStorage.setItem("gameSuccess", JSON.stringify({ success: true, color: selectedColorName }));
+        setTimeout(() => { document.body.innerHTML = `<h1 style="display:flex; height:100vh; justify-content:center; align-items:center; color:white; font-size: 5rem;">${selectedColorName}</h1>`; }, 2000);
+    }
+
+    function setState(val) {
+      if (!selectedColor) return;
+      set(ref(db, `rooms/${room}/${deviceId}`), val);
+    }
+
+    mainBtn.addEventListener("pointerdown", () => {
+      if (!selectedColor) return;
+      isHolding = true;
+      mainBtn.classList.add("pressed");
+      setState({ color: selectedColor, holding: true });
+    });
+
+    function release() {
+      if (!isHolding) return;
+      isHolding = false;
+      mainBtn.classList.remove("pressed");
+      cancelSuccessSequence();
+      setState({ color: selectedColor, holding: false });
+    }
+
+    mainBtn.addEventListener("pointerup", release);
+    mainBtn.addEventListener("pointercancel", release);
+    mainBtn.addEventListener("pointerleave", release);
+
+    onValue(ref(db, `rooms/${room}`), snap => {
+      const data = snap.val() || {};
+      const activeColors = new Set();
+      Object.values(data).forEach(device => {
+        if (device?.holding && device?.color) activeColors.add(device.color);
+      });
+      const count = activeColors.size;
+      status.textContent = `${count} / ${REQUIRED_SUCCESS_COUNT}`;
+      clearInterval(lineInterval);
+      if (count >= REQUIRED_SUCCESS_COUNT && isHolding) {
+          if (!successTimer) {
+              startSuccessSequence();
+              successTimer = setTimeout(runFinalTransition, CONFIG.SUCCESS_DURATION);
+          }
+      } else {
+          if (successTimer) { cancelSuccessSequence(); }
+      }
+    });
+
+    window.addEventListener("beforeunload", () => { remove(ref(db, `rooms/${room}/${deviceId}`)); });
+    lucide.createIcons();
 }
-
-/* MAIN BUTTON INTERACTION */
-mainBtn.addEventListener("pointerdown", () => {
-  if (!selectedColor) return;
-  isHolding = true;
-  mainBtn.classList.add("pressed");
-  setState({ color: selectedColor, holding: true });
-});
-
-function release() {
-  if (!isHolding) return;
-  isHolding = false;
-  mainBtn.classList.remove("pressed");
-  setState({ color: selectedColor, holding: false });
-}
-
-mainBtn.addEventListener("pointerup", release);
-mainBtn.addEventListener("pointercancel", release);
-mainBtn.addEventListener("pointerleave", release);
-
-/* GLOBAL COUNT UPDATER */
-onValue(ref(db, `rooms/${room}`), snap => {
-  const data = snap.val() || {};
-  const activeColors = new Set();
-  Object.values(data).forEach(device => {
-    if (device?.holding && device?.color) activeColors.add(device.color);
-  });
-
-  const count = activeColors.size;
-  status.textContent = `${count} / 7`;
-
-  // Manage Spawning Interval
-  clearInterval(lineInterval);
-  if (count > 1) {
-    const rate = SPAWN_RATES[count] || 500;
-    lineInterval = setInterval(() => spawnLine(), rate);
-  }
-
-  if (count >= 7) {
-    document.body.innerHTML = "<h1 style='text-align:center; margin-top:40vh'>SUCCESS</h1>";
-  }
-});
-
-/* BACKGROUND EFFECT */
-function spawnLine() {
-  const d = document.createElement("div");
-  d.className = "line";
-  d.style.top = Math.random() * 100 + "%";
-  bgLayer.appendChild(d);
-  setTimeout(() => d.remove(), 1000);
-}
-
-window.addEventListener("beforeunload", () => {
-  remove(ref(db, `rooms/${room}/${deviceId}`));
-});
-
-lucide.createIcons();
 </script>
-
 </body>
 </html>
