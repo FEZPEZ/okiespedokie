@@ -63,23 +63,27 @@ body, button {
     left: 50%;
     top: 45%;
     
-    /* Using will-change to prevent jittering */
+    /* Hardware acceleration fixes mobile jitter */
     will-change: transform, box-shadow;
+    backface-visibility: hidden;
+    perspective: 1000px;
     
-    /* Unified transition for smoothness */
+    /* Using separate transition durations can also smooth out rendering */
     transition: transform 0.12s ease, box-shadow 0.12s ease;
     
     transform: translate(calc(-50% - var(--offset)/2), calc(-50% - var(--offset)/2));
     border: none;
     display: none;
-    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.2);
+    box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.11);
     
     outline: none;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
   #mainBtn.pressed {
-    transform: translate(-50%, -50%);
+    /* Use translate3d to force GPU rendering on mobile */
+    transform: translate3d(-50%, -50%, 0);
     box-shadow: 0 0 0 rgba(255,255,255,0.2);
   }
 
