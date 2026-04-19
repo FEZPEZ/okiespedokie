@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-<title>Multi-Device Puzzle</title>
+<title>Faunareth</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="favicon.png">
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
@@ -43,7 +44,15 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
     opacity: 0; pointer-events: none; transition: opacity 2s ease;
 }
 
-#infoWrap { text-align: center; margin-top: 18px; position: relative; z-index: 1; transition: text-shadow 0.2s ease; }
+#infoWrap {
+  position: fixed;
+  top: 20px;   /* or 50% if you want true center */
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 2;
+}
+
 #infoWrap.glowing { text-shadow: 0 0 var(--glow-radius) #fff; }
 
 #status { font-size: 28px; }
@@ -121,6 +130,30 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
     0% { transform: scale(1); opacity: 0.11; }
     100% { transform: scale(2); opacity: 0; }
 }
+
+#finalImageWrap {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* anchor to top */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+
+#finalImageWrap.show {
+  opacity: 1;
+}
+
+#finalImage {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
 </style>
 </head>
 
@@ -134,7 +167,7 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
     <div id="bgLayer"></div>
     <div id="pulseOverlay"></div>
     <div id="infoWrap">
-      <div id="status">0 / 7</div>
+      <div id="status">0 / </div>
       <div id="sub">buttons pressed</div>
     </div>
     <button id="mainBtn"></button>
@@ -148,9 +181,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const MOBILE_ONLY_MODE = false;
-const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-if (!MOBILE_ONLY_MODE || isMobile) {
+// Treat anything larger than a phone as "not allowed"
+const isTabletOrDesktop = Math.min(window.innerWidth, window.innerHeight) >= 768;
+
+const isPhone = isTouch && !isTabletOrDesktop;
+
+if (!MOBILE_ONLY_MODE || isPhone) {
     document.getElementById("gameContainer").style.display = "block";
 } else {
     document.getElementById("desktopFallback").style.display = "flex";
@@ -166,16 +204,22 @@ if (!MOBILE_ONLY_MODE || isMobile) {
         SUCCESS_DURATION: 5000
     };
 
-    const REQUIRED_SUCCESS_COUNT = 2;
+    const REQUIRED_SUCCESS_COUNT = 7;
     const gameContainer = document.getElementById("gameContainer");
 
     function initApp() {
-        const saved = JSON.parse(localStorage.getItem("gameSuccess"));
-        if (saved?.success) {
-            document.body.innerHTML = `<h1 style="display:flex; height:100vh; justify-content:center; align-items:center; color:white; font-size: 5rem;">${saved.color}</h1>`;
-            return; 
-        }
-    }
+		const saved = JSON.parse(localStorage.getItem("gameSuccess"));
+		if (saved?.success && saved?.image) {
+			const wrap = document.getElementById("finalImageWrap");
+			const img = document.getElementById("finalImage");
+	
+			img.src = `assets/combo-pics/${saved.image}.png`;
+			wrap.classList.add("show");
+	
+			document.getElementById("gameContainer").style.display = "none";
+			return;
+		}
+	}
     initApp();
 
     const firebaseConfig = {
@@ -194,6 +238,15 @@ if (!MOBILE_ONLY_MODE || isMobile) {
     const deviceId = Math.random().toString(36).substring(2, 10);
     const colors = ["#cd5955","#ce846c","#d3b48d","#96a188","#709ead","#6c839e","#79708d"];
     const colorNames = ["Red", "Orange", "Tan", "Green", "Teal", "Blue", "Purple"];
+    const colorToImageMap = {
+	  "#cd5955": 1,
+	  "#ce846c": 2,
+	  "#d3b48d": 3,
+	  "#96a188": 4,
+	  "#709ead": 5,
+	  "#6c839e": 6,
+	  "#79708d": 7
+	};
 
     const bottom = document.getElementById("bottom");
     const mainBtn = document.getElementById("mainBtn");
@@ -293,11 +346,28 @@ if (!MOBILE_ONLY_MODE || isMobile) {
     }
 
     function runFinalTransition() {
-        gameContainer.classList.add("invert-mode");
-        bgFade.style.opacity = "1";
-        localStorage.setItem("gameSuccess", JSON.stringify({ success: true, color: selectedColorName }));
-        setTimeout(() => { document.body.innerHTML = `<h1 style="display:flex; height:100vh; justify-content:center; align-items:center; color:white; font-size: 5rem;">${selectedColorName}</h1>`; }, 2000);
-    }
+		gameContainer.classList.add("invert-mode");
+		bgFade.style.opacity = "1";
+	
+		const imgIndex = colorToImageMap[selectedColor];
+		const imgPath = `assets/combo-pics/${imgIndex}.png`;
+	
+		const wrap = document.getElementById("finalImageWrap");
+		const img = document.getElementById("finalImage");
+	
+		img.src = imgPath;
+	
+		// slight delay so fade feels intentional after bg fade
+		setTimeout(() => {
+			wrap.classList.add("show");
+		}, 300);
+	
+		localStorage.setItem("gameSuccess", JSON.stringify({
+			success: true,
+			color: selectedColorName,
+			image: imgIndex
+		}));
+	}
 
     function setState(val) {
       if (!selectedColor) return;
@@ -346,5 +416,8 @@ if (!MOBILE_ONLY_MODE || isMobile) {
 
 lucide.createIcons();
 </script>
+<div id="finalImageWrap">
+  <img id="finalImage" src="" />
+</div>
 </body>
 </html>
