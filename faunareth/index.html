@@ -32,7 +32,7 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
 #gameContainer.invert-mode { filter: grayscale(1) invert(1); }
 
 /* Overlays */
-#bgLayer { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+#bgLayer { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 #pulseOverlay { 
     position: fixed; inset: 0; z-index: 0; pointer-events: none; 
     background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
@@ -51,21 +51,47 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
 
 /* MAIN BUTTON */
 #mainBtn {
+  /* Logic: Offset=14px. Unpressed is shifted -7px/-7px. Pressed is centered. */
   --offset: 14px;
-  width: 220px; height: 220px;
-  position: absolute; left: 50%; top: 45%;
-  will-change: transform, box-shadow, background-color;
+  --is-pressed: 0; 
+  --shake-x: 0px;
+  --shake-y: 0px;
+  
+  width: 220px;
+  height: 220px;
+  
+  position: absolute;
+  left: 50%;
+  top: 50%; /* Centered anchor */
+  
+  /* Translation Logic:
+     Base: -50% (Center)
+     Adjustment: -(1 - is-pressed) * (offset/2) 
+     Result: If unpressed, shifts up/left. If pressed, returns to true center.
+  */
+  transform: translate(
+    calc(-50% - (1 - var(--is-pressed)) * (var(--offset) / 2) + var(--shake-x)),
+    calc(-50% - (1 - var(--is-pressed)) * (var(--offset) / 2) + var(--shake-y))
+  );
+
+  border: none;
+  display: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
   backface-visibility: hidden;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 4s linear;
-  transform: translate(calc(-50% - var(--offset)/2), calc(-50% - var(--offset)/2));
-  border: none; display: none;
-  box-shadow: var(--offset) var(--offset) 0 rgba(255,255,255,0.11);
-  outline: none; -webkit-tap-highlight-color: transparent;
+  will-change: transform, box-shadow, background-color;
+
+  /* Shadow logic: offset when unpressed, removed when pressed */
+  box-shadow: calc(var(--offset) * (1 - var(--is-pressed))) calc(var(--offset) * (1 - var(--is-pressed))) 0 rgba(255,255,255,0.11);
+  transition: box-shadow 0.12s linear, transform 0.12s linear;
 }
 
 #mainBtn.pressed {
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 rgba(255,255,255,0.2);
+  --is-pressed: 1;
+}
+
+#mainBtn.fade-bg {
+  transition: box-shadow 0.12s linear, transform 0.12s linear, background-color 4.4s linear;
 }
 
 @keyframes pulse {
@@ -82,9 +108,6 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
 .colorBtn.active { transform: translateY(-10px); }
 .colorBtn.active svg { display: block; }
 .colorBtn.active::after { content: ""; position: absolute; inset: 0; border: 2px solid white; pointer-events: none; }
-
-.line { position: absolute; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.08); animation: grow 1s ease-out forwards; }
-@keyframes grow { 0% { transform: scaleY(0.2); opacity: 0; } 30% { opacity: 1; } 100% { transform: scaleY(6); opacity: 0; } }
 
 /* Particle Effect */
 .particle {
@@ -120,20 +143,20 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
 
 <div id="bgFade"></div>
 
-<script>
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-        document.getElementById("gameContainer").style.display = "block";
-    } else {
-        document.getElementById("desktopFallback").style.display = "flex";
-    }
-</script>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Only run game logic if on mobile
-if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+const MOBILE_ONLY_MODE = false;
+const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+if (!MOBILE_ONLY_MODE || isMobile) {
+    document.getElementById("gameContainer").style.display = "block";
+} else {
+    document.getElementById("desktopFallback").style.display = "flex";
+}
+
+if (!MOBILE_ONLY_MODE || isMobile) {
     const CONFIG = {
         PARTICLE_MIN_SIZE: 30,
         PARTICLE_MAX_SIZE: 60,
@@ -143,7 +166,7 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
         SUCCESS_DURATION: 5000
     };
 
-    const REQUIRED_SUCCESS_COUNT = 2;
+    const REQUIRED_SUCCESS_COUNT = 1;
     const gameContainer = document.getElementById("gameContainer");
 
     function initApp() {
@@ -182,10 +205,9 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     let selectedColor = null;
     let selectedColorName = null;
     let isHolding = false;
-    let lineInterval = null;
     let successTimer = null;
     let shakeRaf = null;
-    let mag = 20;
+    let mag = 0;
     let magInterval = null;
     let particleTimeout = null;
     let startTime = null;
@@ -200,27 +222,22 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
         selectedColor = c;
         selectedColorName = colorNames[i];
         mainBtn.style.display = "block";
-        
-        mainBtn.style.transition = "transform 0.12s ease, box-shadow 0.12s ease, background-color 0s";
-        mainBtn.style.background = c;
-        
-        setTimeout(() => {
-            mainBtn.style.transition = "transform 0.12s ease, box-shadow 0.12s ease, background-color 5s linear";
-        }, 50);
-
+        mainBtn.style.backgroundColor = selectedColor;
+    
         document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
         b.classList.add("active");
         lucide.createIcons();
-      });
+    });
       bottom.appendChild(b);
     });
 
     function shakeEffect() {
-        const x = (Math.random() - 0.5) * mag;
-        const y = (Math.random() - 0.5) * mag;
-        const baseTransform = isHolding ? "translate(-50%, -50%)" : "translate(calc(-50% - 7px), calc(-50% - 7px))";
-        mainBtn.style.transform = `${baseTransform} translate(${x}px, ${y}px)`;
-        shakeRaf = requestAnimationFrame(shakeEffect);
+      const x = (Math.random() - 0.5) * mag;
+      const y = (Math.random() - 0.5) * mag;
+      
+      mainBtn.style.setProperty("--shake-x", `${x}px`);
+      mainBtn.style.setProperty("--shake-y", `${y}px`);
+      shakeRaf = requestAnimationFrame(shakeEffect);
     }
 
     function spawnParticle() {
@@ -247,26 +264,32 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
         pulseOverlay.classList.add("active");
         document.documentElement.style.setProperty('--glow-radius', CONFIG.GLOW_RADIUS);
         infoWrap.classList.add("glowing");
+    
+        mainBtn.classList.add("fade-bg");
         mainBtn.style.backgroundColor = "white";
+    
         startTime = Date.now();
         particleLoop();
-        mag = 20;
+        mag = 0;
         shakeEffect();
-        magInterval = setInterval(() => { mag = Math.min(mag + 20, 50); }, 200);
+        magInterval = setInterval(() => { mag = Math.min(mag + 5, 50); }, 20);
     }
 
     function cancelSuccessSequence() {
-        cancelAnimationFrame(shakeRaf);
-        clearInterval(magInterval);
-        clearTimeout(particleTimeout);
-        mainBtn.style.transition = "transform 0.12s ease, box-shadow 0.12s ease, background-color 0s";
-        mainBtn.style.backgroundColor = selectedColor;
-        setTimeout(() => { mainBtn.style.transition = "transform 0.12s ease, box-shadow 0.12s ease, background-color 4s linear"; }, 50);
-        mainBtn.style.transform = isHolding ? "translate(-50%, -50%)" : "translate(calc(-50% - 7px), calc(-50% - 7px))";
-        pulseOverlay.classList.remove("active");
-        infoWrap.classList.remove("glowing");
-        clearTimeout(successTimer);
-        successTimer = null;
+      cancelAnimationFrame(shakeRaf);
+      clearInterval(magInterval);
+      clearTimeout(particleTimeout);
+      
+      mainBtn.style.setProperty("--shake-x", "0px");
+      mainBtn.style.setProperty("--shake-y", "0px");
+    
+      mainBtn.classList.remove("fade-bg");
+      mainBtn.style.backgroundColor = selectedColor;
+    
+      pulseOverlay.classList.remove("active");
+      infoWrap.classList.remove("glowing");
+      clearTimeout(successTimer);
+      successTimer = null;
     }
 
     function runFinalTransition() {
@@ -308,7 +331,6 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
       });
       const count = activeColors.size;
       status.textContent = `${count} / ${REQUIRED_SUCCESS_COUNT}`;
-      clearInterval(lineInterval);
       if (count >= REQUIRED_SUCCESS_COUNT && isHolding) {
           if (!successTimer) {
               startSuccessSequence();
@@ -322,7 +344,6 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     window.addEventListener("beforeunload", () => { remove(ref(db, `rooms/${room}/${deviceId}`)); });
 }
 
-// Ensure icons render regardless of state
 lucide.createIcons();
 </script>
 </body>
