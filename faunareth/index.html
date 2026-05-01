@@ -32,6 +32,29 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
 #gameContainer { transition: filter 0.5s ease; height: 100%; width: 100%; }
 #gameContainer.invert-mode { filter: grayscale(1) invert(1); }
 
+#buttonText {
+  font-size: 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  line-height: 1.1;
+  font-family: "Oswald", sans-serif;
+  width: 100%;
+  height: 100%;
+}
+
+#line1 {
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+#line2 {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 /* Overlays */
 #bgLayer { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 #pulseOverlay { 
@@ -170,7 +193,12 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
       <div id="status">0 / </div>
       <div id="sub">buttons pressed</div>
     </div>
-    <button id="mainBtn"></button>
+    <button id="mainBtn">
+	  <div id="buttonText">
+		<div id="line1">you are</div>
+		<div id="line2"></div>
+	  </div>
+	</button>
     <div id="bottom"></div>
 </div>
 
@@ -194,7 +222,7 @@ if (!MOBILE_ONLY_MODE || isPhone) {
     document.getElementById("desktopFallback").style.display = "flex";
 }
 
-if (!MOBILE_ONLY_MODE || isMobile) {
+if (!MOBILE_ONLY_MODE || isPhone) {
     const CONFIG = {
         PARTICLE_MIN_SIZE: 30,
         PARTICLE_MAX_SIZE: 60,
@@ -204,7 +232,7 @@ if (!MOBILE_ONLY_MODE || isMobile) {
         SUCCESS_DURATION: 5000
     };
 
-    const REQUIRED_SUCCESS_COUNT = 7;
+    const REQUIRED_SUCCESS_COUNT = 1;
     const gameContainer = document.getElementById("gameContainer");
 
     function initApp() {
@@ -237,7 +265,7 @@ if (!MOBILE_ONLY_MODE || isMobile) {
     const room = "default";
     const deviceId = Math.random().toString(36).substring(2, 10);
     const colors = ["#cd5955","#ce846c","#d3b48d","#96a188","#709ead","#6c839e","#79708d"];
-    const colorNames = ["Red", "Orange", "Tan", "Green", "Teal", "Blue", "Purple"];
+    const colorNames = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet"];
     const colorToImageMap = {
 	  "#cd5955": 1,
 	  "#ce846c": 2,
@@ -254,6 +282,7 @@ if (!MOBILE_ONLY_MODE || isMobile) {
     const infoWrap = document.getElementById("infoWrap");
     const pulseOverlay = document.getElementById("pulseOverlay");
     const bgFade = document.getElementById("bgFade");
+    const buttonText = document.getElementById("buttonText")
 
     let selectedColor = null;
     let selectedColorName = null;
@@ -276,6 +305,10 @@ if (!MOBILE_ONLY_MODE || isMobile) {
         selectedColorName = colorNames[i];
         mainBtn.style.display = "block";
         mainBtn.style.backgroundColor = selectedColor;
+        
+        const line2 = document.getElementById("line2");
+		  line2.textContent = selectedColorName;
+		
     
         document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
         b.classList.add("active");
@@ -283,6 +316,43 @@ if (!MOBILE_ONLY_MODE || isMobile) {
     });
       bottom.appendChild(b);
     });
+    
+    function applyHashSelection() {
+	  const hash = window.location.hash.replace("#", "").toLowerCase();
+	  if (!hash) return;
+	
+	  const map = {
+		redbutton: 0,
+		orangebutton: 1,
+		yellowbutton: 2,
+		greenbutton: 3,
+		bluebutton: 4,
+		indigobutton: 5,
+		violetbutton: 6
+	  };
+	
+	  const index = map[hash];
+	  if (index === undefined) return;
+	
+	  const btns = document.querySelectorAll(".colorBtn");
+	  const target = btns[index];
+	
+	  if (!target) return;
+	
+	  // replicate click logic directly
+	  selectedColor = colors[index];
+	  selectedColorName = colorNames[index];
+	
+	  mainBtn.style.display = "block";
+	  mainBtn.style.backgroundColor = selectedColor;
+	  const line2 = document.getElementById("line2");
+		  line2.textContent = selectedColorName;
+	
+	  document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
+	  target.classList.add("active");
+	
+	  lucide.createIcons();
+	}
 
     function shakeEffect() {
       const x = (Math.random() - 0.5) * mag;
@@ -392,6 +462,11 @@ if (!MOBILE_ONLY_MODE || isMobile) {
     mainBtn.addEventListener("pointerup", release);
     mainBtn.addEventListener("pointercancel", release);
     mainBtn.addEventListener("pointerleave", release);
+    window.addEventListener("hashchange", applyHashSelection);
+    
+    requestAnimationFrame(() => {
+	  applyHashSelection();
+	});
 
     onValue(ref(db, `rooms/${room}`), snap => {
       const data = snap.val() || {};
