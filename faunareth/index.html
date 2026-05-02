@@ -63,13 +63,13 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
     opacity: 0;
 }
 #bgFade { 
-    position: fixed; inset: 0; z-index: 100; background: #111; 
-    opacity: 0; pointer-events: none; transition: opacity 2s ease;
+    position: fixed; inset: 0; z-index: 100; background: #fff; 
+    opacity: 0; pointer-events: none;
 }
 
 #infoWrap {
   position: fixed;
-  top: 20px;   /* or 50% if you want true center */
+  top: 20px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -83,7 +83,6 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
 
 /* MAIN BUTTON */
 #mainBtn {
-  /* Logic: Offset=14px. Unpressed is shifted -7px/-7px. Pressed is centered. */
   --offset: 14px;
   --is-pressed: 0; 
   --shake-x: 0px;
@@ -94,13 +93,8 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
   
   position: absolute;
   left: 50%;
-  top: 50%; /* Centered anchor */
+  top: 50%; 
   
-  /* Translation Logic:
-     Base: -50% (Center)
-     Adjustment: -(1 - is-pressed) * (offset/2) 
-     Result: If unpressed, shifts up/left. If pressed, returns to true center.
-  */
   transform: translate(
     calc(-50% - (1 - var(--is-pressed)) * (var(--offset) / 2) + var(--shake-x)),
     calc(-50% - (1 - var(--is-pressed)) * (var(--offset) / 2) + var(--shake-y))
@@ -113,7 +107,6 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
   backface-visibility: hidden;
   will-change: transform, box-shadow, background-color;
 
-  /* Shadow logic: offset when unpressed, removed when pressed */
   box-shadow: calc(var(--offset) * (1 - var(--is-pressed))) calc(var(--offset) * (1 - var(--is-pressed))) 0 rgba(255,255,255,0.11);
   transition: box-shadow 0.12s linear, transform 0.12s linear;
 }
@@ -154,27 +147,27 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
     100% { transform: scale(2); opacity: 0; }
 }
 
-#finalImageWrap {
+/* Final Text Transition Styles */
+#finalTextWrap {
   position: fixed;
   inset: 0;
-  z-index: 9999;
-  background: #000;
+  z-index: 101; 
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-items: flex-start; /* anchor to top */
-  opacity: 0;
+  align-items: center;
   pointer-events: none;
-  transition: opacity 1.2s ease;
+  color: #111; 
+  text-align: center;
 }
 
-#finalImageWrap.show {
-  opacity: 1;
-}
-
-#finalImage {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
+.final-word {
+  font-family: "Oswald", sans-serif;
+  font-size: 3.7vh;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin: -4px 0;
+  opacity: 0;
 }
 
 </style>
@@ -194,26 +187,44 @@ body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
       <div id="sub">buttons pressed</div>
     </div>
     <button id="mainBtn">
-	  <div id="buttonText">
-		<div id="line1">you are</div>
-		<div id="line2"></div>
-	  </div>
-	</button>
+      <div id="buttonText">
+        <div id="line1">you are</div>
+        <div id="line2"></div>
+      </div>
+    </button>
     <div id="bottom"></div>
 </div>
 
 <div id="bgFade"></div>
+<div id="finalTextWrap"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+// --- END TRANSITION CONFIGURATION ---
+
+const randomWords = ["bookshop", "option", "oyster"];
+
+const TRANSITION_CONFIG = {
+    FADE_TO_WHITE_MS: 2500, // Total time for screen to go white
+    WORD_FADE_TIME: "0.8s", // CSS transition duration for each word
+    STAGGER_DELAY: 400,     // Delay between each word appearing
+    COLOR_WORDS: {
+    "#cd5955": ["Look up", "\"what3words\"", "you", randomWords[0], "find the", "place", randomWords[1], "map"],
+    "#ce846c": ["Look up", randomWords[1], "you", "need to", "find the", "place", "on the", randomWords[0]],
+    "#d3b48d": [randomWords[2], "\"what3words\"", "you", "need to", "find the", "place", randomWords[0], "map"],
+    "#96a188": ["Look up", "\"what3words\"", randomWords[0], "need to", "find the", randomWords[2], "on the", "map"],
+    "#709ead": ["Look up", "\"what3words\"", "you", "need to", randomWords[1], "place", "on the", randomWords[2]],
+    "#6c839e": ["Look up", randomWords[0], "you", "need to", "find the", "place", randomWords[1], "map"],
+    "#79708d": [randomWords[1], "\"what3words\"", "you", "need to", "find the", "place", "on the", randomWords[2]]
+},
+    LETTER_SPACING: 10
+};
+
 const MOBILE_ONLY_MODE = false;
 const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-// Treat anything larger than a phone as "not allowed"
 const isTabletOrDesktop = Math.min(window.innerWidth, window.innerHeight) >= 768;
-
 const isPhone = isTouch && !isTabletOrDesktop;
 
 if (!MOBILE_ONLY_MODE || isPhone) {
@@ -235,21 +246,6 @@ if (!MOBILE_ONLY_MODE || isPhone) {
     const REQUIRED_SUCCESS_COUNT = 1;
     const gameContainer = document.getElementById("gameContainer");
 
-    function initApp() {
-		const saved = JSON.parse(localStorage.getItem("gameSuccess"));
-		if (saved?.success && saved?.image) {
-			const wrap = document.getElementById("finalImageWrap");
-			const img = document.getElementById("finalImage");
-	
-			img.src = `assets/combo-pics/${saved.image}.png`;
-			wrap.classList.add("show");
-	
-			document.getElementById("gameContainer").style.display = "none";
-			return;
-		}
-	}
-    initApp();
-
     const firebaseConfig = {
       apiKey: "AIzaSyBadLM5gvODvZnVSoMm-GPE_sBXB8nvLyQ",
       authDomain: "kercher-animal-puzzle.firebaseapp.com",
@@ -266,15 +262,6 @@ if (!MOBILE_ONLY_MODE || isPhone) {
     const deviceId = Math.random().toString(36).substring(2, 10);
     const colors = ["#cd5955","#ce846c","#d3b48d","#96a188","#709ead","#6c839e","#79708d"];
     const colorNames = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet"];
-    const colorToImageMap = {
-	  "#cd5955": 1,
-	  "#ce846c": 2,
-	  "#d3b48d": 3,
-	  "#96a188": 4,
-	  "#709ead": 5,
-	  "#6c839e": 6,
-	  "#79708d": 7
-	};
 
     const bottom = document.getElementById("bottom");
     const mainBtn = document.getElementById("mainBtn");
@@ -282,7 +269,7 @@ if (!MOBILE_ONLY_MODE || isPhone) {
     const infoWrap = document.getElementById("infoWrap");
     const pulseOverlay = document.getElementById("pulseOverlay");
     const bgFade = document.getElementById("bgFade");
-    const buttonText = document.getElementById("buttonText")
+    const finalTextWrap = document.getElementById("finalTextWrap");
 
     let selectedColor = null;
     let selectedColorName = null;
@@ -293,6 +280,57 @@ if (!MOBILE_ONLY_MODE || isPhone) {
     let magInterval = null;
     let particleTimeout = null;
     let startTime = null;
+    
+    function initApp() {
+
+    const saved = JSON.parse(localStorage.getItem("gameSuccess"));
+
+    if (saved?.success) {
+
+        const gameContainer = document.getElementById("gameContainer");
+
+        // hide game immediately
+        gameContainer.style.display = "none";
+
+        // force white transition canvas state
+        document.body.style.background = "#fff";
+        document.body.style.overflow = "hidden";
+
+        // pick color key
+        const colorKey = saved.color; 
+        // (supports either stored hex or legacy name)
+        
+        const words = TRANSITION_CONFIG.COLOR_WORDS[colorKey];
+
+if (!words) {
+    console.error("Missing color mapping for:", colorKey);
+    return;
+}
+
+        words.forEach((wordText) => {
+            const el = document.createElement("div");
+            el.className = "final-word";
+            el.textContent = wordText;
+            // Strict fade-only transition
+            el.style.transition = `opacity ${TRANSITION_CONFIG.WORD_FADE_TIME} ease-in-out`;
+            finalTextWrap.appendChild(el);
+        });
+
+        // 3. Staggered fade in ONLY after the white-out is complete
+        setTimeout(() => {
+            const wordDivs = finalTextWrap.querySelectorAll(".final-word");
+            wordDivs.forEach((div, index) => {
+                setTimeout(() => {
+                    div.style.opacity = "1";
+                }, index * TRANSITION_CONFIG.STAGGER_DELAY);
+            });
+        }, 50); 
+
+        return;
+    }
+}
+
+initApp();
 
     /* BUILD UI */
     colors.forEach((c, i) => {
@@ -305,11 +343,7 @@ if (!MOBILE_ONLY_MODE || isPhone) {
         selectedColorName = colorNames[i];
         mainBtn.style.display = "block";
         mainBtn.style.backgroundColor = selectedColor;
-        
-        const line2 = document.getElementById("line2");
-		  line2.textContent = selectedColorName;
-		
-    
+        document.getElementById("line2").textContent = selectedColorName;
         document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
         b.classList.add("active");
         lucide.createIcons();
@@ -318,46 +352,27 @@ if (!MOBILE_ONLY_MODE || isPhone) {
     });
     
     function applyHashSelection() {
-	  const hash = window.location.hash.replace("#", "").toLowerCase();
-	  if (!hash) return;
-	
-	  const map = {
-		redbutton: 0,
-		orangebutton: 1,
-		yellowbutton: 2,
-		greenbutton: 3,
-		bluebutton: 4,
-		indigobutton: 5,
-		violetbutton: 6
-	  };
-	
-	  const index = map[hash];
-	  if (index === undefined) return;
-	
-	  const btns = document.querySelectorAll(".colorBtn");
-	  const target = btns[index];
-	
-	  if (!target) return;
-	
-	  // replicate click logic directly
-	  selectedColor = colors[index];
-	  selectedColorName = colorNames[index];
-	
-	  mainBtn.style.display = "block";
-	  mainBtn.style.backgroundColor = selectedColor;
-	  const line2 = document.getElementById("line2");
-		  line2.textContent = selectedColorName;
-	
-	  document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
-	  target.classList.add("active");
-	
-	  lucide.createIcons();
-	}
+      const hash = window.location.hash.replace("#", "").toLowerCase();
+      if (!hash) return;
+      const map = { redbutton: 0, orangebutton: 1, yellowbutton: 2, greenbutton: 3, bluebutton: 4, indigobutton: 5, violetbutton: 6 };
+      const index = map[hash];
+      if (index === undefined) return;
+      const btns = document.querySelectorAll(".colorBtn");
+      const target = btns[index];
+      if (!target) return;
+      selectedColor = colors[index];
+      selectedColorName = colorNames[index];
+      mainBtn.style.display = "block";
+      mainBtn.style.backgroundColor = selectedColor;
+      document.getElementById("line2").textContent = selectedColorName;
+      document.querySelectorAll(".colorBtn").forEach(x => x.classList.remove("active"));
+      target.classList.add("active");
+      lucide.createIcons();
+    }
 
     function shakeEffect() {
       const x = (Math.random() - 0.5) * mag;
       const y = (Math.random() - 0.5) * mag;
-      
       mainBtn.style.setProperty("--shake-x", `${x}px`);
       mainBtn.style.setProperty("--shake-y", `${y}px`);
       shakeRaf = requestAnimationFrame(shakeEffect);
@@ -387,10 +402,8 @@ if (!MOBILE_ONLY_MODE || isPhone) {
         pulseOverlay.classList.add("active");
         document.documentElement.style.setProperty('--glow-radius', CONFIG.GLOW_RADIUS);
         infoWrap.classList.add("glowing");
-    
         mainBtn.classList.add("fade-bg");
         mainBtn.style.backgroundColor = "white";
-    
         startTime = Date.now();
         particleLoop();
         mag = 0;
@@ -402,13 +415,10 @@ if (!MOBILE_ONLY_MODE || isPhone) {
       cancelAnimationFrame(shakeRaf);
       clearInterval(magInterval);
       clearTimeout(particleTimeout);
-      
       mainBtn.style.setProperty("--shake-x", "0px");
       mainBtn.style.setProperty("--shake-y", "0px");
-    
       mainBtn.classList.remove("fade-bg");
       mainBtn.style.backgroundColor = selectedColor;
-    
       pulseOverlay.classList.remove("active");
       infoWrap.classList.remove("glowing");
       clearTimeout(successTimer);
@@ -416,28 +426,38 @@ if (!MOBILE_ONLY_MODE || isPhone) {
     }
 
     function runFinalTransition() {
-		gameContainer.classList.add("invert-mode");
-		bgFade.style.opacity = "1";
-	
-		const imgIndex = colorToImageMap[selectedColor];
-		const imgPath = `assets/combo-pics/${imgIndex}.png`;
-	
-		const wrap = document.getElementById("finalImageWrap");
-		const img = document.getElementById("finalImage");
-	
-		img.src = imgPath;
-	
-		// slight delay so fade feels intentional after bg fade
-		setTimeout(() => {
-			wrap.classList.add("show");
-		}, 300);
-	
-		localStorage.setItem("gameSuccess", JSON.stringify({
-			success: true,
-			color: selectedColorName,
-			image: imgIndex
-		}));
-	}
+        // 1. Fade to white strictly
+        bgFade.style.transition = `opacity ${TRANSITION_CONFIG.FADE_TO_WHITE_MS}ms ease-in-out`;
+        bgFade.style.opacity = "1";
+        
+        // 2. Clear wrapper and create word elements
+        finalTextWrap.innerHTML = ""; 
+        const words = TRANSITION_CONFIG.COLOR_WORDS[selectedColor] || ["READY", "STEADY", "GO", "DONE", "FINISHED", "WIN", "YES"];
+
+        words.forEach((wordText) => {
+            const el = document.createElement("div");
+            el.className = "final-word";
+            el.textContent = wordText;
+            // Strict fade-only transition
+            el.style.transition = `opacity ${TRANSITION_CONFIG.WORD_FADE_TIME} ease-in-out`;
+            finalTextWrap.appendChild(el);
+        });
+
+        // 3. Staggered fade in ONLY after the white-out is complete
+        setTimeout(() => {
+            const wordDivs = finalTextWrap.querySelectorAll(".final-word");
+            wordDivs.forEach((div, index) => {
+                setTimeout(() => {
+                    div.style.opacity = "1";
+                }, index * TRANSITION_CONFIG.STAGGER_DELAY);
+            });
+        }, TRANSITION_CONFIG.FADE_TO_WHITE_MS); 
+
+        localStorage.setItem("gameSuccess", JSON.stringify({
+            success: true,
+            color: selectedColor
+        }));
+    }
 
     function setState(val) {
       if (!selectedColor) return;
@@ -464,9 +484,7 @@ if (!MOBILE_ONLY_MODE || isPhone) {
     mainBtn.addEventListener("pointerleave", release);
     window.addEventListener("hashchange", applyHashSelection);
     
-    requestAnimationFrame(() => {
-	  applyHashSelection();
-	});
+    requestAnimationFrame(() => { applyHashSelection(); });
 
     onValue(ref(db, `rooms/${room}`), snap => {
       const data = snap.val() || {};
@@ -491,8 +509,6 @@ if (!MOBILE_ONLY_MODE || isPhone) {
 
 lucide.createIcons();
 </script>
-<div id="finalImageWrap">
-  <img id="finalImage" src="" />
-</div>
+
 </body>
 </html>
