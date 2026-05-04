@@ -210,7 +210,7 @@ const randomWords = ["bookshop", "option", "oyster"];
 const TRANSITION_CONFIG = {
     FADE_TO_WHITE_MS: 2500, // Total time for screen to go white
     WORD_FADE_TIME: "0.8s", // CSS transition duration for each word
-    STAGGER_DELAY: 200,     // Delay between each word appearing
+    STAGGER_DELAY: 300,     // Delay between each word appearing
     COLOR_WORDS: {
     "#cd5955": ["Look up", "\"what3words\"", "you", randomWords[0], "find the", "place", randomWords[1], "map"],
     "#ce846c": ["Look up", randomWords[1], "you", "need to", "find the", "place", "on the", randomWords[0]],
@@ -244,7 +244,7 @@ if (!MOBILE_ONLY_MODE || isPhone) {
         SUCCESS_DURATION: 5000
     };
 
-    const REQUIRED_SUCCESS_COUNT = 1;
+    const REQUIRED_SUCCESS_COUNT = 7;
     const gameContainer = document.getElementById("gameContainer");
 
     const firebaseConfig = {
