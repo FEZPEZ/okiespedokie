@@ -9,6 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="favicon.png">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script>
+document.documentElement.classList.add("js-loading");
+</script>
 
 <style>
 :root { --glow-radius: 25px; }
@@ -20,6 +23,10 @@
 body, button { -webkit-user-select: none; user-select: none; touch-action: none; }
 html, body { margin: 0; padding: 0; height: 100%; width: 100%; overscroll-behavior: none; -webkit-text-size-adjust: 100%; background: #111; }
 body { font-family: "Oswald", sans-serif; color: white; overflow: hidden; }
+
+html.js-loading body {
+  visibility: hidden;
+}
 
 /* Desktop Fallback */
 #desktopFallback {
@@ -507,6 +514,10 @@ initApp();
 
     window.addEventListener("beforeunload", () => { remove(ref(db, `rooms/${room}/${deviceId}`)); });
 }
+
+window.addEventListener("load", () => {
+  document.documentElement.classList.remove("js-loading");
+});
 
 lucide.createIcons();
 </script>
