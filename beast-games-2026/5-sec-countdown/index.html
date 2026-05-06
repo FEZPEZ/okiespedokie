@@ -41,21 +41,8 @@
 
     color: #00ff66;
     user-select: none;
+    transition: transform 60ms linear;
 }
-
-    .glitch {
-        position: relative;
-        animation: glitch 0.08s infinite;
-    }
-
-    @keyframes glitch {
-        0%   { transform: translate(0px, 0px); }
-        20%  { transform: translate(-6px, 4px); }
-        40%  { transform: translate(5px, -5px); }
-        60%  { transform: translate(-4px, -3px); }
-        80%  { transform: translate(3px, 5px); }
-        100% { transform: translate(0px, 0px); }
-    }
 
     .scanlines::after {
         content: "";
@@ -115,6 +102,7 @@ function trigger() {
     if (started) return;
     started = true;
     startCountdown();
+    startGlitches(); // ADD THIS
 }
 
 // KEYBOARD — capture phase, highest priority
@@ -146,6 +134,39 @@ window.addEventListener("mousedown", (e) => {
 
 // prevent scroll/gesture side effects
 window.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+
+
+let glitchTimer = null;
+
+function startGlitches() {
+    function glitchOnce() {
+        if (!started) return;
+
+        const x = (Math.random() - 0.5) * 14; // small random shift
+        const y = (Math.random() - 0.5) * 10;
+
+        screen.style.transform = `translate(${x}px, ${y}px)`;
+
+        // snap back very quickly
+        setTimeout(() => {
+            screen.style.transform = "translate(0px, 0px)";
+        }, 60);
+    }
+
+    function scheduleNext() {
+        if (!started) return;
+
+        // random delay: mostly quiet, occasional glitch
+        const delay = 400 + Math.random() * 1800;
+
+        glitchTimer = setTimeout(() => {
+            glitchOnce();
+            scheduleNext();
+        }, delay);
+    }
+
+    scheduleNext();
+}
 
 </script>
 
