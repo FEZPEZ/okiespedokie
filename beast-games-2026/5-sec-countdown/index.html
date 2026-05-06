@@ -27,17 +27,21 @@
     }
 
     #screen {
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #00ff66;
-        font-family: "Silkscreen", monospace;
-        font-weight: 400;
-        font-size: 80vh;
-        user-select: none;
-    }
+    width: 100vw;
+    height: 100vh;
+
+    display: grid;
+    place-items: center;
+
+    font-family: "Silkscreen", monospace;
+    font-weight: 400;
+    font-size: min(85vw, 85dvh);
+
+    line-height: 1;
+
+    color: #00ff66;
+    user-select: none;
+}
 
     .glitch {
         position: relative;
