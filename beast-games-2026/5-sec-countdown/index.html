@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Terminal Countdown</title>
+
+<!-- Silkscreen font -->
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        background: black;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    #screen {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #00ff66;
+        font-family: "Silkscreen", monospace;
+        font-weight: 400;
+        font-size: 80vh;
+        user-select: none;
+    }
+
+    .glitch {
+        position: relative;
+        animation: glitch 0.08s infinite;
+    }
+
+    @keyframes glitch {
+        0%   { transform: translate(0px, 0px); }
+        20%  { transform: translate(-6px, 4px); }
+        40%  { transform: translate(5px, -5px); }
+        60%  { transform: translate(-4px, -3px); }
+        80%  { transform: translate(3px, 5px); }
+        100% { transform: translate(0px, 0px); }
+    }
+
+    .scanlines::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+            to bottom,
+            rgba(0,255,100,0.08),
+            rgba(0,255,100,0.08) 2px,
+            transparent 2px,
+            transparent 4px
+        );
+        pointer-events: none;
+    }
+</style>
+</head>
+<body>
+
+<div id="screen" class="scanlines"></div>
+
+<script>
+let started = false;
+let countdownInterval = null;
+const screen = document.getElementById("screen");
+
+function startCountdown() {
+    let count = 5;
+    screen.textContent = count;
+    screen.classList.add("glitch");
+
+    countdownInterval = setInterval(() => {
+        count--;
+
+        if (count > 0) {
+            screen.textContent = count;
+        }
+
+        else {
+            clearInterval(countdownInterval);
+            powerOff();
+        }
+    }, 1000);
+}
+
+function powerOff() {
+    screen.classList.remove("glitch");
+    screen.textContent = "";
+    document.body.style.background = "black";
+    started = false;
+}
+
+document.addEventListener("keydown", () => {
+    if (!started) {
+        started = true;
+        startCountdown();
+    }
+});
+</script>
+
+</body>
+</html>
