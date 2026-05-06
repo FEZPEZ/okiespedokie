@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <title>Terminal Countdown</title>
 
+<!-- PWA / fullscreen -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#000000">
+
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<link rel="manifest" href="manifest.json">
+
 <!-- Silkscreen font -->
 <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 
@@ -66,21 +76,24 @@
 <script>
 let started = false;
 let countdownInterval = null;
+
 const screen = document.getElementById("screen");
 
 function startCountdown() {
     let count = 5;
+
     screen.textContent = count;
     screen.classList.add("glitch");
+
+    // force immediate paint so first frame doesn't lag
+    screen.getBoundingClientRect();
 
     countdownInterval = setInterval(() => {
         count--;
 
         if (count > 0) {
             screen.textContent = count;
-        }
-
-        else {
+        } else {
             clearInterval(countdownInterval);
             powerOff();
         }
@@ -90,16 +103,46 @@ function startCountdown() {
 function powerOff() {
     screen.classList.remove("glitch");
     screen.textContent = "";
-    document.body.style.background = "black";
     started = false;
 }
 
-document.addEventListener("keydown", () => {
-    if (!started) {
-        started = true;
-        startCountdown();
-    }
-});
+// central input handler (fast path)
+function trigger() {
+    if (started) return;
+    started = true;
+    startCountdown();
+}
+
+// KEYBOARD — capture phase, highest priority
+window.addEventListener("keydown", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    trigger();
+}, { capture: true });
+
+// extra safety: some devices fire keypress inconsistently
+window.addEventListener("keypress", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+}, { capture: true });
+
+// TOUCH / CLICK fallback
+window.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    trigger();
+}, { capture: true });
+
+window.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    trigger();
+}, { capture: true });
+
+// prevent scroll/gesture side effects
+window.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+
 </script>
 
 </body>
