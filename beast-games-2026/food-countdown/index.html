@@ -4,109 +4,198 @@
 <meta charset="UTF-8">
 <title>Terminal Countdown</title>
 
-<!-- PWA / fullscreen -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#000000">
 
 <link rel="apple-touch-icon" href="icon-192.png">
-
 <link rel="manifest" href="manifest.json">
 
-<!-- Silkscreen font -->
-<link href="https://fonts.googleapis.com/css2?family=Handjet:wght@400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+    rel="preload"
+    as="style"
+    href="https://fonts.googleapis.com/css2?family=Handjet:wght@400&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'"
+>
+
+<noscript>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Handjet:wght@400&display=swap"
+        rel="stylesheet"
+    >
+</noscript>
 
 <style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        background: black;
-        overflow: hidden;
-        height: 100%;
-    }
-    
-    #crt {
+html, body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* CRT container */
+#crt {
     width: 100vw;
     height: 100vh;
     perspective: 900px;
-    overflow: hidden;
     background: black;
+    position: relative;
+    color: #00ffaa;
+    overflow: hidden;
 }
 
-    #screen {
-    width: 100vw;
-    height: 100vh;
+/* shared transformed space */
+#layer {
+    width: 100%;
+    height: 100%;
+    transform: rotateX(5.5deg) scale(1.02);
+    transform-origin: center;
+    position: relative;
+    transition: transform 1ms linear;
+}
 
+/* countdown text */
+#screen {
+    width: 100%;
+    height: 100%;
     display: grid;
     place-items: center;
 
     font-family: "Handjet", monospace;
-    font-weight: 400;
     font-size: min(85vw, 85dvh);
-
     line-height: 1;
 
-    color: #00ffaa;
+    color: inherit;
     user-select: none;
-    transition: transform 1ms linear;
-    
-    transform: rotateX(5.5deg) scale(1.02);
-    transform-origin: center;
-    
+
     text-shadow:
-        0 0 0.5vh rgba(0, 255, 170, 0.9),
-        0 0 1.2vh rgba(0, 255, 170, 0.6),
-        0 0 2.5vh rgba(0, 255, 170, 0.3),
+        0 0 0.5vh currentColor,
+        0 0 1.2vh currentColor,
+        0 0 2.5vh currentColor,
         0 0 4vh rgba(0, 255, 170, 0.15);
 }
 
-    .scanlines::after {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: repeating-linear-gradient(
-            to bottom,
-            rgba(0,255,100,0.08),
-            rgba(0,255,100,0.08) 10px,
-            transparent 10px,
-            transparent 20px
-        );
-        pointer-events: none;
-    }
+/* FINAL IMAGE MODE */
+#final {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 6vw;
+    pointer-events: none;
+}
+
+#final.active {
+    display: flex;
+}
+
+#final img {
+    width: min(25vw, 25vh);
+    height: auto;
+
+    filter: brightness(0) saturate(100%);
+
+    filter:
+    drop-shadow(0 0 0.3vh currentColor)
+    drop-shadow(0 0 0.9vh currentColor);
+}
+
+/* step animation */
+.lift { transform: translateY(-2vh); }
+.lower { transform: translateY(2vh); }
+
+/* scanlines overlay */
+.scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,255,100,0.08),
+        rgba(0,255,100,0.08) 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    pointer-events: none;
+}
 </style>
 </head>
+
 <body>
 
-<div id="crt">
-    <div id="screen" class="scanlines"></div>
+<div id="crt" class="scanlines">
+    <div id="layer">
+        <div id="screen"></div>
+
+        <div id="final">
+            <img id="fork" src="assets/fork.png">
+            <img id="spoon" src="assets/spoon.png">
+        </div>
+    </div>
 </div>
 
 <script>
 let started = false;
 let countdownInterval = null;
+let glitchTimer = null;
 
 const screen = document.getElementById("screen");
+const final = document.getElementById("final");
+const fork = document.getElementById("fork");
+const spoon = document.getElementById("spoon");
+const layer = document.getElementById("layer");
+
+const baseTransform = "rotateX(5.5deg) scale(1.02)";
+
+function applyTransform(extra = "") {
+    layer.style.transform = `${baseTransform} ${extra}`;
+}
+
+const preloadImages = async () => {
+    const images = [
+        "assets/fork.png",
+        "assets/spoon.png"
+    ];
+
+    const promises = images.map(src => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = src;
+
+            img.onload = () => {
+                if (img.decode) {
+                    img.decode().then(resolve).catch(resolve);
+                } else {
+                    resolve();
+                }
+            };
+
+            img.onerror = resolve;
+        });
+    });
+
+    await Promise.all(promises);
+};
+
+preloadImages();
 
 function startCountdown() {
-    let count = 5;
-    const minDigits = 0;
+    let count = 60;
+    let padCount = 2;
 
-    function format(n) {
-        return String(n).padStart(minDigits, "0");
-    }
-
-    screen.textContent = format(count);
-    screen.classList.add("glitch");
-
-    screen.getBoundingClientRect();
+    screen.textContent = String(count).padStart(padCount, "0");
 
     countdownInterval = setInterval(() => {
         count--;
 
         if (count > 0) {
-            screen.textContent = format(count);
+            screen.textContent = String(count).padStart(padCount, "0");
         } else {
             clearInterval(countdownInterval);
             powerOff();
@@ -115,20 +204,91 @@ function startCountdown() {
 }
 
 function powerOff() {
-    screen.classList.remove("glitch");
-    screen.textContent = "";
+    screen.style.display = "none";
+    final.classList.add("active");
+    startForkSpoon();
     started = false;
+
+    if (glitchTimer) {
+        clearTimeout(glitchTimer);
+        glitchTimer = null;
+    }
+
+    applyTransform("");
 }
 
-// central input handler (fast path)
+function startForkSpoon() {
+    let state = 0;
+
+    setInterval(() => {
+        state ^= 1;
+
+        if (state === 0) {
+            fork.classList.add("lift");
+            fork.classList.remove("lower");
+
+            spoon.classList.add("lower");
+            spoon.classList.remove("lift");
+        } else {
+            fork.classList.add("lower");
+            fork.classList.remove("lift");
+
+            spoon.classList.add("lift");
+            spoon.classList.remove("lower");
+        }
+    }, 450);
+}
+
+const crt = document.getElementById("crt");
+
+function random(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function globalGlitchLoop() {
+    // ALWAYS distort entire screen, regardless of content state
+    const x = random(-4, 4);
+    const y = random(-3, 3);
+    const r = random(-0.2, 0.2);
+    const s = random(0.997, 1.005);
+
+    crt.style.transform = `
+        translate(${x}px, ${y}px)
+        rotate(${r}deg)
+        scale(${s})
+    `;
+
+    // scanline jitter effect via filter shift
+    crt.style.filter = `
+        hue-rotate(${random(-7, 7)}deg)
+        contrast(${random(0.98, 1.05)})
+        saturate(${random(0.9, 1.2)})
+    `;
+
+    // occasional “frame tear”
+    if (Math.random() < 0.2) {
+        crt.style.clipPath = `inset(${random(0,5)}% 0 ${random(0,5)}% 0)`;
+
+        setTimeout(() => {
+            crt.style.clipPath = "";
+        }, 80);
+    }
+
+    setTimeout(globalGlitchLoop, random(40, 180));
+}
+
+globalGlitchLoop();
+
 function trigger() {
     if (started) return;
+
     started = true;
+
     startCountdown();
-    startGlitches(); // ADD THIS
+    startGlitches();
 }
 
-// KEYBOARD — capture phase, highest priority
+/* input handling */
 window.addEventListener("keydown", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -136,13 +296,11 @@ window.addEventListener("keydown", (e) => {
     trigger();
 }, { capture: true });
 
-// extra safety: some devices fire keypress inconsistently
 window.addEventListener("keypress", (e) => {
     e.preventDefault();
     e.stopPropagation();
 }, { capture: true });
 
-// TOUCH / CLICK fallback
 window.addEventListener("touchstart", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -155,50 +313,9 @@ window.addEventListener("mousedown", (e) => {
     trigger();
 }, { capture: true });
 
-// prevent scroll/gesture side effects
-window.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
-
-
-let glitchTimer = null;
-
-let baseTransform = "rotateX(5.5deg) scale(1.02)";
-
-function applyTransform(extra = "") {
-    screen.style.transform = `${baseTransform} ${extra}`;
-}
-
-function startGlitches() {
-    if (glitchTimer) {
-        clearTimeout(glitchTimer);
-        glitchTimer = null;
-    }
-
-    function glitchOnce() {
-        if (!started) return;
-
-        const x = (Math.random() - 0.5) * 14;
-        const y = (Math.random() - 0.5) * 10;
-
-        applyTransform(`translate(${x}px, ${y}px)`);
-
-        setTimeout(() => {
-            applyTransform(""); // returns to base CRT warp
-        }, 60);
-    }
-
-    function scheduleNext() {
-        if (!started) return;
-
-        const delay = 3 * 400 + Math.random() * 2800;
-
-        glitchTimer = setTimeout(() => {
-            glitchOnce();
-            scheduleNext();
-        }, delay);
-    }
-
-    scheduleNext();
-}
+window.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+}, { passive: false });
 
 </script>
 
