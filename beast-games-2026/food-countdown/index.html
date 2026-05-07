@@ -247,8 +247,8 @@ function random(min, max) {
 
 function globalGlitchLoop() {
     // ALWAYS distort entire screen, regardless of content state
-    const x = random(-4, 4);
-    const y = random(-3, 3);
+    const x = random(-1, 1);
+    const y = random(-2, 2);
     const r = random(-0.2, 0.2);
     const s = random(0.997, 1.005);
 
@@ -260,9 +260,9 @@ function globalGlitchLoop() {
 
     // scanline jitter effect via filter shift
     crt.style.filter = `
-        hue-rotate(${random(-7, 7)}deg)
-        contrast(${random(0.98, 1.05)})
-        saturate(${random(0.9, 1.2)})
+        hue-rotate(${random(-5, 5)}deg)
+        contrast(${random(0.99, 1.03)})
+        saturate(${random(0.92, 1.12)})
     `;
 
     // occasional “frame tear”
@@ -279,10 +279,16 @@ function globalGlitchLoop() {
 
 globalGlitchLoop();
 
-function trigger() {
-    if (started) return;
+async function waitForFont() {
+    await document.fonts.load("85px Handjet");
+    await document.fonts.ready;
+}
 
+async function trigger() {
+    if (started) return;
     started = true;
+
+    await waitForFont();
 
     startCountdown();
     startGlitches();
