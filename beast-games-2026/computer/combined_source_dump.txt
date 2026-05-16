@@ -1,0 +1,1246 @@
+================================================================================
+FILE: index.html
+================================================================================
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Terminal Countdown</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* CRT container */
+#crt {
+    width: 100vw;
+    height: 100vh;
+    perspective: 900px;
+    background: black;
+    position: relative;
+    color: #00ffaa;
+    overflow: hidden;
+}
+
+/* shared transform space */
+#layer {
+    width: 100%;
+    height: 100%;
+    transform: rotateX(5.5deg) scale(1.02);
+    transform-origin: center;
+    position: relative;
+    transition: transform 1ms linear;
+}
+
+/* ASCII screen */
+#screen {
+    width: 100%;
+    height: 100%;
+    display: block;
+    white-space: pre;
+    font-family: monospace;
+    color: inherit;
+    user-select: none;
+    
+    transform-origin: top left;
+    
+    /* THIS is your new "font scale" */
+    font-size: 45px; /* base */
+
+    text-shadow:
+        0 0 0.5vh currentColor,
+        0 0 1.2vh currentColor,
+        0 0 2.5vh currentColor,
+        0 0 4vh rgba(0, 255, 170, 0.15);
+}
+
+/* FINAL ASCII MODE */
+#final {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8vw;
+    pointer-events: none;
+}
+
+#final.active {
+    display: flex;
+}
+
+#final pre {
+    margin: 0;
+    white-space: pre;
+    font-family: monospace;
+    color: inherit;
+
+    text-shadow:
+        0 0 0.3vh currentColor,
+        0 0 0.9vh currentColor;
+}
+
+/* scanlines */
+.scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,255,100,0.08),
+        rgba(0,255,100,0.08) 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    pointer-events: none;
+}
+
+/* transition line layer */
+#transition-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Keyboard side flash overlays */
+.side-glow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 25%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+    z-index: 998;
+}
+
+#glow-left {
+    left: 0;
+    background: linear-gradient(to right, rgba(0, 255, 170, 0.4), transparent);
+}
+
+#glow-right {
+    right: 0;
+    background: linear-gradient(to left, rgba(0, 255, 170, 0.4), transparent);
+}
+</style>
+</head>
+
+<body>
+
+<div id="crt" class="scanlines">
+    <!-- Side flash effect overlays -->
+    <div id="glow-left" class="side-glow"></div>
+    <div id="glow-right" class="side-glow"></div>
+
+    <div id="layer">
+
+        <pre id="screen"></pre>
+
+        <div id="final">
+            <pre id="fork"></pre>
+            <pre id="spoon"></pre>
+        </div>
+
+    </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>
+--- EOF ---
+
+
+================================================================================
+FILE: js/animations.js
+================================================================================
+
+import { render } from "./render.js";
+
+/*
+Animation format:
+
+animationName: {
+    margin: {
+        top,
+        left
+    },
+
+    frames: [
+        {
+            hold,
+            margin: {
+                top,
+                left
+            },
+
+            content
+        }
+    ]
+}
+*/
+
+export const animations = {
+
+    eat: {
+
+        margin: {
+            top: 2,
+            left: 8
+        },
+
+        frames: [
+
+            {
+                hold: 2180,
+
+                margin: {
+                    top: 0,
+                    left: 0
+                },
+
+                content: [
+                    "                        ",
+                    "██████            ██████",
+                    "                        ",
+                    "█                      █",
+                    "████████████████████████",
+                    "█                      █"
+                ].join("\n")
+            },
+
+            {
+                hold: 180,
+
+                margin: {
+                    top: 1,
+                    left: 2
+                },
+
+                content: [
+                    "██████                  ",
+                    "██████            ██████",
+                    "                        ",
+                    "█                      █",
+                    "████████████████████████",
+                    "█                      █"
+                ].join("\n")
+            },
+            
+            {
+                hold: 180,
+
+                margin: {
+                    top: 0,
+                    left: 0
+                },
+
+                content: [
+                    "███     ███     ███",
+                    "███     ███     ███",
+                    "███     ███     ███"
+                ].join("\n")
+            },
+
+            {
+                hold: 180,
+
+                margin: {
+                    top: 1,
+                    left: 2
+                },
+
+                content: [
+                    " ███   ███   ███ ",
+                    "█████████████████",
+                    " ███   ███   ███ "
+                ].join("\n")
+            },
+            
+            {
+                hold: 180,
+
+                margin: {
+                    top: 0,
+                    left: 0
+                },
+
+                content: [
+                    "███     ███     ███",
+                    "███     ███     ███",
+                    "███     ███     ███"
+                ].join("\n")
+            },
+
+            {
+                hold: 180,
+
+                margin: {
+                    top: 1,
+                    left: 2
+                },
+
+                content: [
+                    " ███   ███   ███ ",
+                    "█████████████████",
+                    " ███   ███   ███ "
+                ].join("\n")
+            }
+        ]
+    },
+
+    eyesClosed: {
+
+        margin: {
+            top: 4,
+            left: 13
+        },
+
+        frames: [
+
+            {
+                hold: 180,
+
+                margin: {
+                    top: 0,
+                    left: 0
+                },
+
+                content: [
+                    "                  ",
+                    "██████      ██████",
+                ].join("\n")
+            }
+        ]
+    },
+    
+    
+    eyeOpen: {
+
+        margin: {
+            top: 4,
+            left: 13
+        },
+
+        frames: [
+
+            {
+                hold: 1800,
+
+                margin: {
+                    top: 0,
+                    left: 0
+                },
+
+                content: [
+                    "  ███             ",
+                    "  ███       ██████",
+                ].join("\n")
+            }
+        ]
+    }
+};
+--- EOF ---
+
+
+================================================================================
+FILE: js/effects.js
+================================================================================
+
+const crt = document.getElementById("crt");
+const layer = document.getElementById("layer");
+
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+/* CRT DRIFT + GLITCH (restored original feel) */
+export function startGlitch() {
+  function loop() {
+    const x = random(-1, 1);
+    const y = random(-2, 2);
+    const r = random(-0.25, 0.25);
+    const s = random(0.997, 1.006);
+
+    crt.style.transform = `
+      translate(${x}px, ${y}px)
+      rotate(${r}deg)
+      scale(${s})
+    `;
+
+    crt.style.filter = `
+      hue-rotate(${random(-6, 6)}deg)
+      contrast(${random(0.98, 1.04)})
+      saturate(${random(0.9, 1.15)})
+    `;
+
+    if (Math.random() < 0.18) {
+      crt.style.clipPath = `inset(${random(0,5)}% 0 ${random(0,5)}% 0)`;
+      setTimeout(() => (crt.style.clipPath = ""), 60);
+    }
+
+    setTimeout(loop, random(35, 140));
+  }
+
+  loop();
+}
+
+/* subtle layer wobble (this was missing entirely) */
+export function startLayerDrift() {
+  let t = 0;
+
+  function loop() {
+    t += 0.01;
+
+    layer.style.transform = `
+      rotateX(5.5deg)
+      scale(1.02)
+      translateY(${Math.sin(t) * 0.6}px)
+    `;
+
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+}
+
+/* scanlines toggle hook (kept CSS-driven but controllable) */
+export function enableScanlines() {
+  document.getElementById("crt").classList.add("scanlines");
+}
+--- EOF ---
+
+
+================================================================================
+FILE: js/font.js
+================================================================================
+
+
+
+export const TOP_MARGIN = 0.4;
+export const LEFT_MARGIN = 13;
+export const CHAR_SPACING = 2;
+
+
+export const FONT = {
+
+    "0": [
+        "  ██████  ",
+        " █     ██ ",
+        "█       ██",
+        "█       ██",
+        "█       ██",
+        "█       ██",
+        "█       ██",
+        "█       ██",
+        " █     ██ ",
+        "  ██████  "
+    ],
+
+    "1": [
+        "    ██    ",
+        "   ███    ",
+        "  █  █    ",
+        "     █    ",
+        "     █    ",
+        "     █    ",
+        "     █    ",
+        "     █    ",
+        "     █    ",
+        "██████████"
+    ],
+
+    "2": [
+        "  ███████ ",
+        " █     ███",
+        "█       ██",
+        "       ██ ",
+        "     ███  ",
+        "   ██     ",
+        " ██       ",
+        "█         ",
+        "█        █",
+        "██████████"
+    ],
+
+    "3": [
+        " ████████ ",
+        "█       ██",
+        "        ██",
+        "      ███ ",
+        "    ████  ",
+        "      ███ ",
+        "        ██",
+        "█       ██",
+        " █    ███ ",
+        "  ██████  "
+    ],
+
+    "4": [
+        "    █████ ",
+        "   █   ██ ",
+        "  █    ██ ",
+        " █     ██ ",
+        "█      ██ ",
+        "██████████",
+        "       ██ ",
+        "       ██ ",
+        "       ██ ",
+        "       ██ "
+    ],
+
+    "5": [
+        "█████████ ",
+        "█       ██",
+        "█         ",
+        "█         ",
+        "█████████ ",
+        "        ██",
+        "        ██",
+        "█       ██",
+        " █     ██ ",
+        "  ██████  "
+    ],
+
+    "6": [
+        "  ██████  ",
+        " █     ██ ",
+        "█       ██",
+        "█         ",
+        "████████  ",
+        "█      ██ ",
+        "█       ██",
+        "█       ██",
+        " █     ██ ",
+        "  ██████  "
+    ],
+
+    "7": [
+        "██████████",
+        "█       ██",
+        "        ██",
+        "       ██ ",
+        "      ██  ",
+        "     ██   ",
+        "    ██    ",
+        "   ██     ",
+        "  ██      ",
+        " ██       "
+    ],
+
+    "8": [
+        "  ██████  ",
+        " ██     █ ",
+        "██       █",
+        " ██     █ ",
+        "  ██████  ",
+        " █     ██ ",
+        "█       ██",
+        "█       ██",
+        " █     ██ ",
+        "  ██████  "
+    ],
+
+    "9": [
+        "  ██████  ",
+        " █     ██ ",
+        "█       ██",
+        "█       ██",
+        "██     ███",
+        " █████████",
+        "        ██",
+        "█       ██",
+        " █     ██ ",
+        "  ██████  "
+    ],
+    "fork": [
+    "██  ██    ",
+    "██  ██    ",
+    "██  ██    ",
+    "██  ██    ",
+    "████████  ",
+    "   ██     ",
+    "   ██     ",
+    "   ██     ",
+    "   ██     ",
+    "   ██     "
+],
+"spoon": [
+    "   ██     ",
+    "  ████    ",
+    " ██████   ",
+    "████████   ",
+    "████████   ",
+    " ██████   ",
+    "  ████    ",
+    "   ██     ",
+    "   ██     ",
+    "   ██     "
+]
+};
+
+--- EOF ---
+
+
+================================================================================
+FILE: js/glitch.js
+================================================================================
+
+export function startGlitch(crt) {
+
+    function random(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function loop() {
+
+        crt.style.transform = `
+            translate(${random(-1, 1)}px, ${random(-2, 2)}px)
+            rotate(${random(-0.2, 0.2)}deg)
+            scale(${random(0.997, 1.005)})
+        `;
+
+        crt.style.filter = `
+            hue-rotate(${random(-5, 5)}deg)
+            contrast(${random(0.99, 1.03)})
+            saturate(${random(0.92, 1.12)})
+        `;
+
+        if (Math.random() < 0.2) {
+            crt.style.clipPath = `inset(${random(0,5)}% 0 ${random(0,5)}% 0)`;
+
+            setTimeout(() => {
+                crt.style.clipPath = "";
+            }, 80);
+        }
+
+        setTimeout(loop, random(40, 180));
+    }
+
+    loop();
+}
+--- EOF ---
+
+
+================================================================================
+FILE: js/main.js
+================================================================================
+
+import { render } from "./render.js";
+import { startGlitch } from "./glitch.js";
+import { animations } from "./animations.js";
+import { playTransitionEffect } from "./transition.js";
+
+const screen = document.getElementById("screen");
+const crt = document.getElementById("crt");
+const glowLeft = document.getElementById("glow-left");
+const glowRight = document.getElementById("glow-right");
+
+// Keyboard side partitions configuration
+const LEFT_HAND_KEYS = [
+    "q", "w", "e", "r", "t", "a", "s", "d", "f", "g", "z", "x", "c", "v", "b",
+    "1", "2", "3", "4", "5", "`", "tab", "capslock", "shiftleft", "controlleft", "altleft"
+];
+
+const RIGHT_HAND_KEYS = [
+    "y", "u", "i", "o", "p", "[", "]", "\\", "h", "j", "k", "l", ";", "'", "enter",
+    "n", "m", ",", ".", "/", "6", "7", "8", "9", "0", "-", "=", "backspace", 
+    "shiftright", "controlright", "altright"
+];
+
+/* =========================================================
+   STATE MACHINE CONFIGURATION
+========================================================= */
+let state = {
+    owner: "boot", // "boot" | "default" | "idle" | "timer" | "transition" | "end"
+    shiftDown: false,
+    passwordBuffer: [], // Used as a sliding array queue (max 3 items)
+    countdownInterval: null,
+    animTimeout: null,
+    currentMode: null,
+    currentAnimName: null,
+    transitionActive: false // Flag to block conflicting inputs during transition animations
+};
+
+const MODES = {
+    "111": {
+        timerLength: 6,
+        defaultAnimation: "eyesClosed", // Baseline single animation
+        endAnimation: "eyesClosed",
+        endAnimationTime: 3000,
+        idle: {
+            pool: ["eyeOpen"], // Idle choices
+            minDelay: 2000,             // Countdown range to trigger an idle breakout
+            maxDelay: 4000
+        }
+    },
+    "444": {
+        timerLength: 10,
+        defaultAnimation: "textPulse",
+        endAnimation: "eyeOpen",
+        endAnimationTime: 2000,
+        idle: {
+            pool: ["eat", "eyeOpen"],
+            minDelay: 4000,
+            maxDelay: 8000
+        }
+    }
+};
+
+startGlitch(crt);
+setupDebugOverlay();
+
+/* =========================================================
+   HARD OVERRIDE AND CLEANUP
+========================================================= */
+function killAllActiveLoops() {
+    if (state.animTimeout) {
+        clearTimeout(state.animTimeout);
+        state.animTimeout = null;
+    }
+}
+
+function clearIdleTimeout() {
+    if (state.countdownInterval) {
+        clearTimeout(state.countdownInterval);
+        state.countdownInterval = null;
+    }
+}
+
+/* =========================================================
+   FLASH EFFECTS ENGINE
+========================================================= */
+function triggerSideGlow(e) {
+    if (!e || !e.key) return;
+    
+    const keyLower = e.key.toLowerCase();
+    const codeLower = e.code.toLowerCase();
+
+    glowLeft.style.transition = "none";
+    glowRight.style.transition = "none";
+    glowLeft.style.opacity = "0";
+    glowRight.style.opacity = "0";
+    
+    void glowLeft.offsetWidth; 
+
+    const isLeftKey = LEFT_HAND_KEYS.includes(keyLower) || LEFT_HAND_KEYS.includes(codeLower);
+    const isRightKey = RIGHT_HAND_KEYS.includes(keyLower) || RIGHT_HAND_KEYS.includes(codeLower);
+
+    if (isLeftKey) {
+        glowLeft.style.opacity = "1";
+        setTimeout(() => {
+            glowLeft.style.transition = "opacity 0.4s ease-out";
+            glowLeft.style.opacity = "0";
+        }, 50);
+    } else if (isRightKey) {
+        glowRight.style.opacity = "1";
+        setTimeout(() => {
+            glowRight.style.transition = "opacity 0.4s ease-out";
+            glowRight.style.opacity = "0";
+        }, 50);
+    }
+}
+
+/* =========================================================
+   ANIMATION CORNER
+========================================================= */
+function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
+    const anim = animations[name];
+    if (!anim) return;
+
+    // Halt only active frames, do NOT kill the idle breakdown intervals!
+    killAllActiveLoops();
+    
+    state.owner = targetOwnerState;
+    state.currentAnimName = name;
+    updateDebug();
+
+    let i = 0;
+
+    function loop() {
+        if (state.owner !== targetOwnerState || state.currentAnimName !== name) return;
+
+        const frame = anim.frames[i];
+        
+        screen.textContent = applyFrameMargins(
+            frame.content,
+            anim.margin,
+            frame.margin
+        );
+
+        i++;
+        if (i >= anim.frames.length) {
+            i = 0;
+            if (onCompleteCycle) {
+                onCompleteCycle();
+                return;
+            }
+        }
+
+        state.animTimeout = setTimeout(loop, frame.hold);
+    }
+
+    loop();
+}
+
+function startDefaultOrIdleCycle() {
+    const mode = state.currentMode;
+    
+    // 1. Play standard baseline loop
+    playEngineAnimation(mode.defaultAnimation, "default");
+
+    // Clear any loose trailing cycles before assigning a clean loop
+    clearIdleTimeout();
+
+    // 2. Set up the random countdown interval for breakout
+    const config = mode.idle;
+    const randomDelay = Math.random() * (config.maxDelay - config.minDelay) + config.minDelay;
+
+    state.countdownInterval = setTimeout(() => {
+        if (state.owner !== "default") return;
+
+        // 3. Select random idle animation
+        const selectedIdle = config.pool[Math.floor(Math.random() * config.pool.length)];
+
+        // 4. Play idle once, then route recursion back to standard default tracking
+        playEngineAnimation(selectedIdle, "idle", () => {
+            startDefaultOrIdleCycle();
+        });
+
+    }, randomDelay);
+}
+
+/* =========================================================
+   TIMER CONTROL
+========================================================= */
+function startTimer(seconds) {
+    killAllActiveLoops();
+    clearIdleTimeout();
+    state.owner = "timer";
+    state.currentAnimName = "NONE (TIMER RUNNING)";
+    updateDebug();
+
+    let count = seconds;
+    screen.textContent = render(String(count).padStart(2, "0"));
+
+    let timerInterval = setInterval(async () => {
+        if (state.owner !== "timer") {
+            clearInterval(timerInterval);
+            return;
+        }
+
+        count--;
+        if (count > 0) {
+            screen.textContent = render(String(count).padStart(2, "0"));
+        } else {
+            clearInterval(timerInterval);
+            await runEndSequence();
+        }
+    }, 1000);
+}
+
+/* =========================================================
+   SEQUENCING & ROUTING TRANSITIONS
+========================================================= */
+async function changeStateWithTransition(nextState, actionCallback) {
+    killAllActiveLoops();
+    clearIdleTimeout();
+    state.owner = "transition";
+    state.currentAnimName = "NONE (TRANSITIONING)";
+    state.transitionActive = true;
+    updateDebug();
+    
+    screen.textContent = "";
+    await playTransitionEffect();
+    
+    state.transitionActive = false;
+    state.owner = nextState;
+    actionCallback();
+    updateDebug();
+}
+
+async function runEndSequence() {
+    await changeStateWithTransition("end", () => {
+        const mode = state.currentMode;
+        const anim = mode.endAnimation;
+        const duration = mode.endAnimationTime;
+        const startTime = Date.now();
+
+        playEngineAnimation(anim, "end", () => {
+            if (Date.now() - startTime >= duration) {
+                startDefaultOrIdleCycle();
+            }
+        });
+        
+        state.animTimeout = setTimeout(() => {
+            if (state.owner === "end") {
+                startDefaultOrIdleCycle();
+            }
+        }, duration);
+    });
+}
+
+function initDefaultMode() {
+    if (!state.currentMode) {
+        const initialKey = Object.keys(MODES)[0];
+        state.currentMode = structuredClone(MODES[initialKey]);
+    }
+}
+
+/* =========================================================
+   USER INPUTS INTERFACES
+========================================================= */
+async function handleActionTrigger(eventObj = null) {
+    if (state.transitionActive) return;
+
+    const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end");
+
+    if (eventObj && isInitialActivationPress) {
+        triggerSideGlow(eventObj);
+    }
+
+    if (state.owner === "end") {
+        await changeStateWithTransition("timer", () => {
+            startTimer(state.currentMode.timerLength);
+        });
+        return;
+    }
+
+    if (state.owner !== "default" && state.owner !== "idle") return;
+
+    await changeStateWithTransition("timer", () => {
+        startTimer(state.currentMode.timerLength);
+    });
+}
+
+async function forceSwitchMode(configKey) {
+    killAllActiveLoops(); 
+    clearIdleTimeout();
+    state.owner = "transition";
+    state.currentAnimName = "NONE (OVERRIDE TRANSITION)";
+    state.transitionActive = true;
+    updateDebug();
+
+    screen.textContent = "";
+    await playTransitionEffect();
+
+    state.transitionActive = false;
+    state.currentMode = structuredClone(MODES[configKey]);
+    resetPassword();
+    startDefaultOrIdleCycle();
+}
+
+function resetPassword() {
+    state.passwordBuffer = [];
+    updateDebug();
+}
+
+function applyFrameMargins(content, globalMargin, frameMargin) {
+    const top = (globalMargin?.top || 0) + (frameMargin?.top || 0);
+    const left = (globalMargin?.left || 0) + (frameMargin?.left || 0);
+    const lines = content.split("\n");
+    const out = [];
+
+    for (let i = 0; i < top; i++) out.push("");
+    for (const line of lines) {
+        out.push(" ".repeat(left) + line);
+    }
+    return out.join("\n");
+}
+
+/* =========================================================
+   EVENT WIREUP
+========================================================= */
+window.addEventListener("keydown", e => {
+    const pressedKey = e.key.toLowerCase();
+
+    if (pressedKey === "b") {
+        state.shiftDown = true;
+        resetPassword();
+        return;
+    }
+
+    if (!state.shiftDown) {
+        if (e.key !== "F12" && e.key !== "R") e.preventDefault();
+        handleActionTrigger(e); 
+        return;
+    }
+
+    if (/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        
+        state.passwordBuffer.push(e.key);
+        if (state.passwordBuffer.length > 3) {
+            state.passwordBuffer.shift();
+        }
+        updateDebug();
+
+        if (state.passwordBuffer.length === 3) {
+            const matchStr = state.passwordBuffer.join("");
+            if (MODES[matchStr]) {
+                forceSwitchMode(matchStr);
+            }
+        }
+    }
+}, { capture: true });
+
+window.addEventListener("keyup", e => {
+    if (e.key.toLowerCase() === "b") {
+        state.shiftDown = false;
+        resetPassword();
+    }
+}, { capture: true });
+
+window.addEventListener("mousedown", e => {
+    if (state.shiftDown) return;
+    e.preventDefault();
+    handleActionTrigger();
+}, { capture: true });
+
+window.addEventListener("touchstart", e => {
+    if (state.shiftDown) return;
+    e.preventDefault();
+    handleActionTrigger();
+}, { capture: true });
+
+/* =========================================================
+   DEBUGGING CONSOLE COMPONENT
+========================================================= */
+function setupDebugOverlay() {
+    let debugDiv = document.getElementById("terminal-debug");
+    if (!debugDiv) {
+        debugDiv = document.createElement("div");
+        debugDiv.id = "terminal-debug";
+        Object.assign(debugDiv.style, {
+            position: "absolute",
+            bottom: "10px",
+            left: "10px",
+            background: "rgba(0, 0, 0, 0.85)",
+            color: "#00ffaa",
+            fontFamily: "monospace",
+            fontSize: "12px",
+            padding: "10px",
+            borderRadius: "4px",
+            border: "1px solid #00ffaa",
+            zIndex: "10000",
+            pointerEvents: "none",
+            lineHeight: "1.4"
+        });
+        document.body.appendChild(debugDiv);
+    }
+}
+
+function updateDebug() {
+    const debugDiv = document.getElementById("terminal-debug");
+    if (!debugDiv) return;
+
+    const codeBufferDisplay = state.passwordBuffer.length > 0 
+        ? `[ ${state.passwordBuffer.join(", ")} ]` 
+        : "EMPTY";
+
+    debugDiv.innerHTML = `
+        <strong>⚙️ SYSTEM STATE DEBUGGER</strong><br>
+        -----------------------------------<br>
+        STATE OWNER    : <span style="color:#fff">${state.owner.toUpperCase()}</span><br>
+        ANIMATION      : <span style="color:#fff">${state.currentAnimName || 'NONE'}</span><br>
+        SHIFT MODIFIER : ${state.shiftDown ? '<span style="color:#ff3333;font-weight:bold">HELD</span>' : 'RELEASED'}<br>
+        SLIDING QUEUE  : <span style="color:#ffff33">${codeBufferDisplay}</span><br>
+        TRANSITION LOCK: ${state.transitionActive ? 'ACTIVE' : 'READY'}<br>
+        CURRENT MODE   : <span style="color:#33ffff">${state.currentMode ? Object.keys(MODES).find(k => MODES[k].timerLength === state.currentMode.timerLength) : 'NONE'}</span>
+    `;
+}
+
+// Entry Point Init
+initDefaultMode();
+startDefaultOrIdleCycle();
+--- EOF ---
+
+
+================================================================================
+FILE: js/render.js
+================================================================================
+
+import { FONT, TOP_MARGIN, LEFT_MARGIN, CHAR_SPACING } from "./font.js";
+
+const FALLBACK_CHAR = " ";
+
+/* ========================================
+   RENDER CHARACTER
+   Any non-space becomes this character
+======================================== */
+const RENDER_CHAR = "█";
+
+function getGlyph(ch) {
+    return FONT[ch] || FONT[FALLBACK_CHAR] || [" "];
+}
+
+/* ========================================
+   Convert glyph row:
+   spaces stay spaces
+   everything else -> RENDER_CHAR
+======================================== */
+function normalizeRow(row) {
+
+    let out = "";
+
+    for (const ch of row) {
+        out += (ch === " ") ? " " : RENDER_CHAR;
+    }
+
+    return out;
+}
+
+export function render(text) {
+
+    const str = String(text ?? "");
+    const chars = str.length ? str.split("") : [FALLBACK_CHAR];
+
+    const firstGlyph = getGlyph(chars[0]);
+    const h = firstGlyph.length;
+
+    const out = [];
+
+    /* top margin */
+    const topPad = Math.max(0, TOP_MARGIN);
+
+    for (let i = 0; i < topPad; i++) {
+        out.push("");
+    }
+
+    for (let row = 0; row < h; row++) {
+
+        let line = " ".repeat(LEFT_MARGIN);
+
+        for (let i = 0; i < chars.length; i++) {
+
+            const glyph = getGlyph(chars[i]);
+
+            const rawRow = glyph[row] ?? " ";
+
+            /* normalize all filled chars */
+            line += normalizeRow(rawRow);
+
+            /* character spacing */
+            if (i < chars.length - 1) {
+                line += " ".repeat(Math.max(0, CHAR_SPACING));
+            }
+        }
+
+        out.push(line);
+    }
+
+    return out.join("\n");
+}
+--- EOF ---
+
+
+================================================================================
+FILE: js/transition.js
+================================================================================
+
+const crt = document.getElementById("crt");
+let transitionLayer = document.getElementById("transition-layer");
+
+if (!transitionLayer) {
+    transitionLayer = document.createElement("div");
+    transitionLayer.id = "transition-layer";
+    crt.appendChild(transitionLayer);
+}
+
+export const TRANSITION_CONFIG = {
+    lineThickness: 16,
+    lineSpeed: 25000, // px per sec
+    color: "#00ffaa"
+};
+
+Object.assign(transitionLayer.style, {
+    position: "absolute",
+    inset: "0",
+    pointerEvents: "none",
+    overflow: "hidden",
+    display: "none",
+    zIndex: "999"
+});
+
+transitionLayer.innerHTML = ""; // Clear legacy elements
+const line = document.createElement("div");
+
+Object.assign(line.style, {
+    position: "absolute",
+    left: "0",
+    width: "100%",
+    background: TRANSITION_CONFIG.color,
+    boxShadow: `
+        0 0 10px ${TRANSITION_CONFIG.color},
+        0 0 30px ${TRANSITION_CONFIG.color}
+    `
+});
+transitionLayer.appendChild(line);
+
+function setLineY(y) {
+    line.style.transform = `translateY(${y}px)`;
+}
+
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function animateLinear(from, to, duration) {
+    return new Promise(resolve => {
+        const start = performance.now();
+
+        function frame(now) {
+            const t = Math.min((now - start) / duration, 1);
+            const y = from + ((to - from) * t);
+            setLineY(y);
+
+            if (t < 1) {
+                requestAnimationFrame(frame);
+            } else {
+                resolve();
+            }
+        }
+        requestAnimationFrame(frame);
+    });
+}
+
+export async function playTransitionEffect() {
+    const h = window.innerHeight;
+    const thickness = TRANSITION_CONFIG.lineThickness;
+
+    line.style.height = `${thickness}px`;
+    transitionLayer.style.display = "block";
+
+    const middle = (h * 0.5) - (thickness * 0.5);
+    setLineY(middle);
+    await wait(18);
+
+    const topTarget = -thickness;
+    const upwardDistance = Math.abs(middle - topTarget);
+    const upwardDuration = (upwardDistance / TRANSITION_CONFIG.lineSpeed) * 1000;
+
+    await animateLinear(middle, topTarget, upwardDuration);
+
+    const below = h + thickness;
+    setLineY(below);
+    await wait(8);
+
+    const upwardDistance2 = Math.abs(below - middle);
+    const upwardDuration2 = (upwardDistance2 / TRANSITION_CONFIG.lineSpeed) * 1000;
+
+    await animateLinear(below, middle, upwardDuration2);
+    transitionLayer.style.display = "none";
+}
+--- EOF ---
+
+
