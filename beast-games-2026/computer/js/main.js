@@ -36,14 +36,14 @@ let state = {
 
 const MODES = {
     "111": {
-        timerLength: 6,
+        timerLength: 5,
         defaultAnimation: "eyesClosed", // Baseline single animation
         endAnimation: "eyesClosed",
         endAnimationTime: 3000,
         idle: {
             pool: ["eyeOpen"], // Idle choices
-            minDelay: 1000,             // Countdown range to trigger an idle breakout
-            maxDelay: 2000
+            minDelay: 3000,             // Countdown range to trigger an idle breakout
+            maxDelay: 10000
         }
     },
     "444": {
@@ -60,7 +60,7 @@ const MODES = {
 };
 
 startGlitch(crt);
-setupDebugOverlay();
+//setupDebugOverlay();
 
 /* =========================================================
    HARD OVERRIDE AND CLEANUP
@@ -126,7 +126,7 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
 
     state.owner = targetOwnerState;
     state.currentAnimName = name;
-    updateDebug();
+    //updateDebug();
 
     let i = 0;
 
