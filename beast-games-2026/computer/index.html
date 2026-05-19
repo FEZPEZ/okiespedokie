@@ -2,9 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Terminal Countdown</title>
+<title></title>
 
+<!-- Mobile viewport -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<!-- PWA / standalone app behavior -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- Status bar appearance (iOS) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- App title when saved -->
+<meta name="apple-mobile-web-app-title" content="Terminal Countdown">
+<meta name="application-name" content="Terminal Countdown">
+
+<!-- Theme / browser chrome color -->
+<meta name="theme-color" content="#000000">
+
+<!-- Disable phone number auto-linking -->
+<meta name="format-detection" content="telephone=no">
 
 <style>
 html, body {
@@ -38,18 +56,22 @@ html, body {
 
 /* ASCII screen */
 #screen {
-    width: 100%;
-    height: 100%;
-    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
     white-space: pre;
     font-family: monospace;
     color: inherit;
     user-select: none;
-    
-    transform-origin: top left;
-    
-    /* THIS is your new "font scale" */
-    font-size: 45px; /* base */
+
+    font-size: 45px;
+    line-height: 1;
+
+    margin: 0;
+    padding: 0;
 
     text-shadow:
         0 0 0.5vh currentColor,

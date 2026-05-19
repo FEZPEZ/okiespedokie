@@ -28,7 +28,9 @@ let state = {
     shiftDown: false,
     passwordBuffer: [], // Used as a sliding array queue (max 3 items)
     countdownInterval: null,
+    timerInterval: null,
     animTimeout: null,
+    sequenceToken: 0,
     currentMode: null,
     currentAnimName: null,
     transitionActive: false // Flag to block conflicting inputs during transition animations
@@ -36,26 +38,42 @@ let state = {
 
 const MODES = {
     "111": {
-        timerLength: 5,
-        defaultAnimation: "eyesClosed", // Baseline single animation
-        endAnimation: "eyesClosed",
+        timerLength: 20,
+        defaultAnimation: "familyFaceOff",
+        endAnimation: "familyFaceOff",
         endAnimationTime: 3000,
-        idle: {
-            pool: ["eyeOpen"], // Idle choices
-            minDelay: 3000,             // Countdown range to trigger an idle breakout
-            maxDelay: 10000
-        }
+        sideGlowEnabled: false,
+        interruptEnabled: false, // <-- Added field
+        idle: { pool: ["familyFaceOff"], minDelay: 3000, maxDelay: 10000 }
+    },
+    "222": {
+        timerLength: 3,
+        defaultAnimation: "oneTicketPlease",
+        endAnimation: "oneTicketPleaseEnd",
+        endAnimationTime: 3000,
+        sideGlowEnabled: true,
+        interruptEnabled: false, // <-- Added field
+        idle: { pool: ["oneTicketPlease"], minDelay: 4000, maxDelay: 8000 }
+    },
+    "333": {
+        timerLength: 10,
+        defaultAnimation: "iCouldDoThat",
+        endAnimation: "iCouldDoThatFail",
+        endAnimationTime: 5000,
+        sideGlowEnabled: false,
+        interruptEnabled: true,          // <-- Enabled here
+        interruptAnimation: "iCouldDoThatSuccess",   // <-- Added optional animation
+        interruptAnimationTime: 5000,    // <-- Added animation duration
+        idle: { pool: ["iCouldDoThat"], minDelay: 4000, maxDelay: 8000 }
     },
     "444": {
-        timerLength: 10,
-        defaultAnimation: "textPulse",
-        endAnimation: "eyeOpen",
-        endAnimationTime: 2000,
-        idle: {
-            pool: ["eat", "eyeOpen"],
-            minDelay: 4000,
-            maxDelay: 8000
-        }
+        timerLength: 60,
+        defaultAnimation: "deadlyDinner",
+        endAnimation: "deadlyDinnerEnd",
+        endAnimationTime: 9000,
+        sideGlowEnabled: false,
+        interruptEnabled: false, // <-- Added field
+        idle: { pool: ["deadlyDinner"], minDelay: 4000, maxDelay: 8000 }
     }
 };
 
@@ -84,6 +102,9 @@ function clearIdleTimeout() {
 ========================================================= */
 function triggerSideGlow(e) {
     if (!e || !e.key) return;
+    
+    const mode = state.currentMode;
+    if (!mode?.sideGlowEnabled) return;
     
     const keyLower = e.key.toLowerCase();
     const codeLower = e.code.toLowerCase();
@@ -131,11 +152,7 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
     let i = 0;
 
     function renderFrame(frame) {
-        screen.textContent = applyFrameMargins(
-            frame.content,
-            anim.margin,
-            frame.margin
-        );
+        screen.textContent = frame.content;
     }
 
     function scheduleNext(delay, fn) {
@@ -173,10 +190,12 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
 
         if (i >= anim.frames.length) {
             i = 0;
-
             if (onCompleteCycle) {
-                scheduleNext(delay, onCompleteCycle);
-                return;
+                // Execute lifecycle hooks safely as side effects 
+                // without cutting off the ongoing animation loop execution path
+                setTimeout(() => {
+                    if (state.animToken === token) onCompleteCycle();
+                }, delay);
             }
         }
 
@@ -217,26 +236,41 @@ function startDefaultOrIdleCycle() {
    TIMER CONTROL
 ========================================================= */
 function startTimer(seconds) {
+	state.sequenceToken++;
     killAllActiveLoops();
     clearIdleTimeout();
+    
+    if (state.animTimeout) {
+		clearTimeout(state.animTimeout);
+		state.animTimeout = null;
+	}
+
+    if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+    }
+
     state.owner = "timer";
     state.currentAnimName = "NONE (TIMER RUNNING)";
     updateDebug();
 
     let count = seconds;
-    screen.textContent = render(String(count).padStart(2, "0"));
+    screen.textContent = render(String(count).padStart(1, "0"));
 
-    let timerInterval = setInterval(async () => {
+    state.timerInterval = setInterval(async () => {
         if (state.owner !== "timer") {
-            clearInterval(timerInterval);
+            clearInterval(state.timerInterval);
+            state.timerInterval = null;
             return;
         }
 
         count--;
+
         if (count > 0) {
-            screen.textContent = render(String(count).padStart(2, "0"));
+            screen.textContent = render(String(count).padStart(1, "0"));
         } else {
-            clearInterval(timerInterval);
+            clearInterval(state.timerInterval);
+            state.timerInterval = null;
             await runEndSequence();
         }
     }, 1000);
@@ -246,6 +280,7 @@ function startTimer(seconds) {
    SEQUENCING & ROUTING TRANSITIONS
 ========================================================= */
 async function changeStateWithTransition(nextState, actionCallback) {
+	state.sequenceToken++;
     killAllActiveLoops();
     clearIdleTimeout();
     state.owner = "transition";
@@ -260,23 +295,60 @@ async function changeStateWithTransition(nextState, actionCallback) {
     state.owner = nextState;
     actionCallback();
     updateDebug();
+    
+    return state.sequenceToken;
 }
 
 async function runEndSequence() {
-    await changeStateWithTransition("end", () => {
+    // REMOVE THIS LINE: const token = ++state.sequenceToken;
+
+    // CAPTURE THE RETURNED TOKEN HERE INSTEAD
+    const token = await changeStateWithTransition("end", () => {
+
         const mode = state.currentMode;
         const anim = mode.endAnimation;
         const duration = mode.endAnimationTime;
         const startTime = Date.now();
 
         playEngineAnimation(anim, "end", () => {
+            if (state.sequenceToken !== token) return;
+
             if (Date.now() - startTime >= duration) {
                 startDefaultOrIdleCycle();
             }
         });
-        
+
         state.animTimeout = setTimeout(() => {
+            if (state.sequenceToken !== token) return;
             if (state.owner === "end") {
+                startDefaultOrIdleCycle();
+            }
+        }, duration);
+    });
+}
+
+async function runInterruptSequence() {
+    if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+    }
+
+    const token = await changeStateWithTransition("interrupt", () => {
+        const mode = state.currentMode;
+        const anim = mode.interruptAnimation || mode.defaultAnimation;
+        const duration = mode.interruptAnimationTime || 2000;
+        const startTime = Date.now();
+
+        playEngineAnimation(anim, "interrupt", () => {
+            if (state.sequenceToken !== token) return;
+            if (Date.now() - startTime >= duration) {
+                startDefaultOrIdleCycle();
+            }
+        });
+
+        state.animTimeout = setTimeout(() => {
+            if (state.sequenceToken !== token) return;
+            if (state.owner === "interrupt") {
                 startDefaultOrIdleCycle();
             }
         }, duration);
@@ -296,13 +368,22 @@ function initDefaultMode() {
 async function handleActionTrigger(eventObj = null) {
     if (state.transitionActive) return;
 
+	// Prevent new timer from starting if in end animation
+	if (state.owner === "end" || state.owner === "interrupt") return;
+	
+    // Intercept active timer if the current mode supports it
+    if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
+        await runInterruptSequence();
+        return;
+    }
+
     const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end");
 
     if (eventObj && isInitialActivationPress) {
         triggerSideGlow(eventObj);
     }
 
-    if (state.owner === "end") {
+    if (state.owner === "end" || state.owner === "interrupt") {
         await changeStateWithTransition("timer", () => {
             startTimer(state.currentMode.timerLength);
         });
@@ -317,6 +398,7 @@ async function handleActionTrigger(eventObj = null) {
 }
 
 async function forceSwitchMode(configKey) {
+	state.sequenceToken++;
     killAllActiveLoops(); 
     clearIdleTimeout();
     state.owner = "transition";
@@ -336,19 +418,6 @@ async function forceSwitchMode(configKey) {
 function resetPassword() {
     state.passwordBuffer = [];
     updateDebug();
-}
-
-function applyFrameMargins(content, globalMargin, frameMargin) {
-    const top = (globalMargin?.top || 0) + (frameMargin?.top || 0);
-    const left = (globalMargin?.left || 0) + (frameMargin?.left || 0);
-    const lines = content.split("\n");
-    const out = [];
-
-    for (let i = 0; i < top; i++) out.push("");
-    for (const line of lines) {
-        out.push(" ".repeat(left) + line);
-    }
-    return out.join("\n");
 }
 
 /* =========================================================

@@ -6,9 +6,27 @@ FILE: index.html
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Terminal Countdown</title>
+<title></title>
 
+<!-- Mobile viewport -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<!-- PWA / standalone app behavior -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- Status bar appearance (iOS) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- App title when saved -->
+<meta name="apple-mobile-web-app-title" content="Terminal Countdown">
+<meta name="application-name" content="Terminal Countdown">
+
+<!-- Theme / browser chrome color -->
+<meta name="theme-color" content="#000000">
+
+<!-- Disable phone number auto-linking -->
+<meta name="format-detection" content="telephone=no">
 
 <style>
 html, body {
@@ -42,18 +60,22 @@ html, body {
 
 /* ASCII screen */
 #screen {
-    width: 100%;
-    height: 100%;
-    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
     white-space: pre;
     font-family: monospace;
     color: inherit;
     user-select: none;
-    
-    transform-origin: top left;
-    
-    /* THIS is your new "font scale" */
-    font-size: 45px; /* base */
+
+    font-size: 45px;
+    line-height: 1;
+
+    margin: 0;
+    padding: 0;
 
     text-shadow:
         0 0 0.5vh currentColor,
@@ -192,117 +214,211 @@ animationName: {
 
 export const animations = {
 
-    eat: {
+    oneTicketPlease: {
 
         margin: {
-            top: 2,
-            left: 8
+            top: 0,
+            left: 3
         },
 
         frames: [
 
             {
-                hold: 2180,
+				hold: 1000,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"  _     _    █   █   █   █   █   █   █   █",
+					" | ||\\||_",
+					" (_)| \\|_",
+					" _____   _    ____    _  __   _____  _____",
+					"/__ __\\ / \\  /   _\\  / |/ /  /  __/ /__ __\\",
+					"  / \\   | |  |  /    |   /   |  \\     / \\  ",
+					"  | |   | |  |  \\__  |   \\   |  /_    | |  ",
+					"  \\_/   \\_/  \\____/  \\_|\\_\\  \\____\\   \\_/  ",
+					"                       _     _  _  _  _  ",
+					"                      |_)|  |_ |_||_ |_ |",
+					"  █   █   █   █   █   |  |_ |_ | | _)|_ .",
+					].join("\n")
+								}
+							]
+						},
+						
+						
+	iCouldDoThat: {
 
-                margin: {
-                    top: 0,
-                    left: 0
-                },
+        margin: {
+            top: 0,
+            left: 3
+        },
 
-                content: [
-                    "                        ",
-                    "██████            ██████",
-                    "                        ",
-                    "█                      █",
-                    "████████████████████████",
-                    "█                      █"
-                ].join("\n")
-            },
+        frames: [
 
             {
-                hold: 180,
+				hold: 1000,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+				
+					"           __  _          __     __   _     ",
+					"     |    /   / \\ | | |   | \\    | \\ / \\    ",
+					"     |    \\__ \\_/ \\_/ |__ |_/    |_/ \\_/    ",
+					"                   ",
+					"                   ",
+					" :::::::::::  ::   .:     :::.    :::::::::: ",
+					" ;;;;;;;'''' ,;;   ;;,    ;;`;;   ;;;;;;;''' ",
+					"     [[     ,[[[,,,[[[   ,[[ '[[,     [[     ",
+					"     $$     \"$$$\"\"\"$$$  c$$$cc$$$c    $$     ",
+					"     88,     888   \"88o  888   888,   88,    ",
+					"     MMM     MMM    YMM  YMM   \"\"`    MMM    ",
+					
+					].join("\n")
+								}
+							]
+						},
+						
+	deadlyDinner: {
 
-                margin: {
-                    top: 1,
-                    left: 2
-                },
+        margin: {
+            top: 0,
+            left: 2
+        },
 
-                content: [
-                    "██████                  ",
-                    "██████            ██████",
-                    "                        ",
-                    "█                      █",
-                    "████████████████████████",
-                    "█                      █"
-                ].join("\n")
-            },
+        frames: [
+
             
-            {
-                hold: 180,
+								{
+				hold: 1000000,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"______  _____   ___  ______  _           ",
+					"|  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
+					"| | | || |__  / /_\\ \\| | | || |   █  █  █",
+					"| | | ||  __| |  _  || | | || |   \\█████/",
+					"| |/ / | |___ | | | || |/ / | |____  █   ",
+					"|___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
+					"______  _____ _   _  _   _  _____ ___█__ ",
+					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
+					"| | | |  | | |  \\| ||  \\| || |__  | |█/ /",
+					"| | | |  | | | . ` || . ` ||  __| |  █ / ",
+					"| |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
+					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
+					].join("\n")
+								}
+							]
+					},
+					
+					
+	iCouldDoThatSuccess: {
 
-                margin: {
-                    top: 0,
-                    left: 0
-                },
+        margin: {
+            top: 0,
+            left: 2
+        },
 
-                content: [
-                    "███     ███     ███",
-                    "███     ███     ███",
-                    "███     ███     ███"
-                ].join("\n")
-            },
+        frames: [
 
-            {
-                hold: 180,
-
-                margin: {
-                    top: 1,
-                    left: 2
-                },
-
-                content: [
-                    " ███   ███   ███ ",
-                    "█████████████████",
-                    " ███   ███   ███ "
-                ].join("\n")
-            },
             
-            {
-                hold: 180,
+								{
+				hold: 1000000,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"               ()            ()              ",
+					"                \\    ,-.     /     _         ",
+					"                 \\  |   |   /     / \\        ",
+					"                  \\  `-'   /     _|_|_       ",
+					"                   \\,----,/     / \\ / \\      ",
+					"                    |    |     _|_|_|_|_     ",
+					"                    |    |    / \\ / \\ / \\    ",
+					"                    |    |    |_| |_| |_|    ",
+					"█████████████████████████████████████████████",
+					"                                             ",
+					"                                             "
+					].join("\n")
+								}
+							]
+					},
+					
+	iCouldDoThatFail: {
 
-                margin: {
-                    top: 0,
-                    left: 0
-                },
+        margin: {
+            top: 0,
+            left: 2
+        },
 
-                content: [
-                    "███     ███     ███",
-                    "███     ███     ███",
-                    "███     ███     ███"
-                ].join("\n")
-            },
+        frames: [
 
-            {
-                hold: 180,
-
-                margin: {
-                    top: 1,
-                    left: 2
-                },
-
-                content: [
-                    " ███   ███   ███ ",
-                    "█████████████████",
-                    " ███   ███   ███ "
-                ].join("\n")
-            }
-        ]
-    },
+            
+								{
+				hold: 500,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"                     \"                       ",
+					"                  \"      \"                   ",
+					"                     ,-.   \"                 ",
+					"            ()____  |   |                    ",
+					"          ___     \\  `-'            /\\       ",
+					"         <___|     \\,----,   ()    / /       ",
+					"       _     /\\     |    |\\  /   _ \\/   _    ",
+					"      / \\    \\ \\    |    | \\/   / \\    / \\   ",
+					"      | |     \\/    |    |      | |    | |   ",
+					"█████████████████████████████████████████████",
+					"                                             "
+					].join("\n")
+								},
+								
+								{
+				hold: 500,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"                                             ",
+					"                     \"  \"                    ",
+					"                   \" ,-.                   ",
+					"            ()____  |   | \"                   ",
+					"          ___     \\  `-'            /\\       ",
+					"         <___|     \\,----,   ()    / /       ",
+					"       _     /\\     |    |\\  /   _ \\/   _    ",
+					"      / \\    \\ \\    |    | \\/   / \\    / \\   ",
+					"      | |     \\/    |    |      | |    | |   ",
+					"█████████████████████████████████████████████",
+					"                                             "
+					].join("\n")
+								}
+							]
+					},
 
     eyesClosed: {
 
         margin: {
-            top: 4,
+            top: 6,
             left: 13
         },
 
@@ -317,8 +433,10 @@ export const animations = {
                 },
 
                 content: [
-                    "                  ",
-                    "██████      ██████",
+					"                      ",
+					"                      ",
+                    "                      ",
+                    "████████      ████████",
                 ].join("\n")
             }
         ]
@@ -328,14 +446,14 @@ export const animations = {
     eyeOpen: {
 
         margin: {
-            top: 4,
+            top: 5,
             left: 13
         },
 
         frames: [
 
             {
-                hold: 1800,
+                hold: 2200,
 
                 margin: {
                     top: 0,
@@ -343,8 +461,10 @@ export const animations = {
                 },
 
                 content: [
-                    "  ███             ",
-                    "  ███       ██████",
+                	"                      ",
+                    "     ███              ",
+                    "     ███              ",
+                    "     ███      ████████",
                 ].join("\n")
             }
         ]
@@ -358,7 +478,7 @@ FILE: js/effects.js
 ================================================================================
 
 const crt = document.getElementById("crt");
-const layer = document.getElementById("layer");
+   const layer = document.getElementById("layer");
 
 function random(min, max) {
   return Math.random() * (max - min) + min;
@@ -426,13 +546,123 @@ FILE: js/font.js
 ================================================================================
 
 
-
-export const TOP_MARGIN = 0.4;
-export const LEFT_MARGIN = 13;
-export const CHAR_SPACING = 2;
+export const CHAR_SPACING = 1;
 
 
 export const FONT = {
+
+    "0": [
+        " .d8888b. ",
+        "d88P  Y88b",
+        "888    888",
+        "888    888",
+        "888    888",
+        "888    888",
+        "Y88b  d88P",
+        " \"Y8888P\" "
+    ],
+
+    "1": [
+        "   d888   ",
+        "  d8888   ",
+        "    888   ",
+        "    888   ",
+        "    888   ",
+        "    888   ",
+        "    888   ",
+        " 888888888"
+    ],
+
+    "2": [
+        " .d8888b. ",
+        "d88P  Y88b",
+        "       888",
+        "     .d88P",
+        " .od888P\" ",
+        "d88P\"     ",
+        "888\"      ",
+        "888888888 "
+    ],
+
+    "3": [
+        " .d8888b. ",
+        "d88P  Y88b",
+        "     .d88P",
+        "    8888\" ",
+        "     \"Y8b.",
+        "888    888",
+        "Y88b  d88P",
+        " \"Y8888P\" "
+    ],
+
+    "4": [
+        "    d8888 ",
+        "   d8P888 ",
+        "  d8P 888 ",
+        " d8P  888 ",
+        "d88   888 ",
+        "8888888888",
+        "      888 ",
+        "      888 "
+    ],
+
+    "5": [
+        "888888888 ",
+        "888       ",
+        "888       ",
+        "8888888b. ",
+        "     \"Y88b",
+        "       888",
+        "Y88b  d88P",
+        " \"Y8888P\" "
+    ],
+
+    "6": [
+        " .d8888b. ",
+        "d88P  Y88b",
+        "888       ",
+        "888d888b. ",
+        "888P \"Y88b",
+        "888    888",
+        "Y88b  d88P",
+        " \"Y8888P\" "
+    ],
+
+    "7": [
+        "8888888888",
+        "      d88P",
+        "     d88P ",
+        "    d88P  ",
+        "   d88P   ",
+        "  d88P    ",
+        " d88P     ",
+        "d88P      "
+    ],
+
+    "8": [
+        " .d8888b. ",
+        "d88P  Y88b",
+        "Y88b. d88P",
+        " \"Y88888\" ",
+        ".d8P\"\"Y8b.",
+        "888    888",
+        "Y88b  d88P",
+        " \"Y8888P\" "
+    ],
+
+    "9": [
+        " .d8888b. ",
+        "d88P  Y88b",
+        "888    888",
+        "Y88b. d888",
+        " \"Y888P888",
+        "       888",
+        "Y88b  d88P",
+        " \"Y8888P\" "
+    ]
+};
+
+export const FONT_2 = {
 
     "0": [
         "  ██████  ",
@@ -474,9 +704,9 @@ export const FONT = {
     ],
 
     "3": [
-        " ████████ ",
+        "  ███████ ",
+        " █     ███",
         "█       ██",
-        "        ██",
         "      ███ ",
         "    ████  ",
         "      ███ ",
@@ -562,31 +792,7 @@ export const FONT = {
         "█       ██",
         " █     ██ ",
         "  ██████  "
-    ],
-    "fork": [
-    "██  ██    ",
-    "██  ██    ",
-    "██  ██    ",
-    "██  ██    ",
-    "████████  ",
-    "   ██     ",
-    "   ██     ",
-    "   ██     ",
-    "   ██     ",
-    "   ██     "
-],
-"spoon": [
-    "   ██     ",
-    "  ████    ",
-    " ██████   ",
-    "████████   ",
-    "████████   ",
-    " ██████   ",
-    "  ████    ",
-    "   ██     ",
-    "   ██     ",
-    "   ██     "
-]
+    ]
 };
 
 --- EOF ---
@@ -666,7 +872,9 @@ let state = {
     shiftDown: false,
     passwordBuffer: [], // Used as a sliding array queue (max 3 items)
     countdownInterval: null,
+    timerInterval: null,
     animTimeout: null,
+    sequenceToken: 0,
     currentMode: null,
     currentAnimName: null,
     transitionActive: false // Flag to block conflicting inputs during transition animations
@@ -674,31 +882,47 @@ let state = {
 
 const MODES = {
     "111": {
-        timerLength: 6,
-        defaultAnimation: "eyesClosed", // Baseline single animation
+        timerLength: 500,
+        defaultAnimation: "eyesClosed",
         endAnimation: "eyesClosed",
         endAnimationTime: 3000,
-        idle: {
-            pool: ["eyeOpen"], // Idle choices
-            minDelay: 2000,             // Countdown range to trigger an idle breakout
-            maxDelay: 4000
-        }
+        sideGlowEnabled: false,
+        interruptEnabled: false, // <-- Added field
+        idle: { pool: ["eyeOpen"], minDelay: 3000, maxDelay: 10000 }
     },
-    "444": {
-        timerLength: 10,
-        defaultAnimation: "textPulse",
+    "222": {
+        timerLength: 5,
+        defaultAnimation: "oneTicketPlease",
         endAnimation: "eyeOpen",
         endAnimationTime: 2000,
-        idle: {
-            pool: ["eat", "eyeOpen"],
-            minDelay: 4000,
-            maxDelay: 8000
-        }
+        sideGlowEnabled: true,
+        interruptEnabled: false, // <-- Added field
+        idle: { pool: ["oneTicketPlease"], minDelay: 4000, maxDelay: 8000 }
+    },
+    "333": {
+        timerLength: 10,
+        defaultAnimation: "iCouldDoThat",
+        endAnimation: "iCouldDoThatFail",
+        endAnimationTime: 4000,
+        sideGlowEnabled: false,
+        interruptEnabled: true,          // <-- Enabled here
+        interruptAnimation: "iCouldDoThatSuccess",   // <-- Added optional animation
+        interruptAnimationTime: 4000,    // <-- Added animation duration
+        idle: { pool: ["iCouldDoThat"], minDelay: 4000, maxDelay: 8000 }
+    },
+    "444": {
+        timerLength: 60,
+        defaultAnimation: "deadlyDinner",
+        endAnimation: "eyeOpen",
+        endAnimationTime: 2000,
+        sideGlowEnabled: false,
+        interruptEnabled: false, // <-- Added field
+        idle: { pool: ["deadlyDinner"], minDelay: 4000, maxDelay: 8000 }
     }
 };
 
 startGlitch(crt);
-setupDebugOverlay();
+//setupDebugOverlay();
 
 /* =========================================================
    HARD OVERRIDE AND CLEANUP
@@ -722,6 +946,9 @@ function clearIdleTimeout() {
 ========================================================= */
 function triggerSideGlow(e) {
     if (!e || !e.key) return;
+    
+    const mode = state.currentMode;
+    if (!mode?.sideGlowEnabled) return;
     
     const keyLower = e.key.toLowerCase();
     const codeLower = e.code.toLowerCase();
@@ -758,36 +985,63 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
     const anim = animations[name];
     if (!anim) return;
 
-    // Halt only active frames, do NOT kill the idle breakdown intervals!
-    killAllActiveLoops();
-    
+    // Token system prevents cross-animation interference
+    const token = Symbol(name);
+    state.animToken = token;
+
     state.owner = targetOwnerState;
     state.currentAnimName = name;
-    updateDebug();
+    //updateDebug();
 
     let i = 0;
 
+    function renderFrame(frame) {
+        screen.textContent = frame.content;
+    }
+
+    function scheduleNext(delay, fn) {
+        state.animTimeout = setTimeout(() => {
+            if (state.animToken !== token) return;
+            fn();
+        }, delay);
+    }
+
+    // SINGLE FRAME HANDLING
+    if (anim.frames.length === 1) {
+        const frame = anim.frames[0];
+
+        renderFrame(frame);
+
+        const hold = frame.hold ?? 0;
+
+        if (onCompleteCycle) {
+            scheduleNext(hold, onCompleteCycle);
+        }
+
+        return;
+    }
+
+    // MULTI FRAME LOOP
     function loop() {
-        if (state.owner !== targetOwnerState || state.currentAnimName !== name) return;
+        if (state.animToken !== token) return;
 
         const frame = anim.frames[i];
-        
-        screen.textContent = applyFrameMargins(
-            frame.content,
-            anim.margin,
-            frame.margin
-        );
+        renderFrame(frame);
+
+        const delay = frame.hold ?? 100;
 
         i++;
+
         if (i >= anim.frames.length) {
             i = 0;
+
             if (onCompleteCycle) {
-                onCompleteCycle();
+                scheduleNext(delay, onCompleteCycle);
                 return;
             }
         }
 
-        state.animTimeout = setTimeout(loop, frame.hold);
+        scheduleNext(delay, loop);
     }
 
     loop();
@@ -824,26 +1078,41 @@ function startDefaultOrIdleCycle() {
    TIMER CONTROL
 ========================================================= */
 function startTimer(seconds) {
+	state.sequenceToken++;
     killAllActiveLoops();
     clearIdleTimeout();
+    
+    if (state.animTimeout) {
+		clearTimeout(state.animTimeout);
+		state.animTimeout = null;
+	}
+
+    if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+    }
+
     state.owner = "timer";
     state.currentAnimName = "NONE (TIMER RUNNING)";
     updateDebug();
 
     let count = seconds;
-    screen.textContent = render(String(count).padStart(2, "0"));
+    screen.textContent = render(String(count).padStart(1, "0"));
 
-    let timerInterval = setInterval(async () => {
+    state.timerInterval = setInterval(async () => {
         if (state.owner !== "timer") {
-            clearInterval(timerInterval);
+            clearInterval(state.timerInterval);
+            state.timerInterval = null;
             return;
         }
 
         count--;
+
         if (count > 0) {
-            screen.textContent = render(String(count).padStart(2, "0"));
+            screen.textContent = render(String(count).padStart(1, "0"));
         } else {
-            clearInterval(timerInterval);
+            clearInterval(state.timerInterval);
+            state.timerInterval = null;
             await runEndSequence();
         }
     }, 1000);
@@ -853,6 +1122,7 @@ function startTimer(seconds) {
    SEQUENCING & ROUTING TRANSITIONS
 ========================================================= */
 async function changeStateWithTransition(nextState, actionCallback) {
+	state.sequenceToken++;
     killAllActiveLoops();
     clearIdleTimeout();
     state.owner = "transition";
@@ -867,23 +1137,60 @@ async function changeStateWithTransition(nextState, actionCallback) {
     state.owner = nextState;
     actionCallback();
     updateDebug();
+    
+    return state.sequenceToken;
 }
 
 async function runEndSequence() {
-    await changeStateWithTransition("end", () => {
+    // REMOVE THIS LINE: const token = ++state.sequenceToken;
+
+    // CAPTURE THE RETURNED TOKEN HERE INSTEAD
+    const token = await changeStateWithTransition("end", () => {
+
         const mode = state.currentMode;
         const anim = mode.endAnimation;
         const duration = mode.endAnimationTime;
         const startTime = Date.now();
 
         playEngineAnimation(anim, "end", () => {
+            if (state.sequenceToken !== token) return;
+
             if (Date.now() - startTime >= duration) {
                 startDefaultOrIdleCycle();
             }
         });
-        
+
         state.animTimeout = setTimeout(() => {
+            if (state.sequenceToken !== token) return;
             if (state.owner === "end") {
+                startDefaultOrIdleCycle();
+            }
+        }, duration);
+    });
+}
+
+async function runInterruptSequence() {
+    if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+    }
+
+    const token = await changeStateWithTransition("interrupt", () => {
+        const mode = state.currentMode;
+        const anim = mode.interruptAnimation || mode.defaultAnimation;
+        const duration = mode.interruptAnimationTime || 2000;
+        const startTime = Date.now();
+
+        playEngineAnimation(anim, "interrupt", () => {
+            if (state.sequenceToken !== token) return;
+            if (Date.now() - startTime >= duration) {
+                startDefaultOrIdleCycle();
+            }
+        });
+
+        state.animTimeout = setTimeout(() => {
+            if (state.sequenceToken !== token) return;
+            if (state.owner === "interrupt") {
                 startDefaultOrIdleCycle();
             }
         }, duration);
@@ -903,13 +1210,19 @@ function initDefaultMode() {
 async function handleActionTrigger(eventObj = null) {
     if (state.transitionActive) return;
 
+    // Intercept active timer if the current mode supports it
+    if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
+        await runInterruptSequence();
+        return;
+    }
+
     const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end");
 
     if (eventObj && isInitialActivationPress) {
         triggerSideGlow(eventObj);
     }
 
-    if (state.owner === "end") {
+    if (state.owner === "end" || state.owner === "interrupt") {
         await changeStateWithTransition("timer", () => {
             startTimer(state.currentMode.timerLength);
         });
@@ -924,6 +1237,7 @@ async function handleActionTrigger(eventObj = null) {
 }
 
 async function forceSwitchMode(configKey) {
+	state.sequenceToken++;
     killAllActiveLoops(); 
     clearIdleTimeout();
     state.owner = "transition";
@@ -943,19 +1257,6 @@ async function forceSwitchMode(configKey) {
 function resetPassword() {
     state.passwordBuffer = [];
     updateDebug();
-}
-
-function applyFrameMargins(content, globalMargin, frameMargin) {
-    const top = (globalMargin?.top || 0) + (frameMargin?.top || 0);
-    const left = (globalMargin?.left || 0) + (frameMargin?.left || 0);
-    const lines = content.split("\n");
-    const out = [];
-
-    for (let i = 0; i < top; i++) out.push("");
-    for (const line of lines) {
-        out.push(" ".repeat(left) + line);
-    }
-    return out.join("\n");
 }
 
 /* =========================================================
@@ -1070,7 +1371,7 @@ startDefaultOrIdleCycle();
 FILE: js/render.js
 ================================================================================
 
-import { FONT, TOP_MARGIN, LEFT_MARGIN, CHAR_SPACING } from "./font.js";
+import { FONT, CHAR_SPACING } from "./font.js";
 
 const FALLBACK_CHAR = " ";
 
@@ -1094,7 +1395,7 @@ function normalizeRow(row) {
     let out = "";
 
     for (const ch of row) {
-        out += (ch === " ") ? " " : RENDER_CHAR;
+        out += (ch === " ") ? " " : ch;
     }
 
     return out;
@@ -1110,16 +1411,9 @@ export function render(text) {
 
     const out = [];
 
-    /* top margin */
-    const topPad = Math.max(0, TOP_MARGIN);
-
-    for (let i = 0; i < topPad; i++) {
-        out.push("");
-    }
-
     for (let row = 0; row < h; row++) {
 
-        let line = " ".repeat(LEFT_MARGIN);
+        let line = "";
 
         for (let i = 0; i < chars.length; i++) {
 

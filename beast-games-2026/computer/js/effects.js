@@ -1,5 +1,5 @@
 const crt = document.getElementById("crt");
-const layer = document.getElementById("layer");
+   const layer = document.getElementById("layer");
 
 function random(min, max) {
   return Math.random() * (max - min) + min;

@@ -1,4 +1,4 @@
-import { FONT, TOP_MARGIN, LEFT_MARGIN, CHAR_SPACING } from "./font.js";
+import { FONT, CHAR_SPACING } from "./font.js";
 
 const FALLBACK_CHAR = " ";
 
@@ -22,7 +22,7 @@ function normalizeRow(row) {
     let out = "";
 
     for (const ch of row) {
-        out += (ch === " ") ? " " : RENDER_CHAR;
+        out += (ch === " ") ? " " : ch;
     }
 
     return out;
@@ -38,16 +38,9 @@ export function render(text) {
 
     const out = [];
 
-    /* top margin */
-    const topPad = Math.max(0, TOP_MARGIN);
-
-    for (let i = 0; i < topPad; i++) {
-        out.push("");
-    }
-
     for (let row = 0; row < h; row++) {
 
-        let line = " ".repeat(LEFT_MARGIN);
+        let line = "";
 
         for (let i = 0; i < chars.length; i++) {
 
