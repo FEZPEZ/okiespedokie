@@ -7,13 +7,13 @@ export function startGlitch(crt) {
     function loop() {
 
         crt.style.transform = `
-            translate(${random(-1, 1)}px, ${random(-2, 2)}px)
-            rotate(${random(-0.2, 0.2)}deg)
-            scale(${random(0.997, 1.005)})
+            translate(${random(-0.1, 0.1)}px, ${random(-0.5, 0.5)}px)
+            rotate(${random(-0.001, 0.001)}deg)
+            scale(${random(0.998, 1.002)})
         `;
 
         crt.style.filter = `
-            hue-rotate(${random(-5, 5)}deg)
+            hue-rotate(${random(-4, 4)}deg)
             contrast(${random(0.99, 1.03)})
             saturate(${random(0.92, 1.12)})
         `;

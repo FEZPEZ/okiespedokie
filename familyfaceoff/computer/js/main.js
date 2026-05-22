@@ -37,14 +37,24 @@ let state = {
 };
 
 const MODES = {
+	"000": {
+        timerLength: 20,
+        defaultAnimation: "blank",
+        endAnimation: "blank",
+        endAnimationTime: 3000,
+        sideGlowEnabled: false,
+        interruptEnabled: false, // <-- Added field
+        idle: { pool: ["blank"], minDelay: 9999999, maxDelay: 9999999 }
+    },
     "111": {
         timerLength: 20,
+        introAnimation: "OSBootup",
         defaultAnimation: "familyFaceOff",
         endAnimation: "familyFaceOff",
         endAnimationTime: 3000,
         sideGlowEnabled: false,
         interruptEnabled: false, // <-- Added field
-        idle: { pool: ["familyFaceOff"], minDelay: 3000, maxDelay: 10000 }
+        idle: { pool: ["familyFaceOff"], minDelay: 9999999, maxDelay: 9999999 }
     },
     "222": {
         timerLength: 3,
@@ -74,6 +84,15 @@ const MODES = {
         sideGlowEnabled: false,
         interruptEnabled: false, // <-- Added field
         idle: { pool: ["deadlyDinner"], minDelay: 4000, maxDelay: 8000 }
+    },
+    "999": { // title screen, NO LOAD
+        timerLength: 20,
+        defaultAnimation: "familyFaceOff",
+        endAnimation: "familyFaceOff",
+        endAnimationTime: 3000,
+        sideGlowEnabled: false,
+        interruptEnabled: false, // <-- Added field
+        idle: { pool: ["familyFaceOff"], minDelay: 3000, maxDelay: 10000 }
     }
 };
 
@@ -207,6 +226,18 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
 
 function startDefaultOrIdleCycle() {
     const mode = state.currentMode;
+    
+    // Check if an intro animation exists and has not yet been played
+    if (mode.introAnimation && !mode.introPlayed) {
+        // Mark as played instantly so recursive loops or manual overrides don't re-trigger it
+        mode.introPlayed = true;
+
+        // Play intro once, then transition naturally to the continuous default cycle on completion
+        playEngineAnimation(mode.introAnimation, "intro", () => {
+            startDefaultOrIdleCycle();
+        });
+        return;
+    }
     
     // 1. Play standard baseline loop
     playEngineAnimation(mode.defaultAnimation, "default");
@@ -357,7 +388,8 @@ async function runInterruptSequence() {
 
 function initDefaultMode() {
     if (!state.currentMode) {
-        const initialKey = Object.keys(MODES)[0];
+        // Change this from Object.keys(MODES)[0] to explicitly target "000"
+        const initialKey = "000";
         state.currentMode = structuredClone(MODES[initialKey]);
     }
 }
@@ -377,7 +409,7 @@ async function handleActionTrigger(eventObj = null) {
         return;
     }
 
-    const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end");
+    const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end" || state.owner === "intro");
 
     if (eventObj && isInitialActivationPress) {
         triggerSideGlow(eventObj);
@@ -390,7 +422,7 @@ async function handleActionTrigger(eventObj = null) {
         return;
     }
 
-    if (state.owner !== "default" && state.owner !== "idle") return;
+    if (state.owner !== "default" && state.owner !== "idle" && state.owner !== "intro") return;
 
     await changeStateWithTransition("timer", () => {
         startTimer(state.currentMode.timerLength);
