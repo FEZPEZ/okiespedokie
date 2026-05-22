@@ -10,7 +10,7 @@ if (!transitionLayer) {
 export const TRANSITION_CONFIG = {
     lineThickness: 16,
     lineSpeed: 25000, // px per sec
-    color: "#00ffaa"
+    color: "#7CFF5B"
 };
 
 Object.assign(transitionLayer.style, {
