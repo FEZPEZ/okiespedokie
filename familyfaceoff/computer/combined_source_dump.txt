@@ -234,11 +234,104 @@ export const animations = {
 			
 				content: [
 					""
+							] 
+							} 
 							]
 						},
 						
+						
 
 
+	familyFaceOffTemplate: {
+
+        margin: {
+            top: 0,
+            left: 3
+        },
+
+        frames: [
+								
+								{
+				hold: 200,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" ?           ?           ?           ?          ",
+					"         ?           ?           ?           ?  ",
+					"    _____ _____  ?  _____  .__ .__    ___.__.   ",
+					" ?_/ ____\\\\__  \\   /     \\ |__||  |  <   |  |   ",
+					"  \\   __\\? / __ \\_|  Y Y  \\|  ||  |   \\___  |?  ",
+					"   |  |   (____  /|__|_|  /|  ||  |__ / ____|   ",
+					" ? |__|      ? \\/       \\/ |__||____/?\\/        ",
+					"         ?           ?           ?           ?  ",
+					"     ?   ___     ?           ?           ?      ",
+					" ?      |  _|___ ___ ___ ? ___ ___ ___          ",
+					"        |  _| .'|  _| -_|_| . |  _|  _|      ?  ",
+					"     ?  |_| |__,|___|___| |___|  _|  _|  ?      ",
+					" ?           ?           ?    |_| |_|?          ",
+					"         ?           ?           ?           ?  ",
+					"     ?           ?           ?           ?      "
+					].join("\n")
+								},
+								{
+				hold: 200,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"         ?           ?           ?           ?  ",
+					"     ?           ?           ?           ?      ",
+					" ?  _____ _____     _____  .__ .__   ?___.__.   ",
+					"  _/ ____\\\\__  \\   /     \\ |__||  |  <   |  |?  ",
+					"  \\   __\\  / __ \\_|  Y Y  \\|  ||  |   \\___  |   ",
+					" ? |  |   (____  /|__|_|  /|  ||  |__?/ ____|   ",
+					"   |__|  ?     \\/    ?  \\/ |__||____/ \\/     ?  ",
+					"     ?           ?           ?           ?      ",
+					" ?       ___ ?           ?           ?          ",
+					"        |  _|___ ___ ___   ___ ___ ___       ?  ",
+					"     ?  |  _| .'|  _| -_|_| . |  _|  _|  ?      ",
+					" ?      |_| |__,|___|___|?|___|  _|  _|         ",
+					"         ?           ?        |_|?|_|        ?  ",
+					"     ?           ?           ?           ?      ",
+					" ?           ?           ?           ?          "
+					].join("\n")
+								},
+								{
+				hold: 200,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"     ?           ?           ?           ?      ",
+					" ?           ?           ?           ?          ",
+					"    _____?_____     _____  .__ .__    ___.__.?  ",
+					"  _/ ____\\\\__  \\ ? /     \\ |__||  |  <   |  |   ",
+					" ?\\   __\\  / __ \\_|  Y Y  \\|  ||  |  ?\\___  |   ",
+					"   |  |  ?(____  /|__|_|  /|  ||  |__ / ____|?  ",
+					"   |__|        \\/?      \\/ |__||____/ \\/ ?      ",
+					" ?           ?           ?           ?          ",
+					"         ___         ?           ?           ?  ",
+					"     ?  |  _|___ ___ ___   ___ ___ ___   ?      ",
+					" ?      |  _| .'|  _| -_|_| . |  _|  _|         ",
+					"        |_| |__,|___|___| |___|  _|  _|      ?  ",
+					"     ?           ?           ?|_| |_|    ?      ",
+					" ?           ?           ?           ?          ",
+					"         ?           ?           ?           ?  "
+					].join("\n")
+								},
+							]
+						},
+						
 	familyFaceOff: {
 
         margin: {
@@ -249,7 +342,7 @@ export const animations = {
         frames: [
 								
 								{
-				hold: 1000,
+				hold: 200,
 			
 				margin: {
 					top: 0,
@@ -257,19 +350,75 @@ export const animations = {
 				},
 			
 				content: [
-					"   _____ _____     _____  .__ .__    ___.__.  ",
-					" _/ ____\\\\__  \\   /     \\ |__||  |  <   |  |",
-					" \\   __\\  / __ \\_|  Y Y  \\|  ||  |   \\___  |",
-					"  |  |   (____  /|__|_|  /|  ||  |__ / ____|",
-					"  |__|        \\/       \\/ |__||____/ \\/     ",
-					"          ",
-					"       ___  ",
-					"      |  _| ___  ___ ___  ___  ___  ___ ",
-					"      |  _|| .'||  _| -_|| . ||  _||  _|",
-					"      |_|  |__,||___|___||___||  _||  _|",
-					"                              |_|  |_|      "
+					" ?           ?           ?           ?          ",
+					"         ?           ?           ?           ?  ",
+					"    _____ _____  ?  _____  .__ .__    ___.__.   ",
+					" ?_/ ____\\\\__  \\   /     \\ |__||  |  <   |  |   ",
+					"  \\   __\\? / __ \\_|  Y Y  \\|  ||  |   \\___  |?  ",
+					"   |  |   (____  /|__|_|  /|  ||  |__ / ____|   ",
+					" ? |__|      ? \\/       \\/ |__||____/?\\/        ",
+					"         ?           ?           ?           ?  ",
+					"     ?   ___     ?           ?           ?      ",
+					" ?      |  _|___ ___ ___ ? ___ ___ ___          ",
+					"        |  _| .'|  _| -_|_| . |  _|  _|      ?  ",
+					"     ?  |_| |__,|___|___| |___|  _|  _|  ?      ",
+					" ?           ?           ?    |_| |_|?          ",
+					"         ?           ?           ?           ?  ",
+					"     ?           ?           ?           ?      "
 					].join("\n")
-								}
+								},
+								{
+				hold: 200,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"         ?           ?           ?           ?  ",
+					"     ?           ?           ?           ?      ",
+					" ?  _____ _____     _____  .__ .__   ?___.__.   ",
+					"  _/ ____\\\\__  \\   /     \\ |__||  |  <   |  |?  ",
+					"  \\   __\\  / __ \\_|  Y Y  \\|  ||  |   \\___  |   ",
+					" ? |  |   (____  /|__|_|  /|  ||  |__?/ ____|   ",
+					"   |__|  ?     \\/    ?  \\/ |__||____/ \\/     ?  ",
+					"     ?           ?           ?           ?      ",
+					" ?       ___ ?           ?           ?          ",
+					"        |  _|___ ___ ___   ___ ___ ___       ?  ",
+					"     ?  |  _| .'|  _| -_|_| . |  _|  _|  ?      ",
+					" ?      |_| |__,|___|___|?|___|  _|  _|         ",
+					"         ?           ?        |_|?|_|        ?  ",
+					"     ?           ?           ?           ?      ",
+					" ?           ?           ?           ?          "
+					].join("\n")
+								},
+								{
+				hold: 200,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"     ?           ?           ?           ?      ",
+					" ?           ?           ?           ?          ",
+					"    _____?_____     _____  .__ .__    ___.__.?  ",
+					"  _/ ____\\\\__  \\ ? /     \\ |__||  |  <   |  |   ",
+					" ?\\   __\\  / __ \\_|  Y Y  \\|  ||  |  ?\\___  |   ",
+					"   |  |  ?(____  /|__|_|  /|  ||  |__ / ____|?  ",
+					"   |__|        \\/?      \\/ |__||____/ \\/ ?      ",
+					" ?           ?           ?           ?          ",
+					"         ___         ?           ?           ?  ",
+					"     ?  |  _|___ ___ ___   ___ ___ ___   ?      ",
+					" ?      |  _| .'|  _| -_|_| . |  _|  _|         ",
+					"        |_| |__,|___|___| |___|  _|  _|      ?  ",
+					"     ?           ?           ?|_| |_|    ?      ",
+					" ?           ?           ?           ?          ",
+					"         ?           ?           ?           ?  "
+					].join("\n")
+								},
 							]
 						},
 						
@@ -401,7 +550,7 @@ export const animations = {
 
             
 								{
-				hold: 1000000,
+				hold: 2000,
 			
 				margin: {
 					top: 0,
@@ -422,7 +571,168 @@ export const animations = {
 					"| |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
 					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
 					].join("\n")
-								}
+								},
+								{
+				hold: 1000,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"______  _____   ___  ______  _           ",
+					"|  _  \\|  ___| / _ \\ |  _  \\| |   ▒  ▒  ▒",
+					"| | | || |__  / /_\\ \\| | | || |   ▒  ▒  ▒",
+					"| | | ||  __| |  _  || | | || |   \\▒▒▒▒▒/",
+					"| |/ / | |___ | | | || |/ / | |____  ▒   ",
+					"|___/  \\____/ \\_| |_/|___/  \\_____/  ▒   ",
+					"______  _____ _   _  _   _  _____ ___▒__ ",
+					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _▒_ \\",
+					"| | | |  | | |  \\| ||  \\| || |__  | |▒/ /",
+					"| | | |  | | | . ` || . ` ||  __| |  ▒ / ",
+					"| |/ /  _| |_| |\\  || |\\  || |___ | |▒ \\ ",
+					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|▒\\_|  ",
+					].join("\n")
+								},
+								{
+				hold: 2000,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"______  _____   ___  ______  _           ",
+					"|  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
+					"| | | || |__  / /_\\ \\| | | || |   █  █  █",
+					"| | | ||  __| |  _  || | | || |   \\█████/",
+					"| |/ / | |___ | | | || |/ / | |____  █   ",
+					"|___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
+					"______  _____ _   _  _   _  _____ ___█__ ",
+					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
+					"| | | |  | | |  \\| ||  \\| || |__  | |█/ /",
+					"| | | |  | | | . ` || . ` ||  __| |  █ / ",
+					"| |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
+					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
+					].join("\n")
+								},
+								{
+				hold: 70,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"______  _____   ___  ______  _           ",
+					"|  _  \\|  ___| / _ \\ |  _  \\| |   ░  ░  ░",
+					"| | | || |__  / /_\\ \\| | | || |   ░  ░  ░",
+					"| | | ||  __| |  _  || | | || |   \\░░░░░/",
+					"| |/ / | |___ | | | || |/ / | |____  ░   ",
+					"|___/  \\____/ \\_| |_/|___/  \\_____/  ░   ",
+					"______  _____ _   _  _   _  _____ ___░__ ",
+					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _░_ \\",
+					"| | | |  | | |  \\| ||  \\| || |__  | |░/ /",
+					"| | | |  | | | . ` || . ` ||  __| |  ░ / ",
+					"| |/ /  _| |_| |\\  || |\\  || |___ | |░ \\ ",
+					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|░\\_|  ",
+					].join("\n")
+								},
+								{
+				hold: 300,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"______  _____   ___  ______  _           ",
+					"|  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
+					"| | | || |__  / /_\\ \\| | | || |   █  █  █",
+					"| | | ||  __| |  _  || | | || |   \\█████/",
+					"| |/ / | |___ | | | || |/ / | |____  █   ",
+					"|___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
+					"______  _____ _   _  _   _  _____ ___█__ ",
+					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
+					"| | | |  | | |  \\| ||  \\| || |__  | |█/ /",
+					"| | | |  | | | . ` || . ` ||  __| |  █ / ",
+					"| |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
+					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
+					].join("\n")
+								},
+								{
+				hold: 20,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"______  _____   ___  ______  _           ",
+					"|  _  \\|  ___| / _ \\ |  _  \\| |   ░  ░  ░",
+					"| | | || |__  / /_\\ \\| | | || |   ░  ░  ░",
+					"| | | ||  __| |  _  || | | || |   \\░░░░░/",
+					"| |/ / | |___ | | | || |/ / | |____  ░   ",
+					"|___/  \\____/ \\_| |_/|___/  \\_____/  ░   ",
+					"______  _____ _   _  _   _  _____ ___░__ ",
+					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _░_ \\",
+					"| | | |  | | |  \\| ||  \\| || |__  | |░/ /",
+					"| | | |  | | | . ` || . ` ||  __| |  ░ / ",
+					"| |/ /  _| |_| |\\  || |\\  || |___ | |░ \\ ",
+					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|░\\_|  ",
+					].join("\n")
+								},
+								{
+				hold: 50,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"______  _____   ___  ______  _           ",
+					"|  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
+					"| | | || |__  / /_\\ \\| | | || |   █  █  █",
+					"| | | ||  __| |  _  || | | || |   \\█████/",
+					"| |/ / | |___ | | | || |/ / | |____  █   ",
+					"|___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
+					"______  _____ _   _  _   _  _____ ___█__ ",
+					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
+					"| | | |  | | |  \\| ||  \\| || |__  | |█/ /",
+					"| | | |  | | | . ` || . ` ||  __| |  █ / ",
+					"| |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
+					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
+					].join("\n")
+								},
+								{
+				hold: 10,
+			
+				margin: {
+					top: 0,
+					left: 1
+				},
+			
+				content: [
+					"______  _____   ___  ______  _           ",
+					"|  _  \\|  ___| / _ \\ |  _  \\| |   ░  ░  ░",
+					"| | | || |__  / /_\\ \\| | | || |   ░  ░  ░",
+					"| | | ||  __| |  _  || | | || |   \\░░░░░/",
+					"| |/ / | |___ | | | || |/ / | |____  ░   ",
+					"|___/  \\____/ \\_| |_/|___/  \\_____/  ░   ",
+					"______  _____ _   _  _   _  _____ ___░__ ",
+					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _░_ \\",
+					"| | | |  | | |  \\| ||  \\| || |__  | |░/ /",
+					"| | | |  | | | . ` || . ` ||  __| |  ░ / ",
+					"| |/ /  _| |_| |\\  || |\\  || |___ | |░ \\ ",
+					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|░\\_|  ",
+					].join("\n")
+								},
 							]
 					},
 					
@@ -763,6 +1073,543 @@ export const animations = {
             }
         ]
     },
+    
+    OSBootup: {
+
+        margin: {
+            top: 0,
+            left: 3
+        },
+
+        frames: [
+								
+								{
+				hold: 2000,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"█                                         ",
+					"█                                         ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 430,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"██                                        ",
+					"██                                        ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 100,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"███                                       ",
+					"███                                       ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 900,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"████                                      ",
+					"████                                      ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 2000,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"█████                                     ",
+					"█████                                     ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 130,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"███████                                   ",
+					"███████                                   ",
+					"                                          ",
+					].join("\n")
+								},
+								{
+				hold: 100,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"█████████                                 ",
+					"█████████                                 ",
+					"                                          ",
+					
+					].join("\n")
+								},
+																{
+				hold: 90,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"██████████                                ",
+					"██████████                                ",
+					"                                          ",
+					
+					].join("\n")
+								},
+																{
+				hold: 90,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"███████████                               ",
+					"███████████                               ",
+					"                                          ",
+					
+					].join("\n")
+								},
+																{
+				hold: 1000,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"████████████                              ",
+					"████████████                              ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 100,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"████████████████                          ",
+					"████████████████                          ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 200,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"█████████████████                         ",
+					"█████████████████                         ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 400,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"██████████████████                        ",
+					"██████████████████                        ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 1300,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"███████████████████████                   ",
+					"███████████████████████                   ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 50,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"████████████████████████                  ",
+					"████████████████████████                  ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 50,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"█████████████████████████                 ",
+					"█████████████████████████                 ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 50,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"██████████████████████████                ",
+					"██████████████████████████                ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 50,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"███████████████████████████               ",
+					"███████████████████████████               ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+				hold: 50,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					" LOADING OS...                            ",
+					"████████████████████████████              ",
+					"████████████████████████████              ",
+					"                                          ",
+					
+					].join("\n")
+								},
+								{
+	hold: 50,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"██████████████████████████████            ",
+		"██████████████████████████████            ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 50,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"███████████████████████████████           ",
+		"███████████████████████████████           ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 50,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"████████████████████████████████          ",
+		"████████████████████████████████          ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 50,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"█████████████████████████████████         ",
+		"█████████████████████████████████         ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 150,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"██████████████████████████████████        ",
+		"██████████████████████████████████        ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 90,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"███████████████████████████████████       ",
+		"███████████████████████████████████       ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 90,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"████████████████████████████████████      ",
+		"████████████████████████████████████      ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 1000,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"█████████████████████████████████████     ",
+		"█████████████████████████████████████     ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 50,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"██████████████████████████████████████    ",
+		"██████████████████████████████████████    ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 50,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"███████████████████████████████████████   ",
+		"███████████████████████████████████████   ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 50,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"████████████████████████████████████████  ",
+		"████████████████████████████████████████  ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 1250,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"█████████████████████████████████████████ ",
+		"█████████████████████████████████████████ ",
+		"                                          ",
+
+	].join("\n")
+},
+
+{
+	hold: 1550,
+
+	margin: {
+		top: 0,
+		left: 0
+	},
+
+	content: [
+		" LOADING OS...                            ",
+		"██████████████████████████████████████████",
+		"██████████████████████████████████████████",
+		"                                          ",
+
+	].join("\n")
+},
+									
+														
+							]
+						},
     
     
     eyeOpen: {
@@ -1133,13 +1980,13 @@ export function startGlitch(crt) {
     function loop() {
 
         crt.style.transform = `
-            translate(${random(-1, 1)}px, ${random(-2, 2)}px)
-            rotate(${random(-0.2, 0.2)}deg)
-            scale(${random(0.997, 1.005)})
+            translate(${random(-0.1, 0.1)}px, ${random(-0.5, 0.5)}px)
+            rotate(${random(-0.001, 0.001)}deg)
+            scale(${random(0.998, 1.002)})
         `;
 
         crt.style.filter = `
-            hue-rotate(${random(-5, 5)}deg)
+            hue-rotate(${random(-4, 4)}deg)
             contrast(${random(0.99, 1.03)})
             saturate(${random(0.92, 1.12)})
         `;
@@ -1186,6 +2033,24 @@ const RIGHT_HAND_KEYS = [
     "shiftright", "controlright", "altright"
 ];
 
+
+/* =========================================================
+   CHARACTER SWAP GLITCH REGISTRY FOR "iCouldDoThat"
+========================================================= */
+const MIN_SWAP_EFFECT_DELAY = 300;
+const MAX_SWAP_EFFECT_DELAY = 1200;
+const MIN_SWAP_EFFECT_HOLD = 150;
+const MAX_SWAP_EFFECT_HOLD = 700;
+
+const SWAP_CHARACTER_SET = {
+    "$": ["S", "E"],
+    "8": ["S", "O", "9"],
+    "Y": ["U", "J", "L"]
+};
+
+let activeSwaps = []; // Array of { index, original, replacement }
+let characterSwapInterval = null;
+
 /* =========================================================
    STATE MACHINE CONFIGURATION
 ========================================================= */
@@ -1214,6 +2079,7 @@ const MODES = {
     },
     "111": {
         timerLength: 20,
+        introAnimation: "OSBootup",
         defaultAnimation: "familyFaceOff",
         endAnimation: "familyFaceOff",
         endAnimationTime: 3000,
@@ -1272,6 +2138,16 @@ function killAllActiveLoops() {
         clearTimeout(state.animTimeout);
         state.animTimeout = null;
     }
+	stopCharacterSwapLoop(); // <-- Added
+}
+
+// New helper function
+function stopCharacterSwapLoop() {
+    if (characterSwapInterval) {
+        clearTimeout(characterSwapInterval);
+        characterSwapInterval = null;
+    }
+    activeSwaps = [];
 }
 
 function clearIdleTimeout() {
@@ -1325,18 +2201,21 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
     const anim = animations[name];
     if (!anim) return;
 
-    // Token system prevents cross-animation interference
     const token = Symbol(name);
     state.animToken = token;
 
     state.owner = targetOwnerState;
     state.currentAnimName = name;
-    //updateDebug();
 
     let i = 0;
 
     function renderFrame(frame) {
-        screen.textContent = frame.content;
+        // Intercept contents to parse overrides dynamically if running the target state
+        if (name === "iCouldDoThat") {
+            screen.textContent = applyActiveSwaps(frame.content);
+        } else {
+            screen.textContent = frame.content;
+        }
     }
 
     function scheduleNext(delay, fn) {
@@ -1344,6 +2223,13 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
             if (state.animToken !== token) return;
             fn();
         }, delay);
+    }
+
+    // Initialize or tear down character swap background timers matching animation states
+    if (name === "iCouldDoThat") {
+        startCharacterSwapLoop(token);
+    } else {
+        stopCharacterSwapLoop();
     }
 
     // SINGLE FRAME HANDLING
@@ -1392,6 +2278,18 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
 function startDefaultOrIdleCycle() {
     const mode = state.currentMode;
     
+    // Check if an intro animation exists and has not yet been played
+    if (mode.introAnimation && !mode.introPlayed) {
+        // Mark as played instantly so recursive loops or manual overrides don't re-trigger it
+        mode.introPlayed = true;
+
+        // Play intro once, then transition naturally to the continuous default cycle on completion
+        playEngineAnimation(mode.introAnimation, "intro", () => {
+            startDefaultOrIdleCycle();
+        });
+        return;
+    }
+    
     // 1. Play standard baseline loop
     playEngineAnimation(mode.defaultAnimation, "default");
 
@@ -1415,6 +2313,84 @@ function startDefaultOrIdleCycle() {
 
     }, randomDelay);
 }
+
+/* =========================================================
+   DYNAMIC CHARACTER SWAP EFFECT LOGIC
+========================================================= */
+function startCharacterSwapLoop(token) {
+    stopCharacterSwapLoop();
+
+    function scheduleNextSwap() {
+        if (state.animToken !== token || state.currentAnimName !== "iCouldDoThat") return;
+
+        const keys = Object.keys(SWAP_CHARACTER_SET);
+        const targetKey = keys[Math.floor(Math.random() * keys.length)];
+        const targetCharacters = SWAP_CHARACTER_SET[targetKey];
+
+        const anim = animations["iCouldDoThat"];
+        if (anim && anim.frames.length > 0) {
+            const contentString = anim.frames[0].content;
+            
+            // Gather matching, non-overridden character positions inside the layout frame
+            const indices = [];
+            for (let idx = 0; idx < contentString.length; idx++) {
+                if (targetCharacters.includes(contentString[idx])) {
+                    if (!activeSwaps.some(s => s.index === idx)) {
+                        indices.push(idx);
+                    }
+                }
+            }
+
+            if (indices.length > 0) {
+                const targetIndex = indices[Math.floor(Math.random() * indices.length)];
+                const swapObj = {
+                    index: targetIndex,
+                    original: contentString[targetIndex],
+                    replacement: targetKey
+                };
+
+                activeSwaps.push(swapObj);
+
+                // Set up asynchronous fallback reversion hook
+                const holdTime = Math.random() * (MAX_SWAP_EFFECT_HOLD - MIN_SWAP_EFFECT_HOLD) + MIN_SWAP_EFFECT_HOLD;
+                setTimeout(() => {
+                    activeSwaps = activeSwaps.filter(s => s !== swapObj);
+                    triggerFrameRefresh();
+                }, holdTime);
+
+                triggerFrameRefresh();
+            }
+        }
+
+        const nextDelay = Math.random() * (MAX_SWAP_EFFECT_DELAY - MIN_SWAP_EFFECT_DELAY) + MIN_SWAP_EFFECT_DELAY;
+        characterSwapInterval = setTimeout(scheduleNextSwap, nextDelay);
+    }
+
+    const initialDelay = Math.random() * (MAX_SWAP_EFFECT_DELAY - MIN_SWAP_EFFECT_DELAY) + MIN_SWAP_EFFECT_DELAY;
+    characterSwapInterval = setTimeout(scheduleNextSwap, initialDelay);
+}
+
+function applyActiveSwaps(baseContent) {
+    if (activeSwaps.length === 0) return baseContent;
+    
+    let charArray = baseContent.split("");
+    for (const swap of activeSwaps) {
+        if (charArray[swap.index] === swap.original) {
+            charArray[swap.index] = swap.replacement;
+        }
+    }
+    return charArray.join("");
+}
+
+function triggerFrameRefresh() {
+    if (state.currentAnimName === "iCouldDoThat") {
+        const anim = animations["iCouldDoThat"];
+        if (anim && anim.frames[0]) {
+            screen.textContent = applyActiveSwaps(anim.frames[0].content);
+        }
+    }
+}
+
 
 /* =========================================================
    TIMER CONTROL
@@ -1541,7 +2517,8 @@ async function runInterruptSequence() {
 
 function initDefaultMode() {
     if (!state.currentMode) {
-        const initialKey = Object.keys(MODES)[0];
+        // Change this from Object.keys(MODES)[0] to explicitly target "000"
+        const initialKey = "000";
         state.currentMode = structuredClone(MODES[initialKey]);
     }
 }
@@ -1561,7 +2538,7 @@ async function handleActionTrigger(eventObj = null) {
         return;
     }
 
-    const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end");
+    const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end" || state.owner === "intro");
 
     if (eventObj && isInitialActivationPress) {
         triggerSideGlow(eventObj);
@@ -1574,7 +2551,7 @@ async function handleActionTrigger(eventObj = null) {
         return;
     }
 
-    if (state.owner !== "default" && state.owner !== "idle") return;
+    if (state.owner !== "default" && state.owner !== "idle" && state.owner !== "intro") return;
 
     await changeStateWithTransition("timer", () => {
         startTimer(state.currentMode.timerLength);

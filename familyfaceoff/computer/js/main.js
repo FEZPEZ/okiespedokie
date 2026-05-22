@@ -20,6 +20,33 @@ const RIGHT_HAND_KEYS = [
     "shiftright", "controlright", "altright"
 ];
 
+
+/* =========================================================
+   CHARACTER SWAP GLITCH REGISTRY FOR "iCouldDoThat"
+========================================================= */
+const MIN_SWAP_EFFECT_DELAY = 5;
+const MAX_SWAP_EFFECT_DELAY = 25;
+const MIN_SWAP_EFFECT_HOLD = 150;
+const MAX_SWAP_EFFECT_HOLD = 700;
+
+const SWAP_CHARACTER_SET = {
+    "$": ["S", "E"],
+    "8": ["S", "O", "9"],
+    "Y": ["U", "V", "V"],
+    "M": ["W", "E", "N"],
+    "[": ["I", "i", "]", "1", "]", "]"],
+    ",": [".", "_"],
+    "c": ["o", ">", "u"],
+    "\"": ["'"],
+    "'": ["\""],
+    ";": [":", "|", "i", "I", "!"],
+    ":": [";", "|", "i", "I", "!"],
+    ".": [",", "_"],
+};
+
+let activeSwaps = []; // Array of { index, original, replacement }
+let characterSwapInterval = null;
+
 /* =========================================================
    STATE MACHINE CONFIGURATION
 ========================================================= */
@@ -107,6 +134,16 @@ function killAllActiveLoops() {
         clearTimeout(state.animTimeout);
         state.animTimeout = null;
     }
+	stopCharacterSwapLoop(); // <-- Added
+}
+
+// New helper function
+function stopCharacterSwapLoop() {
+    if (characterSwapInterval) {
+        clearTimeout(characterSwapInterval);
+        characterSwapInterval = null;
+    }
+    activeSwaps = [];
 }
 
 function clearIdleTimeout() {
@@ -160,18 +197,21 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
     const anim = animations[name];
     if (!anim) return;
 
-    // Token system prevents cross-animation interference
     const token = Symbol(name);
     state.animToken = token;
 
     state.owner = targetOwnerState;
     state.currentAnimName = name;
-    //updateDebug();
 
     let i = 0;
 
     function renderFrame(frame) {
-        screen.textContent = frame.content;
+        // Intercept contents to parse overrides dynamically if running the target state
+        if (name === "iCouldDoThat") {
+            screen.textContent = applyActiveSwaps(frame.content);
+        } else {
+            screen.textContent = frame.content;
+        }
     }
 
     function scheduleNext(delay, fn) {
@@ -179,6 +219,13 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
             if (state.animToken !== token) return;
             fn();
         }, delay);
+    }
+
+    // Initialize or tear down character swap background timers matching animation states
+    if (name === "iCouldDoThat") {
+        startCharacterSwapLoop(token);
+    } else {
+        stopCharacterSwapLoop();
     }
 
     // SINGLE FRAME HANDLING
@@ -262,6 +309,83 @@ function startDefaultOrIdleCycle() {
 
     }, randomDelay);
 }
+
+/* =========================================================
+   DYNAMIC CHARACTER SWAP EFFECT LOGIC
+========================================================= */
+/* =========================================================
+   DYNAMIC CHARACTER SWAP EFFECT LOGIC
+========================================================= */
+function startCharacterSwapLoop(token) {
+    stopCharacterSwapLoop();
+
+    function scheduleNextSwap() {
+        if (state.animToken !== token || state.currentAnimName !== "iCouldDoThat") return;
+
+        const anim = animations["iCouldDoThat"];
+        if (anim && anim.frames.length > 0) {
+            const contentString = anim.frames[0].content;
+            
+            if (contentString.length > 0) {
+                // 1. Pick a completely random character position from the animation frame
+                const targetIndex = Math.floor(Math.random() * contentString.length);
+                const frameChar = contentString[targetIndex];
+
+                // 2. Check if this character is a key in our swap registry 
+                // AND ensure it isn't already actively swapped right now
+                if (SWAP_CHARACTER_SET.hasOwnProperty(frameChar) && !activeSwaps.some(s => s.index === targetIndex)) {
+                    const targetCharacters = SWAP_CHARACTER_SET[frameChar];
+                    
+                    const swapObj = {
+                        index: targetIndex,
+                        original: frameChar,
+                        // Choose a random erratic glitch character replacement from the array
+                        replacement: targetCharacters[Math.floor(Math.random() * targetCharacters.length)]
+                    };
+
+                    activeSwaps.push(swapObj);
+
+                    // Set up asynchronous fallback reversion hook
+                    const holdTime = Math.random() * (MAX_SWAP_EFFECT_HOLD - MIN_SWAP_EFFECT_HOLD) + MIN_SWAP_EFFECT_HOLD;
+                    setTimeout(() => {
+                        activeSwaps = activeSwaps.filter(s => s !== swapObj);
+                        triggerFrameRefresh();
+                    }, holdTime);
+
+                    triggerFrameRefresh();
+                }
+            }
+        }
+
+        const nextDelay = Math.random() * (MAX_SWAP_EFFECT_DELAY - MIN_SWAP_EFFECT_DELAY) + MIN_SWAP_EFFECT_DELAY;
+        characterSwapInterval = setTimeout(scheduleNextSwap, nextDelay);
+    }
+
+    const initialDelay = Math.random() * (MAX_SWAP_EFFECT_DELAY - MIN_SWAP_EFFECT_DELAY) + MIN_SWAP_EFFECT_DELAY;
+    characterSwapInterval = setTimeout(scheduleNextSwap, initialDelay);
+}
+
+function applyActiveSwaps(baseContent) {
+    if (activeSwaps.length === 0) return baseContent;
+    
+    let charArray = baseContent.split("");
+    for (const swap of activeSwaps) {
+        if (charArray[swap.index] === swap.original) {
+            charArray[swap.index] = swap.replacement;
+        }
+    }
+    return charArray.join("");
+}
+
+function triggerFrameRefresh() {
+    if (state.currentAnimName === "iCouldDoThat") {
+        const anim = animations["iCouldDoThat"];
+        if (anim && anim.frames[0]) {
+            screen.textContent = applyActiveSwaps(anim.frames[0].content);
+        }
+    }
+}
+
 
 /* =========================================================
    TIMER CONTROL
