@@ -55,21 +55,34 @@ html, body {
 }
 
 /* shared transform space */
+/* Shared transform space optimization */
 #layer {
     width: 100%;
     height: 100%;
-
     transform: rotateX(5.5deg) scale(1.02);
     transform-origin: center;
-
     position: relative;
-    transition: transform 1ms linear;
+    
+    /* Hardware acceleration layer promotions */
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
 
-    /* subtle blur for CRT softness */
-    filter: blur(0.25px);
+    /* Combine the micro flicker and layout glitch via native CSS */
+    animation: flicker 0.15s infinite alternate;
+}
 
-    /* tiny flicker */
-    animation: flicker 0.09s infinite alternate;
+/* GPU Accelerated Glitch Loop */
+.gpu-glitch {
+    animation: flicker 0.15s infinite alternate, nativeGlitch 1.25s infinite steps(2) !important;
+}
+
+@keyframes nativeGlitch {
+    0% { transform: rotateX(5.5deg) scale(1.02) translate(0.5px, -0.61px); opacity: 0.99; }
+    5% { transform: rotateX(5.5deg) scale(1.02) translate(-0.6px, 0.4px); }
+    50% { transform: rotateX(5.5deg) scale(1.02) translate(0.2px, -0.14px); opacity: 0.985; }
+    90% { transform: rotateX(5.5deg) scale(1.02) translate(-0.24px, -0.55px); }
+    100% { transform: rotateX(5.5deg) scale(1.02) translate(0px, 0px); opacity: 1; }
 }
 
 /* ASCII screen */
@@ -92,11 +105,8 @@ html, body {
     padding: 0;
 
     text-shadow:
-        0 0 0.15vh currentColor,
-        0 0 0.45vh currentColor,
-        0 0 1vh currentColor,
-        0 0 2vh rgba(255, 113, 206, 0.18),
-        0 0 4vh rgba(255, 113, 206, 0.08);
+    0 0 2px currentColor,
+    0 0 13px rgba(255,113,206,0.8);
 }
 
 /* FINAL ASCII MODE */
@@ -219,15 +229,16 @@ html, body {
         );
 }
 
-/* subtle analog flicker */
-@keyframes flicker {
-    0% {
-        opacity: 0.985;
-    }
+@keyframes glitchShake {
+    0%, 100% { margin: 0 0 0 0; }
+    20%      { margin: 1px 0 0 -1px; }
+    40%      { margin: -1px 0 0 -1px; }
+    60%      { margin: 1px 0 0 1px; }
+    80%      { margin: -1px 0 0 1px; }
+}
 
-    100% {
-        opacity: 1;
-    }
+.screen-holding-pulse {
+    animation: glitchShake 0.15s infinite linear;
 }
 </style>
 </head>

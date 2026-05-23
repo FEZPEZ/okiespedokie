@@ -32,7 +32,7 @@ FILE: index.html
 html, body {
     margin: 0;
     padding: 0;
-    background: black;
+    background: #090006;
     overflow: hidden;
     height: 100%;
 }
@@ -42,9 +42,19 @@ html, body {
     width: 100vw;
     height: 100vh;
     perspective: 900px;
-    background: black;
+
+    /* deep black-pink background */
+    background:
+        radial-gradient(circle at center,
+            rgba(255, 80, 180, 0.06),
+            rgba(0,0,0,0.96) 70%),
+        #090006;
+
     position: relative;
-    color: #00ffaa;
+
+    /* HOT PINK TERMINAL */
+    color: #ff71ce;
+
     overflow: hidden;
 }
 
@@ -52,10 +62,15 @@ html, body {
 #layer {
     width: 100%;
     height: 100%;
+
     transform: rotateX(5.5deg) scale(1.02);
     transform-origin: center;
+
     position: relative;
-    transition: transform 1ms linear;
+    transition: none;
+
+    /* tiny flicker */
+    animation: flicker 0.35s infinite alternate;
 }
 
 /* ASCII screen */
@@ -78,20 +93,22 @@ html, body {
     padding: 0;
 
     text-shadow:
-        0 0 0.5vh currentColor,
-        0 0 1.2vh currentColor,
-        0 0 2.5vh currentColor,
-        0 0 4vh rgba(0, 255, 170, 0.15);
+    0 0 2px currentColor,
+    0 0 13px rgba(255,113,206,0.8);
 }
 
 /* FINAL ASCII MODE */
 #final {
     position: absolute;
     inset: 0;
+
     display: none;
+
     align-items: center;
     justify-content: center;
+
     gap: 8vw;
+
     pointer-events: none;
 }
 
@@ -101,27 +118,53 @@ html, body {
 
 #final pre {
     margin: 0;
+
     white-space: pre;
     font-family: monospace;
     color: inherit;
 
     text-shadow:
-        0 0 0.3vh currentColor,
-        0 0 0.9vh currentColor;
+        0 0 0.15vh currentColor,
+        0 0 0.5vh currentColor,
+        0 0 1.2vh rgba(255, 113, 206, 0.25);
 }
 
 /* scanlines */
 .scanlines::after {
     content: "";
+
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(
-        to bottom,
-        rgba(0,255,100,0.08),
-        rgba(0,255,100,0.08) 10px,
-        transparent 10px,
-        transparent 20px
-    );
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255, 140, 220, 0.045),
+            rgba(255, 140, 220, 0.045) 10px,
+            transparent 10px,
+            transparent 20px
+        );
+
+    mix-blend-mode: screen;
+
+    pointer-events: none;
+}
+
+/* subtle CRT vignette */
+.scanlines::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        radial-gradient(
+            circle at center,
+            transparent 45%,
+            rgba(255, 0, 140, 0.05) 75%,
+            rgba(0,0,0,0.45) 100%
+        );
+
     pointer-events: none;
 }
 
@@ -129,6 +172,7 @@ html, body {
 #transition-layer {
     position: absolute;
     inset: 0;
+
     overflow: hidden;
     pointer-events: none;
 }
@@ -136,23 +180,52 @@ html, body {
 /* Keyboard side flash overlays */
 .side-glow {
     position: absolute;
+
     top: 0;
     bottom: 0;
+
     width: 25%;
+
     pointer-events: none;
+
     opacity: 0;
+
     transition: opacity 0.4s ease-out;
+
     z-index: 998;
 }
 
 #glow-left {
     left: 0;
-    background: linear-gradient(to right, rgba(0, 255, 170, 0.4), transparent);
+
+    background:
+        linear-gradient(
+            to right,
+            rgba(255, 113, 206, 0.45),
+            transparent
+        );
 }
 
 #glow-right {
     right: 0;
-    background: linear-gradient(to left, rgba(0, 255, 170, 0.4), transparent);
+
+    background:
+        linear-gradient(
+            to left,
+            rgba(255, 113, 206, 0.45),
+            transparent
+        );
+}
+
+/* subtle analog flicker */
+@keyframes flicker {
+    0% {
+        opacity: 0.985;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 </style>
 </head>
@@ -350,51 +423,25 @@ export const animations = {
 				},
 			
 				content: [
-					" ?           ?           ?           ?          ",
-					"         ?           ?           ?           ?  ",
-					"    _____ _____  ?  _____  .__ .__    ___.__.   ",
-					" ?_/ ____\\\\__  \\   /     \\ |__||  |  <   |  |   ",
-					"  \\   __\\? / __ \\_|  Y Y  \\|  ||  |   \\___  |?  ",
-					"   |  |   (____  /|__|_|  /|  ||  |__ / ____|   ",
-					" ? |__|      ? \\/       \\/ |__||____/?\\/        ",
-					"         ?           ?           ?           ?  ",
-					"     ?   ___     ?           ?           ?      ",
-					" ?      |  _|___ ___ ___ ? ___ ___ ___          ",
-					"        |  _| .'|  _| -_|_| . |  _|  _|      ?  ",
-					"     ?  |_| |__,|___|___| |___|  _|  _|  ?      ",
-					" ?           ?           ?    |_| |_|?          ",
-					"         ?           ?           ?           ?  ",
-					"     ?           ?           ?           ?      "
-					].join("\n")
-								},
-								{
-				hold: 200,
-			
-				margin: {
-					top: 0,
-					left: 0
-				},
-			
-				content: [
-					"         ?           ?           ?           ?  ",
-					"     ?           ?           ?           ?      ",
-					" ?  _____ _____     _____  .__ .__   ?___.__.   ",
-					"  _/ ____\\\\__  \\   /     \\ |__||  |  <   |  |?  ",
+					"                                                ",
+					"                                                ",
+					"    _____ _____     _____  .__ .__    ___.__.   ",
+					"  _/ ____\\\\__  \\   /     \\ |__||  |  <   |  |   ",
 					"  \\   __\\  / __ \\_|  Y Y  \\|  ||  |   \\___  |   ",
-					" ? |  |   (____  /|__|_|  /|  ||  |__?/ ____|   ",
-					"   |__|  ?     \\/    ?  \\/ |__||____/ \\/     ?  ",
-					"     ?           ?           ?           ?      ",
-					" ?       ___ ?           ?           ?          ",
-					"        |  _|___ ___ ___   ___ ___ ___       ?  ",
-					"     ?  |  _| .'|  _| -_|_| . |  _|  _|  ?      ",
-					" ?      |_| |__,|___|___|?|___|  _|  _|         ",
-					"         ?           ?        |_|?|_|        ?  ",
-					"     ?           ?           ?           ?      ",
-					" ?           ?           ?           ?          "
+					"   |  |   (____  /|__|_|  /|  ||  |__ / ____|   ",
+					"   |__|        \\/       \\/ |__||____/ \\/        ",
+					"                                                ",
+					"         ___                                    ",
+					"        |  _|___ ___ ___   ___ ___ ___          ",
+					"        |  _| .'|  _| -_|_| . |  _|  _|         ",
+					"        |_| |__,|___|___| |___|  _|  _|         ",
+					"                              |_| |_|           ",
+					"                                                ",
+					"                                                "
 					].join("\n")
 								},
 								{
-				hold: 200,
+				hold: 100,
 			
 				margin: {
 					top: 0,
@@ -402,27 +449,181 @@ export const animations = {
 				},
 			
 				content: [
-					"     ?           ?           ?           ?      ",
-					" ?           ?           ?           ?          ",
-					"    _____?_____     _____  .__ .__    ___.__.?  ",
-					"  _/ ____\\\\__  \\ ? /     \\ |__||  |  <   |  |   ",
-					" ?\\   __\\  / __ \\_|  Y Y  \\|  ||  |  ?\\___  |   ",
-					"   |  |  ?(____  /|__|_|  /|  ||  |__ / ____|?  ",
-					"   |__|        \\/?      \\/ |__||____/ \\/ ?      ",
-					" ?           ?           ?           ?          ",
-					"         ___         ?           ?           ?  ",
-					"     ?  |  _|___ ___ ___   ___ ___ ___   ?      ",
-					" ?      |  _| .'|  _| -_|_| . |  _|  _|         ",
-					"        |_| |__,|___|___| |___|  _|  _|      ?  ",
-					"     ?           ?           ?|_| |_|    ?      ",
-					" ?           ?           ?           ?          ",
-					"         ?           ?           ?           ?  "
+					"                                                ",
+					"                                                ",
+					"    _____ _____     _____  .__ .__    ___.__.   ",
+					"  _AE#R#_\\\\__  \\   /     \\ |__||  |  <   |  |   ",
+					"  V#RW__\\  / __ \\_|  Y Y  \\|  ||  |   \\___  |   ",
+					"   #  |   (____  /|__|_|  /|  ||  |__ / ____|   ",
+					"   |__|        \\/       \\/ |__||____/ \\/        ",
+					"                                                ",
+					"         ___                                    ",
+					"        |  _|___ ___ ___   ___ ___ ___          ",
+					"        |  _| .'|  _| -_|_| . |  _|  _|         ",
+					"        |_| |__,|___|___| |___|  _|  _|         ",
+					"                              |_| |_|           ",
+					"                                                ",
+					"                                                "
+					].join("\n")
+								},
+								{
+				hold: 100,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"                                                ",
+					"                                                ",
+					"    _____ _____     _____  .__ .__    ___.__.   ",
+					"  _/ ___E\\\\MB##A   /     \\ |__||  |  <   |  |   ",
+					"  \\   RM\\  ARW_ \\_|  Y Y  \\|  ||  |   \\___  |   ",
+					"   |E#I   O#___  /|__|_|  /|  ||  |__ / ____|   ",
+					"   ER#|        \\/       \\/ |__||____/ \\/        ",
+					"                                                ",
+					"         ___                                    ",
+					"        |  _|___ ___ ___   ___ ___ ___          ",
+					"        |  _| .'|  _| -_|_| . |  _|  _|         ",
+					"        |_| |__,|___|___| |___|  _|  _|         ",
+					"                              |_| |_|           ",
+					"                                                ",
+					"                                                "
+					].join("\n")
+								},
+								{
+				hold: 100,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"                                                ",
+					"                                                ",
+					"    _____ _____     _____  .__ .__    ___.__.   ",
+					"  _/ ____\\\\__  \\   A#ERGNA |__||  |  <   |  |   ",
+					"  \\   __\\  / _W#A_E#EYMYF \\|  ||  |   \\___  |   ",
+					"   |  |   (_#RM##V|ER|#|  /|  ||  |__ / ____|   ",
+					"   |__|        YV       \\/ |__||____/ \\/        ",
+					"                                                ",
+					"         ___                                    ",
+					"        |#MYI___ ___ ___   ___ ___ ___          ",
+					"        |ERMI .'|  _| -_|_| . |  _|  _|         ",
+					"        |#I |__,|___|___| |___|  _|  _|         ",
+					"                              |_| |_|           ",
+					"                                                ",
+					"                                                "
+					].join("\n")
+								},
+								{
+				hold: 100,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"                                                ",
+					"                                                ",
+					"    _____ _____     _____  .__ .__    ___.__.   ",
+					"  _/ ____\\\\__  \\   /     \\ EW#I|#E|  <ER#|RW|   ",
+					"  \\   __\\  / __ \\_|  Y Y #AR#FI|W#|   \\#E#  |   ",
+					"   |  |   (____  /|__|_IRWVGRGI|##|__ AE____|   ",
+					"   |__|        \\/       YV R#WI|W#EGV \\/        ",
+					"                                                ",
+					"         ___                                    ",
+					"        |  _|___ ___ ___   ___ ___ ___          ",
+					"        |  _|E#RIEW#YEE#I_|W##|  _|  _|         ",
+					"        |_| IWBTI###IMM#I |R__|  _|  _|         ",
+					"                              |_| |_|           ",
+					"                                                ",
+					"                                                "
+					].join("\n")
+								},
+								{
+				hold: 100,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"                                                ",
+					"                                                ",
+					"    _____ _____     _____  .__ .__    ___.__.   ",
+					"  _/ ____\\\\__  \\   /     \\ |__||  |  <   |  |   ",
+					"  \\   __\\  / __ \\_|  Y Y  \\|  ||  |   \\___E#|   ",
+					"   |  |   (____  /|__|_|  /|  ||  |__ / R#WWI   ",
+					"   |__|        \\/       \\/ |__||____/ YV        ",
+					"                                                ",
+					"         ___                                    ",
+					"        |  _|___ ___ ___   ___ ___ ___          ",
+					"        |  _| .'|  _| -_|_| . I#TTI#WEI         ",
+					"        |_| |__,|___|___| |_#EI###IRT_|         ",
+					"                              I#I I_|           ",
+					"                                                ",
+					"                                                "
+					].join("\n")
+								},
+								{
+				hold: 50,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"                                                ",
+					"                                                ",
+					"    _____ _____     _____  .__ .__    ___.__.   ",
+					"  _/ ____\\\\__  \\   /     \\ |__||  |  <   |  |   ",
+					"  \\   __\\  / __ \\_|  Y Y  \\|  ||  |   \\___  |   ",
+					"   |  |   (____  /|__|_|  /|  ||  |__ / ____|   ",
+					"   |__|        \\/       \\/ |__||____/ \\/        ",
+					"                                                ",
+					"         ___                                    ",
+					"        |  _|___ ___ ___   ___ ___ ___          ",
+					"        |  _| .'|  _| -_|_| . |  _|  _I         ",
+					"        |_| |__,|___|___| |___|  _| R#I         ",
+					"                              |_| #EI           ",
+					"                                                ",
+					"                                                "
+					].join("\n")
+								},
+								{
+				hold: 4000,
+			
+				margin: {
+					top: 0,
+					left: 0
+				},
+			
+				content: [
+					"                                                ",
+					"                                                ",
+					"    _____ _____     _____  .__ .__    ___.__.   ",
+					"  _/ ____\\\\__  \\   /     \\ |__||  |  <   |  |   ",
+					"  \\   __\\  / __ \\_|  Y Y  \\|  ||  |   \\___  |   ",
+					"   |  |   (____  /|__|_|  /|  ||  |__ / ____|   ",
+					"   |__|        \\/       \\/ |__||____/ \\/        ",
+					"                                                ",
+					"         ___                                    ",
+					"        |  _|___ ___ ___   ___ ___ ___          ",
+					"        |  _| .'|  _| -_|_| . |  _|  _|         ",
+					"        |_| |__,|___|___| |___|  _|  _|         ",
+					"                              |_| |_|           ",
+					"                                                ",
+					"                                                "
 					].join("\n")
 								},
 							]
 						},
-						
-						
 
     oneTicketPlease: {
 
@@ -558,19 +759,19 @@ export const animations = {
 				},
 			
 				content: [
-					"______  _____   ___  ______  _           ",
-					"|  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
-					"| | | || |__  / /_\\ \\| | | || |   █  █  █",
-					"| | | ||  __| |  _  || | | || |   \\█████/",
-					"| |/ / | |___ | | | || |/ / | |____  █   ",
-					"|___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
-					"______  _____ _   _  _   _  _____ ___█__ ",
-					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
-					"| | | |  | | |  \\| ||  \\| || |__  | |█/ /",
-					"| | | |  | | | . ` || . ` ||  __| |  █ / ",
-					"| |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
-					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
-					].join("\n")
+					" ______  _____   ___  ______  _           ",
+					" |  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
+					" | | | || |__  / /_\\ \\| | | || |   █  █  █",
+					" | | | ||  __| |  _  || | | || |   \\█████/",
+					" | |/ / | |___ | | | || |/ / | |____  █   ",
+					" |___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
+					" ______  _____ _   _  _   _  _____ ___█__ ",
+					" |  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
+					" | | | |  | | |  \\| ||  \\| || |__  | |█/ /",
+					" | | | |  | | | . ` || . ` ||  __| |  █ / ",
+					" | |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
+					" |___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
+					] .join("\n")
 								},
 								{
 				hold: 1000,
@@ -581,18 +782,18 @@ export const animations = {
 				},
 			
 				content: [
-					"______  _____   ___  ______  _           ",
-					"|  _  \\|  ___| / _ \\ |  _  \\| |   ▒  ▒  ▒",
-					"| | | || |__  / /_\\ \\| | | || |   ▒  ▒  ▒",
-					"| | | ||  __| |  _  || | | || |   \\▒▒▒▒▒/",
-					"| |/ / | |___ | | | || |/ / | |____  ▒   ",
-					"|___/  \\____/ \\_| |_/|___/  \\_____/  ▒   ",
-					"______  _____ _   _  _   _  _____ ___▒__ ",
-					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _▒_ \\",
-					"| | | |  | | |  \\| ||  \\| || |__  | |▒/ /",
-					"| | | |  | | | . ` || . ` ||  __| |  ▒ / ",
-					"| |/ /  _| |_| |\\  || |\\  || |___ | |▒ \\ ",
-					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|▒\\_|  ",
+					" ______  _____   ___  ______  _           ",
+					" |  _  \\|  ___| / _ \\ |  _  \\| |   ▒  ▒  ▒",
+					" | | | || |__  / /_\\ \\| | | || |   ▒  ▒  ▒",
+					" | | | ||  __| |  _  || | | || |   \\▒▒▒▒▒/",
+					" | |/ / | |___ | | | || |/ / | |____  ▒   ",
+					" |___/  \\____/ \\_| |_/|___/  \\_____/  ▒   ",
+					" ______  _____ _   _  _   _  _____ ___▒__ ",
+					" |  _  \\|_   _| \\ | || \\ | ||  ___|| _▒_ \\",
+					" | | | |  | | |  \\| ||  \\| || |__  | |▒/ /",
+					" | | | |  | | | . ` || . ` ||  __| |  ▒ / ",
+					" | |/ /  _| |_| |\\  || |\\  || |___ | |▒ \\ ",
+					" |___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|▒\\_|  ",
 					].join("\n")
 								},
 								{
@@ -604,18 +805,18 @@ export const animations = {
 				},
 			
 				content: [
-					"______  _____   ___  ______  _           ",
-					"|  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
-					"| | | || |__  / /_\\ \\| | | || |   █  █  █",
-					"| | | ||  __| |  _  || | | || |   \\█████/",
-					"| |/ / | |___ | | | || |/ / | |____  █   ",
-					"|___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
-					"______  _____ _   _  _   _  _____ ___█__ ",
-					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
-					"| | | |  | | |  \\| ||  \\| || |__  | |█/ /",
-					"| | | |  | | | . ` || . ` ||  __| |  █ / ",
-					"| |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
-					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
+					" ______  _____   ___  ______  _           ",
+					" |  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
+					" | | | || |__  / /_\\ \\| | | || |   █  █  █",
+					" | | | ||  __| |  _  || | | || |   \\█████/",
+					" | |/ / | |___ | | | || |/ / | |____  █   ",
+					" |___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
+					" ______  _____ _   _  _   _  _____ ___█__ ",
+					" |  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
+					" | | | |  | | |  \\| ||  \\| || |__  | |█/ /",
+					" | | | |  | | | . ` || . ` ||  __| |  █ / ",
+					" | |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
+					" |___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
 					].join("\n")
 								},
 								{
@@ -627,18 +828,18 @@ export const animations = {
 				},
 			
 				content: [
-					"______  _____   ___  ______  _           ",
-					"|  _  \\|  ___| / _ \\ |  _  \\| |   ░  ░  ░",
-					"| | | || |__  / /_\\ \\| | | || |   ░  ░  ░",
-					"| | | ||  __| |  _  || | | || |   \\░░░░░/",
-					"| |/ / | |___ | | | || |/ / | |____  ░   ",
-					"|___/  \\____/ \\_| |_/|___/  \\_____/  ░   ",
-					"______  _____ _   _  _   _  _____ ___░__ ",
-					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _░_ \\",
-					"| | | |  | | |  \\| ||  \\| || |__  | |░/ /",
-					"| | | |  | | | . ` || . ` ||  __| |  ░ / ",
-					"| |/ /  _| |_| |\\  || |\\  || |___ | |░ \\ ",
-					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|░\\_|  ",
+					" ______  _____   ___  ______  _           ",
+					" |  _  \\|  ___| / _ \\ |  _  \\| |   ░  ░  ░",
+					" | | | || |__  / /_\\ \\| | | || |   ░  ░  ░",
+					" | | | ||  __| |  _  || | | || |   \\░░░░░/",
+					" | |/ / | |___ | | | || |/ / | |____  ░   ",
+					" |___/  \\____/ \\_| |_/|___/  \\_____/  ░   ",
+					" ______  _____ _   _  _   _  _____ ___░__ ",
+					" |  _  \\|_   _| \\ | || \\ | ||  ___|| _░_ \\",
+					" | | | |  | | |  \\| ||  \\| || |__  | |░/ /",
+					" | | | |  | | | . ` || . ` ||  __| |  ░ / ",
+					" | |/ /  _| |_| |\\  || |\\  || |___ | |░ \\ ",
+					" |___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|░\\_|  ",
 					].join("\n")
 								},
 								{
@@ -650,18 +851,18 @@ export const animations = {
 				},
 			
 				content: [
-					"______  _____   ___  ______  _           ",
-					"|  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
-					"| | | || |__  / /_\\ \\| | | || |   █  █  █",
-					"| | | ||  __| |  _  || | | || |   \\█████/",
-					"| |/ / | |___ | | | || |/ / | |____  █   ",
-					"|___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
-					"______  _____ _   _  _   _  _____ ___█__ ",
-					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
-					"| | | |  | | |  \\| ||  \\| || |__  | |█/ /",
-					"| | | |  | | | . ` || . ` ||  __| |  █ / ",
-					"| |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
-					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
+					" ______  _____   ___  ______  _           ",
+					" |  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
+					" | | | || |__  / /_\\ \\| | | || |   █  █  █",
+					" | | | ||  __| |  _  || | | || |   \\█████/",
+					" | |/ / | |___ | | | || |/ / | |____  █   ",
+					" |___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
+					" ______  _____ _   _  _   _  _____ ___█__ ",
+					" |  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
+					" | | | |  | | |  \\| ||  \\| || |__  | |█/ /",
+					" | | | |  | | | . ` || . ` ||  __| |  █ / ",
+					" | |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
+					" |___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
 					].join("\n")
 								},
 								{
@@ -673,18 +874,18 @@ export const animations = {
 				},
 			
 				content: [
-					"______  _____   ___  ______  _           ",
-					"|  _  \\|  ___| / _ \\ |  _  \\| |   ░  ░  ░",
-					"| | | || |__  / /_\\ \\| | | || |   ░  ░  ░",
-					"| | | ||  __| |  _  || | | || |   \\░░░░░/",
-					"| |/ / | |___ | | | || |/ / | |____  ░   ",
-					"|___/  \\____/ \\_| |_/|___/  \\_____/  ░   ",
-					"______  _____ _   _  _   _  _____ ___░__ ",
-					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _░_ \\",
-					"| | | |  | | |  \\| ||  \\| || |__  | |░/ /",
-					"| | | |  | | | . ` || . ` ||  __| |  ░ / ",
-					"| |/ /  _| |_| |\\  || |\\  || |___ | |░ \\ ",
-					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|░\\_|  ",
+					" ______  _____   ___  ______  _           ",
+					" |  _  \\|  ___| / _ \\ |  _  \\| |   ░  ░  ░",
+					" | | | || |__  / /_\\ \\| | | || |   ░  ░  ░",
+					" | | | ||  __| |  _  || | | || |   \\░░░░░/",
+					" | |/ / | |___ | | | || |/ / | |____  ░   ",
+					" |___/  \\____/ \\_| |_/|___/  \\_____/  ░   ",
+					" ______  _____ _   _  _   _  _____ ___░__ ",
+					" |  _  \\|_   _| \\ | || \\ | ||  ___|| _░_ \\",
+					" | | | |  | | |  \\| ||  \\| || |__  | |░/ /",
+					" | | | |  | | | . ` || . ` ||  __| |  ░ / ",
+					" | |/ /  _| |_| |\\  || |\\  || |___ | |░ \\ ",
+					" |___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|░\\_|  ",
 					].join("\n")
 								},
 								{
@@ -696,18 +897,18 @@ export const animations = {
 				},
 			
 				content: [
-					"______  _____   ___  ______  _           ",
-					"|  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
-					"| | | || |__  / /_\\ \\| | | || |   █  █  █",
-					"| | | ||  __| |  _  || | | || |   \\█████/",
-					"| |/ / | |___ | | | || |/ / | |____  █   ",
-					"|___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
-					"______  _____ _   _  _   _  _____ ___█__ ",
-					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
-					"| | | |  | | |  \\| ||  \\| || |__  | |█/ /",
-					"| | | |  | | | . ` || . ` ||  __| |  █ / ",
-					"| |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
-					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
+					" ______  _____   ___  ______  _           ",
+					" |  _  \\|  ___| / _ \\ |  _  \\| |   █  █  █",
+					" | | | || |__  / /_\\ \\| | | || |   █  █  █",
+					" | | | ||  __| |  _  || | | || |   \\█████/",
+					" | |/ / | |___ | | | || |/ / | |____  █   ",
+					" |___/  \\____/ \\_| |_/|___/  \\_____/  █   ",
+					" ______  _____ _   _  _   _  _____ ___█__ ",
+					" |  _  \\|_   _| \\ | || \\ | ||  ___|| _█_ \\",
+					" | | | |  | | |  \\| ||  \\| || |__  | |█/ /",
+					" | | | |  | | | . ` || . ` ||  __| |  █ / ",
+					" | |/ /  _| |_| |\\  || |\\  || |___ | |█ \\ ",
+					" |___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|█\\_|  ",
 					].join("\n")
 								},
 								{
@@ -719,18 +920,18 @@ export const animations = {
 				},
 			
 				content: [
-					"______  _____   ___  ______  _           ",
-					"|  _  \\|  ___| / _ \\ |  _  \\| |   ░  ░  ░",
-					"| | | || |__  / /_\\ \\| | | || |   ░  ░  ░",
-					"| | | ||  __| |  _  || | | || |   \\░░░░░/",
-					"| |/ / | |___ | | | || |/ / | |____  ░   ",
-					"|___/  \\____/ \\_| |_/|___/  \\_____/  ░   ",
-					"______  _____ _   _  _   _  _____ ___░__ ",
-					"|  _  \\|_   _| \\ | || \\ | ||  ___|| _░_ \\",
-					"| | | |  | | |  \\| ||  \\| || |__  | |░/ /",
-					"| | | |  | | | . ` || . ` ||  __| |  ░ / ",
-					"| |/ /  _| |_| |\\  || |\\  || |___ | |░ \\ ",
-					"|___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|░\\_|  ",
+					" ______  _____   ___  ______  _           ",
+					" |  _  \\|  ___| / _ \\ |  _  \\| |   ░  ░  ░",
+					" | | | || |__  / /_\\ \\| | | || |   ░  ░  ░",
+					" | | | ||  __| |  _  || | | || |   \\░░░░░/",
+					" | |/ / | |___ | | | || |/ / | |____  ░   ",
+					" |___/  \\____/ \\_| |_/|___/  \\_____/  ░   ",
+					" ______  _____ _   _  _   _  _____ ___░__ ",
+					" |  _  \\|_   _| \\ | || \\ | ||  ___|| _░_ \\",
+					" | | | |  | | |  \\| ||  \\| || |__  | |░/ /",
+					" | | | |  | | | . ` || . ` ||  __| |  ░ / ",
+					" | |/ /  _| |_| |\\  || |\\  || |___ | |░ \\ ",
+					" |___/   \\___/\\_| \\_/\\_| \\_/\\____/ \\_|░\\_|  ",
 					].join("\n")
 								},
 							]
@@ -1643,74 +1844,6 @@ export const animations = {
 
 
 ================================================================================
-FILE: js/effects.js
-================================================================================
-
-const crt = document.getElementById("crt");
-   const layer = document.getElementById("layer");
-
-function random(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-/* CRT DRIFT + GLITCH (restored original feel) */
-export function startGlitch() {
-  function loop() {
-    const x = random(-1, 1);
-    const y = random(-2, 2);
-    const r = random(-0.25, 0.25);
-    const s = random(0.997, 1.006);
-
-    crt.style.transform = `
-      translate(${x}px, ${y}px)
-      rotate(${r}deg)
-      scale(${s})
-    `;
-
-    crt.style.filter = `
-      hue-rotate(${random(-6, 6)}deg)
-      contrast(${random(0.98, 1.04)})
-      saturate(${random(0.9, 1.15)})
-    `;
-
-    if (Math.random() < 0.18) {
-      crt.style.clipPath = `inset(${random(0,5)}% 0 ${random(0,5)}% 0)`;
-      setTimeout(() => (crt.style.clipPath = ""), 60);
-    }
-
-    setTimeout(loop, random(35, 140));
-  }
-
-  loop();
-}
-
-/* subtle layer wobble (this was missing entirely) */
-export function startLayerDrift() {
-  let t = 0;
-
-  function loop() {
-    t += 0.01;
-
-    layer.style.transform = `
-      rotateX(5.5deg)
-      scale(1.02)
-      translateY(${Math.sin(t) * 0.6}px)
-    `;
-
-    requestAnimationFrame(loop);
-  }
-
-  loop();
-}
-
-/* scanlines toggle hook (kept CSS-driven but controllable) */
-export function enableScanlines() {
-  document.getElementById("crt").classList.add("scanlines");
-}
---- EOF ---
-
-
-================================================================================
 FILE: js/font.js
 ================================================================================
 
@@ -1971,7 +2104,7 @@ export const FONT_2 = {
 FILE: js/glitch.js
 ================================================================================
 
-export function startGlitch(crt) {
+export function startGlitch(layer) {
 
     function random(min, max) {
         return Math.random() * (max - min) + min;
@@ -1979,27 +2112,14 @@ export function startGlitch(crt) {
 
     function loop() {
 
-        crt.style.transform = `
-            translate(${random(-0.1, 0.1)}px, ${random(-0.5, 0.5)}px)
-            rotate(${random(-0.001, 0.001)}deg)
-            scale(${random(0.998, 1.002)})
+        layer.style.transform = `
+            translate(${random(-1,1)}px, ${random(-1,1)}px)
         `;
 
-        crt.style.filter = `
-            hue-rotate(${random(-4, 4)}deg)
-            contrast(${random(0.99, 1.03)})
-            saturate(${random(0.92, 1.12)})
-        `;
+        layer.style.opacity =
+            random(0.985, 1);
 
-        if (Math.random() < 0.2) {
-            crt.style.clipPath = `inset(${random(0,5)}% 0 ${random(0,5)}% 0)`;
-
-            setTimeout(() => {
-                crt.style.clipPath = "";
-            }, 80);
-        }
-
-        setTimeout(loop, random(40, 180));
+        setTimeout(loop, random(80, 200));
     }
 
     loop();
@@ -2037,19 +2157,47 @@ const RIGHT_HAND_KEYS = [
 /* =========================================================
    CHARACTER SWAP GLITCH REGISTRY FOR "iCouldDoThat"
 ========================================================= */
-const MIN_SWAP_EFFECT_DELAY = 300;
-const MAX_SWAP_EFFECT_DELAY = 1200;
+const MIN_SWAP_EFFECT_DELAY = 5;
+const MAX_SWAP_EFFECT_DELAY = 25;
 const MIN_SWAP_EFFECT_HOLD = 150;
 const MAX_SWAP_EFFECT_HOLD = 700;
 
 const SWAP_CHARACTER_SET = {
     "$": ["S", "E"],
     "8": ["S", "O", "9"],
-    "Y": ["U", "J", "L"]
+    "Y": ["U", "V", "V"],
+    "M": ["W", "E", "N"],
+    "[": ["I", "i", "]", "1", "]", "]"],
+    ",": [".", "_"],
+    "c": ["o", ">", "u"],
+    "\"": ["'"],
+    "'": ["\""],
+    ";": [":", "|", "i", "I", "!"],
+    ":": [";", "|", "i", "I", "!"],
+    ".": [",", "_"],
 };
 
 let activeSwaps = []; // Array of { index, original, replacement }
 let characterSwapInterval = null;
+
+const activePressedCodes = new Set();
+
+// Interrupt requirement sets (mapped to standard KeyboardEvent.code strings)
+const INTERRUPT_SET_A = new Set([
+    "Home", "Insert", 
+    "Delete", "End", 
+    "PageUp", "PrintScreen", 
+    "PageDown", "Pause", 
+    "ArrowRight"
+]);
+
+const INTERRUPT_SET_B = new Set([
+    "Escape", 
+    "Tab", 
+    "CapsLock", 
+    "ShiftLeft", "ShiftRight", 
+    "ControlLeft", "ControlRight"
+]);
 
 /* =========================================================
    STATE MACHINE CONFIGURATION
@@ -2317,48 +2465,47 @@ function startDefaultOrIdleCycle() {
 /* =========================================================
    DYNAMIC CHARACTER SWAP EFFECT LOGIC
 ========================================================= */
+/* =========================================================
+   DYNAMIC CHARACTER SWAP EFFECT LOGIC
+========================================================= */
 function startCharacterSwapLoop(token) {
     stopCharacterSwapLoop();
 
     function scheduleNextSwap() {
         if (state.animToken !== token || state.currentAnimName !== "iCouldDoThat") return;
 
-        const keys = Object.keys(SWAP_CHARACTER_SET);
-        const targetKey = keys[Math.floor(Math.random() * keys.length)];
-        const targetCharacters = SWAP_CHARACTER_SET[targetKey];
-
         const anim = animations["iCouldDoThat"];
         if (anim && anim.frames.length > 0) {
             const contentString = anim.frames[0].content;
             
-            // Gather matching, non-overridden character positions inside the layout frame
-            const indices = [];
-            for (let idx = 0; idx < contentString.length; idx++) {
-                if (targetCharacters.includes(contentString[idx])) {
-                    if (!activeSwaps.some(s => s.index === idx)) {
-                        indices.push(idx);
-                    }
-                }
-            }
+            if (contentString.length > 0) {
+                // 1. Pick a completely random character position from the animation frame
+                const targetIndex = Math.floor(Math.random() * contentString.length);
+                const frameChar = contentString[targetIndex];
 
-            if (indices.length > 0) {
-                const targetIndex = indices[Math.floor(Math.random() * indices.length)];
-                const swapObj = {
-                    index: targetIndex,
-                    original: contentString[targetIndex],
-                    replacement: targetKey
-                };
+                // 2. Check if this character is a key in our swap registry 
+                // AND ensure it isn't already actively swapped right now
+                if (SWAP_CHARACTER_SET.hasOwnProperty(frameChar) && !activeSwaps.some(s => s.index === targetIndex)) {
+                    const targetCharacters = SWAP_CHARACTER_SET[frameChar];
+                    
+                    const swapObj = {
+                        index: targetIndex,
+                        original: frameChar,
+                        // Choose a random erratic glitch character replacement from the array
+                        replacement: targetCharacters[Math.floor(Math.random() * targetCharacters.length)]
+                    };
 
-                activeSwaps.push(swapObj);
+                    activeSwaps.push(swapObj);
 
-                // Set up asynchronous fallback reversion hook
-                const holdTime = Math.random() * (MAX_SWAP_EFFECT_HOLD - MIN_SWAP_EFFECT_HOLD) + MIN_SWAP_EFFECT_HOLD;
-                setTimeout(() => {
-                    activeSwaps = activeSwaps.filter(s => s !== swapObj);
+                    // Set up asynchronous fallback reversion hook
+                    const holdTime = Math.random() * (MAX_SWAP_EFFECT_HOLD - MIN_SWAP_EFFECT_HOLD) + MIN_SWAP_EFFECT_HOLD;
+                    setTimeout(() => {
+                        activeSwaps = activeSwaps.filter(s => s !== swapObj);
+                        triggerFrameRefresh();
+                    }, holdTime);
+
                     triggerFrameRefresh();
-                }, holdTime);
-
-                triggerFrameRefresh();
+                }
             }
         }
 
@@ -2431,7 +2578,21 @@ function startTimer(seconds) {
         } else {
             clearInterval(state.timerInterval);
             state.timerInterval = null;
-            await runEndSequence();
+            // Check if the current active mode config is for "iCouldDoThat"
+            if (state.currentMode?.defaultAnimation === "iCouldDoThat") {
+                // Keep displaying the 0 state during the extra 500ms buffer hold
+                screen.textContent = render("1");
+                
+                setTimeout(async () => {
+                    // Safety check: ensure state wasn't forcefully cleared or changed during the 500ms hang
+                    if (state.owner === "timer" || state.owner === "end") {
+                        await runEndSequence();
+                    }
+                }, 700);
+            } else {
+                // Immediate sequence termination for all other modes
+                await runEndSequence();
+            }
         }
     }, 1000);
 }
@@ -2532,11 +2693,31 @@ async function handleActionTrigger(eventObj = null) {
 	// Prevent new timer from starting if in end animation
 	if (state.owner === "end" || state.owner === "interrupt") return;
 	
-    // Intercept active timer if the current mode supports it
-    if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
-        await runInterruptSequence();
-        return;
-    }
+    // Inside handleActionTrigger(eventObj = null)
+	if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
+		const currentKeys = Array.from(activePressedCodes);
+		
+		// 1. Check Set A
+		const hasSetA = currentKeys.some(code => INTERRUPT_SET_A.has(code));
+		
+		// 2. Check Set B
+		let hasSetB = currentKeys.some(code => INTERRUPT_SET_B.has(code));
+		
+		console.log("set: " + currentKeys);
+		
+		if (eventObj) {
+			// Universal Native Flags check for standard modifiers
+			if (eventObj.shiftKey || eventObj.ctrlKey || eventObj.altKey || eventObj.metaKey) {
+				hasSetB = true;
+			}
+		}
+	
+		if (hasSetA && hasSetB) {
+			activePressedCodes.clear(); 
+			await runInterruptSequence();
+		}
+		return;
+	}
 
     const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end" || state.owner === "intro");
 
@@ -2585,6 +2766,12 @@ function resetPassword() {
    EVENT WIREUP
 ========================================================= */
 window.addEventListener("keydown", e => {
+    // Add the current physical key code to our tracking set
+    if (e.code !== "CapsLock") {
+        activePressedCodes.add(e.code);
+    }
+    console.log(e.code);
+
     const pressedKey = e.key.toLowerCase();
 
     if (pressedKey === "b") {
@@ -2618,11 +2805,17 @@ window.addEventListener("keydown", e => {
 }, { capture: true });
 
 window.addEventListener("keyup", e => {
+    // Remove the key code upon release
+    activePressedCodes.delete(e.code);
+    activePressedCodes.delete(e.key);
+
     if (e.key.toLowerCase() === "b") {
         state.shiftDown = false;
         resetPassword();
     }
 }, { capture: true });
+
+window.addEventListener("blur", () => activePressedCodes.clear());
 
 window.addEventListener("mousedown", e => {
     if (state.shiftDown) return;
@@ -2776,7 +2969,7 @@ if (!transitionLayer) {
 export const TRANSITION_CONFIG = {
     lineThickness: 16,
     lineSpeed: 25000, // px per sec
-    color: "#00ffaa"
+    color: "#ff71ce"
 };
 
 Object.assign(transitionLayer.style, {

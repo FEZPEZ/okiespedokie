@@ -24,10 +24,12 @@ const RIGHT_HAND_KEYS = [
 /* =========================================================
    CHARACTER SWAP GLITCH REGISTRY FOR "iCouldDoThat"
 ========================================================= */
-const MIN_SWAP_EFFECT_DELAY = 5;
-const MAX_SWAP_EFFECT_DELAY = 25;
+const MIN_SWAP_EFFECT_DELAY = 150;
+const MAX_SWAP_EFFECT_DELAY = 550;
 const MIN_SWAP_EFFECT_HOLD = 150;
 const MAX_SWAP_EFFECT_HOLD = 700;
+const MIN_SWAP_BATCH_COUNT = 5;
+const MAX_SWAP_BATCH_COUNT = 25;
 
 const SWAP_CHARACTER_SET = {
     "$": ["S", "E"],
@@ -46,6 +48,27 @@ const SWAP_CHARACTER_SET = {
 
 let activeSwaps = []; // Array of { index, original, replacement }
 let characterSwapInterval = null;
+
+let isICouldDoThatPrimed = false;
+
+const activePressedCodes = new Set();
+
+// Interrupt requirement sets (mapped to standard KeyboardEvent.code strings)
+const INTERRUPT_SET_A = new Set([
+    "Home", "Insert", 
+    "Delete", "End", 
+    "PageUp", "PrintScreen", 
+    "PageDown", "Pause", 
+    "ArrowRight"
+]);
+
+const INTERRUPT_SET_B = new Set([
+    "Escape", 
+    "Tab", 
+    "CapsLock", 
+    "ShiftLeft", "ShiftRight", 
+    "ControlLeft", "ControlRight"
+]);
 
 /* =========================================================
    STATE MACHINE CONFIGURATION
@@ -125,6 +148,20 @@ const MODES = {
 
 startGlitch(crt);
 //setupDebugOverlay();
+
+
+/* =========================================================
+   ICOULDDOTHAT HELPER FUNCTIONS
+   ========================================================= */
+function checkICouldDoThatChords() {
+    const hasHomeOrIns = activePressedCodes.has("Home") || activePressedCodes.has("Insert");
+    const hasEscOrBacktick = activePressedCodes.has("Escape") || activePressedCodes.has("Backquote");
+    return hasHomeOrIns && hasEscOrBacktick;
+}
+
+function isReadyToStart() {
+    return state.owner === "default" || state.owner === "idle" || state.owner === "intro";
+}
 
 /* =========================================================
    HARD OVERRIDE AND CLEANUP
@@ -313,9 +350,6 @@ function startDefaultOrIdleCycle() {
 /* =========================================================
    DYNAMIC CHARACTER SWAP EFFECT LOGIC
 ========================================================= */
-/* =========================================================
-   DYNAMIC CHARACTER SWAP EFFECT LOGIC
-========================================================= */
 function startCharacterSwapLoop(token) {
     stopCharacterSwapLoop();
 
@@ -327,31 +361,40 @@ function startCharacterSwapLoop(token) {
             const contentString = anim.frames[0].content;
             
             if (contentString.length > 0) {
-                // 1. Pick a completely random character position from the animation frame
-                const targetIndex = Math.floor(Math.random() * contentString.length);
-                const frameChar = contentString[targetIndex];
+                // Determine how many positions to try swapping in this batch cycle
+                const batchSize = Math.floor(Math.random() * (MAX_SWAP_BATCH_COUNT - MIN_SWAP_BATCH_COUNT + 1)) + MIN_SWAP_BATCH_COUNT;
+                let didApplyAtLeastOneSwap = false;
 
-                // 2. Check if this character is a key in our swap registry 
-                // AND ensure it isn't already actively swapped right now
-                if (SWAP_CHARACTER_SET.hasOwnProperty(frameChar) && !activeSwaps.some(s => s.index === targetIndex)) {
-                    const targetCharacters = SWAP_CHARACTER_SET[frameChar];
-                    
-                    const swapObj = {
-                        index: targetIndex,
-                        original: frameChar,
-                        // Choose a random erratic glitch character replacement from the array
-                        replacement: targetCharacters[Math.floor(Math.random() * targetCharacters.length)]
-                    };
+                for (let b = 0; b < batchSize; b++) {
+                    // 1. Pick a random character position
+                    const targetIndex = Math.floor(Math.random() * contentString.length);
+                    const frameChar = contentString[targetIndex];
 
-                    activeSwaps.push(swapObj);
+                    // 2. Safely evaluate structural eligibility without stepping on an existing swap
+                    if (SWAP_CHARACTER_SET.hasOwnProperty(frameChar) && !activeSwaps.some(s => s.index === targetIndex)) {
+                        const targetCharacters = SWAP_CHARACTER_SET[frameChar];
+                        
+                        const swapObj = {
+                            index: targetIndex,
+                            original: frameChar,
+                            replacement: targetCharacters[Math.floor(Math.random() * targetCharacters.length)]
+                        };
 
-                    // Set up asynchronous fallback reversion hook
-                    const holdTime = Math.random() * (MAX_SWAP_EFFECT_HOLD - MIN_SWAP_EFFECT_HOLD) + MIN_SWAP_EFFECT_HOLD;
-                    setTimeout(() => {
-                        activeSwaps = activeSwaps.filter(s => s !== swapObj);
-                        triggerFrameRefresh();
-                    }, holdTime);
+                        activeSwaps.push(swapObj);
+                        didApplyAtLeastOneSwap = true;
 
+                        // Reversion track is still bound per-element to preserve organic decay,
+                        // but it filters smoothly out of the loop layer
+                        const holdTime = Math.random() * (MAX_SWAP_EFFECT_HOLD - MIN_SWAP_EFFECT_HOLD) + MIN_SWAP_EFFECT_HOLD;
+                        setTimeout(() => {
+                            activeSwaps = activeSwaps.filter(s => s !== swapObj);
+                            triggerFrameRefresh();
+                        }, holdTime);
+                    }
+                }
+
+                // Fire exactly ONE redraw for the entire batch if any modifications stuck
+                if (didApplyAtLeastOneSwap) {
                     triggerFrameRefresh();
                 }
             }
@@ -426,7 +469,21 @@ function startTimer(seconds) {
         } else {
             clearInterval(state.timerInterval);
             state.timerInterval = null;
-            await runEndSequence();
+            // Check if the current active mode config is for "iCouldDoThat"
+            if (state.currentMode?.defaultAnimation === "iCouldDoThat") {
+                // Keep displaying the 0 state during the extra 500ms buffer hold
+                screen.textContent = render("1");
+                
+                setTimeout(async () => {
+                    // Safety check: ensure state wasn't forcefully cleared or changed during the 500ms hang
+                    if (state.owner === "timer" || state.owner === "end") {
+                        await runEndSequence();
+                    }
+                }, 700);
+            } else {
+                // Immediate sequence termination for all other modes
+                await runEndSequence();
+            }
         }
     }, 1000);
 }
@@ -527,11 +584,31 @@ async function handleActionTrigger(eventObj = null) {
 	// Prevent new timer from starting if in end animation
 	if (state.owner === "end" || state.owner === "interrupt") return;
 	
-    // Intercept active timer if the current mode supports it
-    if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
-        await runInterruptSequence();
-        return;
-    }
+    // Inside handleActionTrigger(eventObj = null)
+	if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
+		const currentKeys = Array.from(activePressedCodes);
+		
+		// 1. Check Set A
+		const hasSetA = currentKeys.some(code => INTERRUPT_SET_A.has(code));
+		
+		// 2. Check Set B
+		let hasSetB = currentKeys.some(code => INTERRUPT_SET_B.has(code));
+		
+		console.log("set: " + currentKeys);
+		
+		if (eventObj) {
+			// Universal Native Flags check for standard modifiers
+			if (eventObj.shiftKey || eventObj.ctrlKey || eventObj.altKey || eventObj.metaKey) {
+				hasSetB = true;
+			}
+		}
+	
+		if (hasSetA && hasSetB) {
+			activePressedCodes.clear(); 
+			await runInterruptSequence();
+		}
+		return;
+	}
 
     const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end" || state.owner === "intro");
 
@@ -580,6 +657,12 @@ function resetPassword() {
    EVENT WIREUP
 ========================================================= */
 window.addEventListener("keydown", e => {
+    // Add the current physical key code to our tracking set
+    if (e.code !== "CapsLock") {
+        activePressedCodes.add(e.code);
+    }
+    console.log(e.code);
+
     const pressedKey = e.key.toLowerCase();
 
     if (pressedKey === "b") {
@@ -590,6 +673,17 @@ window.addEventListener("keydown", e => {
 
     if (!state.shiftDown) {
         if (e.key !== "F12" && e.key !== "R") e.preventDefault();
+        
+        // SPECIAL LOGIC: Chorded holding checks for iCouldDoThat (ONLY when waiting to start)
+        if (state.currentMode?.defaultAnimation === "iCouldDoThat" && isReadyToStart()) {
+            if (checkICouldDoThatChords()) {
+            	screen.classList.add("screen-holding-pulse");
+                isICouldDoThatPrimed = true;
+            }
+            // Block immediate timer triggers on keydown during idle/default state
+            return;
+        }
+        
         handleActionTrigger(e); 
         return;
     }
@@ -606,6 +700,7 @@ window.addEventListener("keydown", e => {
         if (state.passwordBuffer.length === 3) {
             const matchStr = state.passwordBuffer.join("");
             if (MODES[matchStr]) {
+            	isICouldDoThatPrimed = false;
                 forceSwitchMode(matchStr);
             }
         }
@@ -613,11 +708,33 @@ window.addEventListener("keydown", e => {
 }, { capture: true });
 
 window.addEventListener("keyup", e => {
+
+	if (state.currentMode?.defaultAnimation === "iCouldDoThat" && isICouldDoThatPrimed) {
+        const wasHomeOrIns = e.code === "Home" || e.code === "Insert";
+        const wasEscOrBacktick = e.code === "Escape" || e.code === "Backquote";
+
+        // If a primed key is lifted, trigger timer ignition instantly!
+        if (wasHomeOrIns || wasEscOrBacktick) {
+            isICouldDoThatPrimed = false; 
+            handleActionTrigger(e);
+            screen.classList.remove("screen-holding-pulse");
+        }
+    }
+    
+    // Remove the key code upon release
+    activePressedCodes.delete(e.code);
+    activePressedCodes.delete(e.key);
+
     if (e.key.toLowerCase() === "b") {
         state.shiftDown = false;
         resetPassword();
     }
 }, { capture: true });
+
+window.addEventListener("blur", () => {
+    activePressedCodes.clear();
+    isICouldDoThatPrimed = false; // Prevent stuck states when window shifts focus
+});
 
 window.addEventListener("mousedown", e => {
     if (state.shiftDown) return;
