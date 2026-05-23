@@ -28,7 +28,7 @@
 html, body {
     margin: 0;
     padding: 0;
-    background: black;
+    background: #090006;
     overflow: hidden;
     height: 100%;
 }
@@ -38,9 +38,19 @@ html, body {
     width: 100vw;
     height: 100vh;
     perspective: 900px;
-    background: black;
+
+    /* deep black-pink background */
+    background:
+        radial-gradient(circle at center,
+            rgba(255, 80, 180, 0.06),
+            rgba(0,0,0,0.96) 70%),
+        #090006;
+
     position: relative;
-    color: #7CFF5B;
+
+    /* HOT PINK TERMINAL */
+    color: #ff71ce;
+
     overflow: hidden;
 }
 
@@ -48,10 +58,18 @@ html, body {
 #layer {
     width: 100%;
     height: 100%;
+
     transform: rotateX(5.5deg) scale(1.02);
     transform-origin: center;
+
     position: relative;
     transition: transform 1ms linear;
+
+    /* subtle blur for CRT softness */
+    filter: blur(0.25px);
+
+    /* tiny flicker */
+    animation: flicker 0.09s infinite alternate;
 }
 
 /* ASCII screen */
@@ -74,20 +92,25 @@ html, body {
     padding: 0;
 
     text-shadow:
-        0 0 0.5vh currentColor,
-        0 0 1.2vh currentColor,
-        0 0 2.5vh currentColor,
-        0 0 4vh rgba(124, 255, 91, 0.12);
+        0 0 0.15vh currentColor,
+        0 0 0.45vh currentColor,
+        0 0 1vh currentColor,
+        0 0 2vh rgba(255, 113, 206, 0.18),
+        0 0 4vh rgba(255, 113, 206, 0.08);
 }
 
 /* FINAL ASCII MODE */
 #final {
     position: absolute;
     inset: 0;
+
     display: none;
+
     align-items: center;
     justify-content: center;
+
     gap: 8vw;
+
     pointer-events: none;
 }
 
@@ -97,27 +120,53 @@ html, body {
 
 #final pre {
     margin: 0;
+
     white-space: pre;
     font-family: monospace;
     color: inherit;
 
     text-shadow:
-        0 0 0.3vh currentColor,
-        0 0 0.9vh currentColor;
+        0 0 0.15vh currentColor,
+        0 0 0.5vh currentColor,
+        0 0 1.2vh rgba(255, 113, 206, 0.25);
 }
 
 /* scanlines */
 .scanlines::after {
     content: "";
+
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(
-        to bottom,
-        rgba(0,255,100,0.08),
-        rgba(0,255,100,0.08) 10px,
-        transparent 10px,
-        transparent 20px
-    );
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255, 140, 220, 0.045),
+            rgba(255, 140, 220, 0.045) 10px,
+            transparent 10px,
+            transparent 20px
+        );
+
+    mix-blend-mode: screen;
+
+    pointer-events: none;
+}
+
+/* subtle CRT vignette */
+.scanlines::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        radial-gradient(
+            circle at center,
+            transparent 45%,
+            rgba(255, 0, 140, 0.05) 75%,
+            rgba(0,0,0,0.45) 100%
+        );
+
     pointer-events: none;
 }
 
@@ -125,6 +174,7 @@ html, body {
 #transition-layer {
     position: absolute;
     inset: 0;
+
     overflow: hidden;
     pointer-events: none;
 }
@@ -132,23 +182,52 @@ html, body {
 /* Keyboard side flash overlays */
 .side-glow {
     position: absolute;
+
     top: 0;
     bottom: 0;
+
     width: 25%;
+
     pointer-events: none;
+
     opacity: 0;
+
     transition: opacity 0.4s ease-out;
+
     z-index: 998;
 }
 
 #glow-left {
     left: 0;
-    background: linear-gradient(to right, rgba(0, 255, 170, 0.4), transparent);
+
+    background:
+        linear-gradient(
+            to right,
+            rgba(255, 113, 206, 0.45),
+            transparent
+        );
 }
 
 #glow-right {
     right: 0;
-    background: linear-gradient(to left, rgba(0, 255, 170, 0.4), transparent);
+
+    background:
+        linear-gradient(
+            to left,
+            rgba(255, 113, 206, 0.45),
+            transparent
+        );
+}
+
+/* subtle analog flicker */
+@keyframes flicker {
+    0% {
+        opacity: 0.985;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 </style>
 </head>
