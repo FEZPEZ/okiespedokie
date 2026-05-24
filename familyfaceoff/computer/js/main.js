@@ -9,16 +9,14 @@ const glowLeft = document.getElementById("glow-left");
 const glowRight = document.getElementById("glow-right");
 
 // Keyboard side partitions configuration
-const LEFT_HAND_KEYS = [
-    "q", "w", "e", "r", "t", "a", "s", "d", "f", "g", "z", "x", "c", "v", "b",
-    "1", "2", "3", "4", "5", "`", "tab", "capslock", "shiftleft", "controlleft", "altleft"
-];
+const LEFT_HAND_KEYS = ["Escape", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", 
+"Tab", "KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY", "KeyH", "KeyG", "KeyV", "KeyF", "KeyC", 
+"KeyD", "KeyS", "KeyX", "KeyA", "KeyZ", "ShiftLeft", "ControlLeft", "MetaLeft", "AltLeft"];
 
-const RIGHT_HAND_KEYS = [
-    "y", "u", "i", "o", "p", "[", "]", "\\", "h", "j", "k", "l", ";", "'", "enter",
-    "n", "m", ",", ".", "/", "6", "7", "8", "9", "0", "-", "=", "backspace", 
-    "shiftright", "controlright", "altright"
-];
+const RIGHT_HAND_KEYS = ["Digit8", "KeyU", "KeyJ", "KeyN", "KeyM", "KeyK", "KeyI", "Digit9", "Digit0", 
+"KeyO", "KeyL", "Comma", "Period", "Slash", "Semicolon", "Quote", "KeyP", "BracketLeft", "BracketRight",
+ "Minus", "Equal", "Backspace", "Backslash", "Enter", "ShiftRight", "ArrowLeft", "ArrowDown", "ArrowRight", 
+ "PageDown", "ArrowUp", "PageUp", "Delete", "Home", "AltRight"];
 
 
 /* =========================================================
@@ -52,23 +50,6 @@ let characterSwapInterval = null;
 let isICouldDoThatPrimed = false;
 
 const activePressedCodes = new Set();
-
-// Interrupt requirement sets (mapped to standard KeyboardEvent.code strings)
-const INTERRUPT_SET_A = new Set([
-    "Home", "Insert", 
-    "Delete", "End", 
-    "PageUp", "PrintScreen", 
-    "PageDown", "Pause", 
-    "ArrowRight"
-]);
-
-const INTERRUPT_SET_B = new Set([
-    "Escape", 
-    "Tab", 
-    "CapsLock", 
-    "ShiftLeft", "ShiftRight", 
-    "ControlLeft", "ControlRight"
-]);
 
 /* =========================================================
    STATE MACHINE CONFIGURATION
@@ -110,7 +91,7 @@ const MODES = {
         timerLength: 3,
         defaultAnimation: "oneTicketPlease",
         endAnimation: "oneTicketPleaseEnd",
-        endAnimationTime: 3000,
+        endAnimationTime: 2000,
         sideGlowEnabled: true,
         interruptEnabled: false, // <-- Added field
         idle: { pool: ["oneTicketPlease"], minDelay: 4000, maxDelay: 8000 }
@@ -191,16 +172,28 @@ function clearIdleTimeout() {
 }
 
 /* =========================================================
+   KEYBOARD PARTITION HELPER FUNCTIONS
+========================================================= */
+function checkHandArrays() {
+    let hasLeft = false;
+    let hasRight = false;
+    
+    for (const code of activePressedCodes) {
+        if (LEFT_HAND_KEYS.includes(code)) hasLeft = true;
+        if (RIGHT_HAND_KEYS.includes(code)) hasRight = true;
+        if (hasLeft && hasRight) break;
+    }
+    return { hasLeft, hasRight };
+}
+
+/* =========================================================
    FLASH EFFECTS ENGINE
 ========================================================= */
 function triggerSideGlow(e) {
-    if (!e || !e.key) return;
+    if (!e || !e.code) return;
     
     const mode = state.currentMode;
     if (!mode?.sideGlowEnabled) return;
-    
-    const keyLower = e.key.toLowerCase();
-    const codeLower = e.code.toLowerCase();
 
     glowLeft.style.transition = "none";
     glowRight.style.transition = "none";
@@ -209,8 +202,8 @@ function triggerSideGlow(e) {
     
     void glowLeft.offsetWidth; 
 
-    const isLeftKey = LEFT_HAND_KEYS.includes(keyLower) || LEFT_HAND_KEYS.includes(codeLower);
-    const isRightKey = RIGHT_HAND_KEYS.includes(keyLower) || RIGHT_HAND_KEYS.includes(codeLower);
+    const isLeftKey = LEFT_HAND_KEYS.includes(e.code);
+    const isRightKey = RIGHT_HAND_KEYS.includes(e.code);
 
     if (isLeftKey) {
         glowLeft.style.opacity = "1";
@@ -657,11 +650,13 @@ function resetPassword() {
    EVENT WIREUP
 ========================================================= */
 window.addEventListener("keydown", e => {
+
     // Add the current physical key code to our tracking set
     if (e.code !== "CapsLock") {
         activePressedCodes.add(e.code);
     }
-    console.log(e.code);
+    console.log("Code: " + e.code);
+    console.log("Key: " + e.key.toLowerCase());
 
     const pressedKey = e.key.toLowerCase();
 
@@ -674,14 +669,27 @@ window.addEventListener("keydown", e => {
     if (!state.shiftDown) {
         if (e.key !== "F12" && e.key !== "R") e.preventDefault();
         
-        // SPECIAL LOGIC: Chorded holding checks for iCouldDoThat (ONLY when waiting to start)
-        if (state.currentMode?.defaultAnimation === "iCouldDoThat" && isReadyToStart()) {
-            if (checkICouldDoThatChords()) {
-            	screen.classList.add("screen-holding-pulse");
-                isICouldDoThatPrimed = true;
+        // SPECIAL LOGIC: Chorded holding checks for iCouldDoThat using Left and Right hand arrays
+        if (state.currentMode?.defaultAnimation === "iCouldDoThat") {
+            const { hasLeft, hasRight } = checkHandArrays();
+
+            if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
+                // If the timer is already running, hitting keys on BOTH sides interrupts it!
+                if (hasLeft && hasRight) {
+                    activePressedCodes.clear(); 
+                    runInterruptSequence();
+                }
+                return;
             }
-            // Block immediate timer triggers on keydown during idle/default state
-            return;
+
+            if (isReadyToStart()) {
+                // Activate holding state only if at least one key is down on BOTH sides
+                if (hasLeft && hasRight) {
+                    screen.classList.add("screen-holding-pulse");
+                    isICouldDoThatPrimed = true;
+                }
+                return;
+            }
         }
         
         handleActionTrigger(e); 
@@ -700,7 +708,7 @@ window.addEventListener("keydown", e => {
         if (state.passwordBuffer.length === 3) {
             const matchStr = state.passwordBuffer.join("");
             if (MODES[matchStr]) {
-            	isICouldDoThatPrimed = false;
+                isICouldDoThatPrimed = false;
                 forceSwitchMode(matchStr);
             }
         }
@@ -708,22 +716,21 @@ window.addEventListener("keydown", e => {
 }, { capture: true });
 
 window.addEventListener("keyup", e => {
+    
+    // Remove the key code upon release before tracking downstream logic
+    activePressedCodes.delete(e.code);
+    activePressedCodes.delete(e.key);
 
-	if (state.currentMode?.defaultAnimation === "iCouldDoThat" && isICouldDoThatPrimed) {
-        const wasHomeOrIns = e.code === "Home" || e.code === "Insert";
-        const wasEscOrBacktick = e.code === "Escape" || e.code === "Backquote";
+    if (state.currentMode?.defaultAnimation === "iCouldDoThat" && isICouldDoThatPrimed) {
+        const { hasLeft, hasRight } = checkHandArrays();
 
-        // If a primed key is lifted, trigger timer ignition instantly!
-        if (wasHomeOrIns || wasEscOrBacktick) {
+        // As soon as either side drops to 0 keys held, detonate the timer loop instantly
+        if (!hasLeft || !hasRight) {
             isICouldDoThatPrimed = false; 
             handleActionTrigger(e);
             screen.classList.remove("screen-holding-pulse");
         }
     }
-    
-    // Remove the key code upon release
-    activePressedCodes.delete(e.code);
-    activePressedCodes.delete(e.key);
 
     if (e.key.toLowerCase() === "b") {
         state.shiftDown = false;
