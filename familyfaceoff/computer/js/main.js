@@ -9,15 +9,8 @@ const glowLeft = document.getElementById("glow-left");
 const glowRight = document.getElementById("glow-right");
 
 // Keyboard side partitions configuration
-const LEFT_HAND_KEYS = ["Escape", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", 
-"Tab", "KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY", "KeyH", "KeyG", "KeyV", "KeyF", "KeyC", 
-"KeyD", "KeyS", "KeyX", "KeyA", "KeyZ", "ShiftLeft", "ControlLeft", "MetaLeft", "AltLeft"];
-
-const RIGHT_HAND_KEYS = ["Digit8", "KeyU", "KeyJ", "KeyN", "KeyM", "KeyK", "KeyI", "Digit9", "Digit0", 
-"KeyO", "KeyL", "Comma", "Period", "Slash", "Semicolon", "Quote", "KeyP", "BracketLeft", "BracketRight",
- "Minus", "Equal", "Backspace", "Backslash", "Enter", "ShiftRight", "ArrowLeft", "ArrowDown", "ArrowRight", 
- "PageDown", "ArrowUp", "PageUp", "Delete", "Home", "AltRight"];
-
+const LEFT_HAND_KEYS = ["KeyR"];
+const RIGHT_HAND_KEYS = ["KeyB"];
 
 /* =========================================================
    CHARACTER SWAP GLITCH REGISTRY FOR "iCouldDoThat"
@@ -68,61 +61,61 @@ let state = {
 };
 
 const MODES = {
-	"000": {
+    "rrrr": {
         timerLength: 20,
         defaultAnimation: "blank",
         endAnimation: "blank",
         endAnimationTime: 3000,
         sideGlowEnabled: false,
-        interruptEnabled: false, // <-- Added field
+        interruptEnabled: false, 
         idle: { pool: ["blank"], minDelay: 9999999, maxDelay: 9999999 }
     },
-    "111": {
+    "rrrb": {
         timerLength: 20,
         introAnimation: "OSBootup",
         defaultAnimation: "familyFaceOff",
         endAnimation: "familyFaceOff",
         endAnimationTime: 3000,
         sideGlowEnabled: false,
-        interruptEnabled: false, // <-- Added field
+        interruptEnabled: false, 
         idle: { pool: ["familyFaceOff"], minDelay: 9999999, maxDelay: 9999999 }
     },
-    "222": {
+    "rrbb": {
         timerLength: 3,
         defaultAnimation: "oneTicketPlease",
         endAnimation: "oneTicketPleaseEnd",
         endAnimationTime: 2000,
         sideGlowEnabled: true,
-        interruptEnabled: false, // <-- Added field
+        interruptEnabled: false, 
         idle: { pool: ["oneTicketPlease"], minDelay: 4000, maxDelay: 8000 }
     },
-    "333": {
+    "rbbb": {
         timerLength: 10,
         defaultAnimation: "iCouldDoThat",
         endAnimation: "iCouldDoThatFail",
         endAnimationTime: 5000,
         sideGlowEnabled: false,
-        interruptEnabled: true,          // <-- Enabled here
-        interruptAnimation: "iCouldDoThatSuccess",   // <-- Added optional animation
-        interruptAnimationTime: 5000,    // <-- Added animation duration
+        interruptEnabled: true,          
+        interruptAnimation: "iCouldDoThatSuccess",   
+        interruptAnimationTime: 5000,    
         idle: { pool: ["iCouldDoThat"], minDelay: 4000, maxDelay: 8000 }
     },
-    "444": {
+    "bbbb": {
         timerLength: 60,
         defaultAnimation: "deadlyDinner",
         endAnimation: "deadlyDinnerEnd",
         endAnimationTime: 9000,
         sideGlowEnabled: false,
-        interruptEnabled: false, // <-- Added field
+        interruptEnabled: false, 
         idle: { pool: ["deadlyDinner"], minDelay: 4000, maxDelay: 8000 }
     },
-    "999": { // title screen, NO LOAD
+    "rbrb": { 
         timerLength: 20,
         defaultAnimation: "familyFaceOff",
         endAnimation: "familyFaceOff",
         endAnimationTime: 3000,
         sideGlowEnabled: false,
-        interruptEnabled: false, // <-- Added field
+        interruptEnabled: false, 
         idle: { pool: ["familyFaceOff"], minDelay: 3000, maxDelay: 10000 }
     }
 };
@@ -152,10 +145,9 @@ function killAllActiveLoops() {
         clearTimeout(state.animTimeout);
         state.animTimeout = null;
     }
-	stopCharacterSwapLoop(); // <-- Added
+    stopCharacterSwapLoop(); 
 }
 
-// New helper function
 function stopCharacterSwapLoop() {
     if (characterSwapInterval) {
         clearTimeout(characterSwapInterval);
@@ -175,14 +167,8 @@ function clearIdleTimeout() {
    KEYBOARD PARTITION HELPER FUNCTIONS
 ========================================================= */
 function checkHandArrays() {
-    let hasLeft = false;
-    let hasRight = false;
-    
-    for (const code of activePressedCodes) {
-        if (LEFT_HAND_KEYS.includes(code)) hasLeft = true;
-        if (RIGHT_HAND_KEYS.includes(code)) hasRight = true;
-        if (hasLeft && hasRight) break;
-    }
+    const hasLeft = activePressedCodes.has("KeyR");
+    const hasRight = activePressedCodes.has("KeyB");
     return { hasLeft, hasRight };
 }
 
@@ -202,8 +188,8 @@ function triggerSideGlow(e) {
     
     void glowLeft.offsetWidth; 
 
-    const isLeftKey = LEFT_HAND_KEYS.includes(e.code);
-    const isRightKey = RIGHT_HAND_KEYS.includes(e.code);
+    const isLeftKey = (e.code === "KeyR");
+    const isRightKey = (e.code === "KeyB");
 
     if (isLeftKey) {
         glowLeft.style.opacity = "1";
@@ -236,7 +222,6 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
     let i = 0;
 
     function renderFrame(frame) {
-        // Intercept contents to parse overrides dynamically if running the target state
         if (name === "iCouldDoThat") {
             screen.textContent = applyActiveSwaps(frame.content);
         } else {
@@ -251,29 +236,23 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
         }, delay);
     }
 
-    // Initialize or tear down character swap background timers matching animation states
     if (name === "iCouldDoThat") {
         startCharacterSwapLoop(token);
     } else {
         stopCharacterSwapLoop();
     }
 
-    // SINGLE FRAME HANDLING
     if (anim.frames.length === 1) {
         const frame = anim.frames[0];
-
         renderFrame(frame);
-
         const hold = frame.hold ?? 0;
 
         if (onCompleteCycle) {
             scheduleNext(hold, onCompleteCycle);
         }
-
         return;
     }
 
-    // MULTI FRAME LOOP
     function loop() {
         if (state.animToken !== token) return;
 
@@ -281,62 +260,45 @@ function playEngineAnimation(name, targetOwnerState, onCompleteCycle) {
         renderFrame(frame);
 
         const delay = frame.hold ?? 100;
-
         i++;
 
         if (i >= anim.frames.length) {
             i = 0;
             if (onCompleteCycle) {
-                // Execute lifecycle hooks safely as side effects 
-                // without cutting off the ongoing animation loop execution path
                 setTimeout(() => {
                     if (state.animToken === token) onCompleteCycle();
                 }, delay);
             }
         }
-
         scheduleNext(delay, loop);
     }
-
     loop();
 }
 
 function startDefaultOrIdleCycle() {
     const mode = state.currentMode;
     
-    // Check if an intro animation exists and has not yet been played
     if (mode.introAnimation && !mode.introPlayed) {
-        // Mark as played instantly so recursive loops or manual overrides don't re-trigger it
         mode.introPlayed = true;
-
-        // Play intro once, then transition naturally to the continuous default cycle on completion
         playEngineAnimation(mode.introAnimation, "intro", () => {
             startDefaultOrIdleCycle();
         });
         return;
     }
     
-    // 1. Play standard baseline loop
     playEngineAnimation(mode.defaultAnimation, "default");
-
-    // Clear any loose trailing cycles before assigning a clean loop
     clearIdleTimeout();
 
-    // 2. Set up the random countdown interval for breakout
     const config = mode.idle;
     const randomDelay = Math.random() * (config.maxDelay - config.minDelay) + config.minDelay;
 
     state.countdownInterval = setTimeout(() => {
         if (state.owner !== "default") return;
 
-        // 3. Select random idle animation
         const selectedIdle = config.pool[Math.floor(Math.random() * config.pool.length)];
-
-        // 4. Play idle once, then route recursion back to standard default tracking
         playEngineAnimation(selectedIdle, "idle", () => {
             startDefaultOrIdleCycle();
         });
-
     }, randomDelay);
 }
 
@@ -354,16 +316,13 @@ function startCharacterSwapLoop(token) {
             const contentString = anim.frames[0].content;
             
             if (contentString.length > 0) {
-                // Determine how many positions to try swapping in this batch cycle
                 const batchSize = Math.floor(Math.random() * (MAX_SWAP_BATCH_COUNT - MIN_SWAP_BATCH_COUNT + 1)) + MIN_SWAP_BATCH_COUNT;
                 let didApplyAtLeastOneSwap = false;
 
                 for (let b = 0; b < batchSize; b++) {
-                    // 1. Pick a random character position
                     const targetIndex = Math.floor(Math.random() * contentString.length);
                     const frameChar = contentString[targetIndex];
 
-                    // 2. Safely evaluate structural eligibility without stepping on an existing swap
                     if (SWAP_CHARACTER_SET.hasOwnProperty(frameChar) && !activeSwaps.some(s => s.index === targetIndex)) {
                         const targetCharacters = SWAP_CHARACTER_SET[frameChar];
                         
@@ -376,8 +335,6 @@ function startCharacterSwapLoop(token) {
                         activeSwaps.push(swapObj);
                         didApplyAtLeastOneSwap = true;
 
-                        // Reversion track is still bound per-element to preserve organic decay,
-                        // but it filters smoothly out of the loop layer
                         const holdTime = Math.random() * (MAX_SWAP_EFFECT_HOLD - MIN_SWAP_EFFECT_HOLD) + MIN_SWAP_EFFECT_HOLD;
                         setTimeout(() => {
                             activeSwaps = activeSwaps.filter(s => s !== swapObj);
@@ -386,7 +343,6 @@ function startCharacterSwapLoop(token) {
                     }
                 }
 
-                // Fire exactly ONE redraw for the entire batch if any modifications stuck
                 if (didApplyAtLeastOneSwap) {
                     triggerFrameRefresh();
                 }
@@ -427,14 +383,14 @@ function triggerFrameRefresh() {
    TIMER CONTROL
 ========================================================= */
 function startTimer(seconds) {
-	state.sequenceToken++;
+    state.sequenceToken++;
     killAllActiveLoops();
     clearIdleTimeout();
     
     if (state.animTimeout) {
-		clearTimeout(state.animTimeout);
-		state.animTimeout = null;
-	}
+        clearTimeout(state.animTimeout);
+        state.animTimeout = null;
+    }
 
     if (state.timerInterval) {
         clearInterval(state.timerInterval);
@@ -462,19 +418,15 @@ function startTimer(seconds) {
         } else {
             clearInterval(state.timerInterval);
             state.timerInterval = null;
-            // Check if the current active mode config is for "iCouldDoThat"
             if (state.currentMode?.defaultAnimation === "iCouldDoThat") {
-                // Keep displaying the 0 state during the extra 500ms buffer hold
                 screen.textContent = render("1");
                 
                 setTimeout(async () => {
-                    // Safety check: ensure state wasn't forcefully cleared or changed during the 500ms hang
                     if (state.owner === "timer" || state.owner === "end") {
                         await runEndSequence();
                     }
                 }, 700);
             } else {
-                // Immediate sequence termination for all other modes
                 await runEndSequence();
             }
         }
@@ -485,7 +437,7 @@ function startTimer(seconds) {
    SEQUENCING & ROUTING TRANSITIONS
 ========================================================= */
 async function changeStateWithTransition(nextState, actionCallback) {
-	state.sequenceToken++;
+    state.sequenceToken++;
     killAllActiveLoops();
     clearIdleTimeout();
     state.owner = "transition";
@@ -505,11 +457,7 @@ async function changeStateWithTransition(nextState, actionCallback) {
 }
 
 async function runEndSequence() {
-    // REMOVE THIS LINE: const token = ++state.sequenceToken;
-
-    // CAPTURE THE RETURNED TOKEN HERE INSTEAD
     const token = await changeStateWithTransition("end", () => {
-
         const mode = state.currentMode;
         const anim = mode.endAnimation;
         const duration = mode.endAnimationTime;
@@ -517,7 +465,6 @@ async function runEndSequence() {
 
         playEngineAnimation(anim, "end", () => {
             if (state.sequenceToken !== token) return;
-
             if (Date.now() - startTime >= duration) {
                 startDefaultOrIdleCycle();
             }
@@ -562,8 +509,7 @@ async function runInterruptSequence() {
 
 function initDefaultMode() {
     if (!state.currentMode) {
-        // Change this from Object.keys(MODES)[0] to explicitly target "000"
-        const initialKey = "000";
+        const initialKey = "rrrr";
         state.currentMode = structuredClone(MODES[initialKey]);
     }
 }
@@ -573,35 +519,25 @@ function initDefaultMode() {
 ========================================================= */
 async function handleActionTrigger(eventObj = null) {
     if (state.transitionActive) return;
-
-	// Prevent new timer from starting if in end animation
-	if (state.owner === "end" || state.owner === "interrupt") return;
-	
-    // Inside handleActionTrigger(eventObj = null)
-	if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
-		const currentKeys = Array.from(activePressedCodes);
-		
-		// 1. Check Set A
-		const hasSetA = currentKeys.some(code => INTERRUPT_SET_A.has(code));
-		
-		// 2. Check Set B
-		let hasSetB = currentKeys.some(code => INTERRUPT_SET_B.has(code));
-		
-		console.log("set: " + currentKeys);
-		
-		if (eventObj) {
-			// Universal Native Flags check for standard modifiers
-			if (eventObj.shiftKey || eventObj.ctrlKey || eventObj.altKey || eventObj.metaKey) {
-				hasSetB = true;
-			}
-		}
-	
-		if (hasSetA && hasSetB) {
-			activePressedCodes.clear(); 
-			await runInterruptSequence();
-		}
-		return;
-	}
+    if (state.owner === "end" || state.owner === "interrupt") return;
+    
+    if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
+        const currentKeys = Array.from(activePressedCodes);
+        const hasSetA = currentKeys.some(code => code === "KeyR");
+        let hasSetB = currentKeys.some(code => code === "KeyB");
+        
+        if (eventObj) {
+            if (eventObj.shiftKey || eventObj.ctrlKey || eventObj.altKey || eventObj.metaKey) {
+                hasSetB = true;
+            }
+        }
+    
+        if (hasSetA && hasSetB) {
+            activePressedCodes.clear(); 
+            await runInterruptSequence();
+        }
+        return;
+    }
 
     const isInitialActivationPress = (state.owner === "default" || state.owner === "idle" || state.owner === "end" || state.owner === "intro");
 
@@ -624,7 +560,7 @@ async function handleActionTrigger(eventObj = null) {
 }
 
 async function forceSwitchMode(configKey) {
-	state.sequenceToken++;
+    state.sequenceToken++;
     killAllActiveLoops(); 
     clearIdleTimeout();
     state.owner = "transition";
@@ -649,63 +585,106 @@ function resetPassword() {
 /* =========================================================
    EVENT WIREUP
 ========================================================= */
-window.addEventListener("keydown", e => {
+const keyPressTimestamps = new Map();
+const MAX_KEY_HOLD_DURATION = 10000; 
 
-    // Add the current physical key code to our tracking set
+function purgeStaleKeys() {
+    const now = Date.now();
+    let changed = false;
+
+    for (const [code, timestamp] of keyPressTimestamps.entries()) {
+        if (code === "Digit1") {
+            continue;
+        }
+
+        if (now - timestamp > MAX_KEY_HOLD_DURATION) {
+            activePressedCodes.delete(code);
+            keyPressTimestamps.delete(code);
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        if (state.currentMode?.defaultAnimation === "iCouldDoThat" && isICouldDoThatPrimed) {
+            const { hasLeft, hasRight } = checkHandArrays();
+            if (!hasLeft || !hasRight) {
+                isICouldDoThatPrimed = false;
+                handleActionTrigger();
+                screen.classList.remove("screen-holding-pulse");
+            }
+        }
+        updateDebug();
+    }
+}
+
+window.addEventListener("keydown", e => {
+    if (e.repeat) return; 
+
+    purgeStaleKeys();
+
     if (e.code !== "CapsLock") {
         activePressedCodes.add(e.code);
+        keyPressTimestamps.set(e.code, Date.now()); 
     }
-    console.log("Code: " + e.code);
-    console.log("Key: " + e.key.toLowerCase());
 
-    const pressedKey = e.key.toLowerCase();
-
-    if (pressedKey === "b") {
+    // 1. If '1' is pressed and modifier isn't active yet, turn it on
+    if (e.code === "Digit1" && !state.shiftDown) {
         state.shiftDown = true;
         resetPassword();
+        updateDebug(); 
         return;
     }
 
     if (!state.shiftDown) {
-        if (e.key !== "F12" && e.key !== "R") e.preventDefault();
+        if (e.key !== "F12" && e.key !== "R" && !e.ctrlKey && !e.metaKey) {
+            if (e.code === "KeyR" || e.code === "KeyB") {
+                e.preventDefault();
+            }
+        }
         
-        // SPECIAL LOGIC: Chorded holding checks for iCouldDoThat using Left and Right hand arrays
         if (state.currentMode?.defaultAnimation === "iCouldDoThat") {
             const { hasLeft, hasRight } = checkHandArrays();
 
             if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
-                // If the timer is already running, hitting keys on BOTH sides interrupts it!
                 if (hasLeft && hasRight) {
                     activePressedCodes.clear(); 
+                    keyPressTimestamps.clear();
                     runInterruptSequence();
                 }
+                updateDebug(); 
                 return;
             }
 
             if (isReadyToStart()) {
-                // Activate holding state only if at least one key is down on BOTH sides
                 if (hasLeft && hasRight) {
                     screen.classList.add("screen-holding-pulse");
                     isICouldDoThatPrimed = true;
                 }
+                updateDebug(); 
                 return;
             }
         }
         
         handleActionTrigger(e); 
+        updateDebug();
         return;
     }
 
-    if (/^[0-9]$/.test(e.key)) {
+    // 2. Fix: Capture letters (or any key) while 1 is held, ignoring the 1 key itself
+    if (e.code !== "Digit1") {
         e.preventDefault();
         
-        state.passwordBuffer.push(e.key);
-        if (state.passwordBuffer.length > 3) {
+        // Use lowercase string to match the MODES configuration keys (e.g., "rrrr")
+        const inputChar = e.key.toLowerCase();
+        state.passwordBuffer.push(inputChar);
+        
+        // Your mode configurations are 4 characters long (e.g., "rrrb")
+        if (state.passwordBuffer.length > 4) {
             state.passwordBuffer.shift();
         }
         updateDebug();
 
-        if (state.passwordBuffer.length === 3) {
+        if (state.passwordBuffer.length === 4) {
             const matchStr = state.passwordBuffer.join("");
             if (MODES[matchStr]) {
                 isICouldDoThatPrimed = false;
@@ -716,15 +695,12 @@ window.addEventListener("keydown", e => {
 }, { capture: true });
 
 window.addEventListener("keyup", e => {
-    
-    // Remove the key code upon release before tracking downstream logic
     activePressedCodes.delete(e.code);
-    activePressedCodes.delete(e.key);
+    keyPressTimestamps.delete(e.code);
 
     if (state.currentMode?.defaultAnimation === "iCouldDoThat" && isICouldDoThatPrimed) {
         const { hasLeft, hasRight } = checkHandArrays();
 
-        // As soon as either side drops to 0 keys held, detonate the timer loop instantly
         if (!hasLeft || !hasRight) {
             isICouldDoThatPrimed = false; 
             handleActionTrigger(e);
@@ -732,15 +708,24 @@ window.addEventListener("keyup", e => {
         }
     }
 
-    if (e.key.toLowerCase() === "b") {
+    if (e.code === "Digit1") {
         state.shiftDown = false;
         resetPassword();
     }
+    
+    updateDebug(); 
 }, { capture: true });
 
 window.addEventListener("blur", () => {
     activePressedCodes.clear();
-    isICouldDoThatPrimed = false; // Prevent stuck states when window shifts focus
+    keyPressTimestamps.clear();
+    isICouldDoThatPrimed = false; 
+    if (state.shiftDown) {
+        state.shiftDown = false;
+        resetPassword();
+    }
+    screen.classList.remove("screen-holding-pulse");
+    updateDebug(); 
 });
 
 window.addEventListener("mousedown", e => {
@@ -756,14 +741,14 @@ window.addEventListener("touchstart", e => {
 }, { capture: true });
 
 /* =========================================================
-   DEBUGGING CONSOLE COMPONENT
+   DEBUGGING CONSOLE COMPONENT (DUAL PANELS)
 ========================================================= */
 function setupDebugOverlay() {
-    let debugDiv = document.getElementById("terminal-debug");
-    if (!debugDiv) {
-        debugDiv = document.createElement("div");
-        debugDiv.id = "terminal-debug";
-        Object.assign(debugDiv.style, {
+    let debugLeft = document.getElementById("terminal-debug-left");
+    if (!debugLeft) {
+        debugLeft = document.createElement("div");
+        debugLeft.id = "terminal-debug-left";
+        Object.assign(debugLeft.style, {
             position: "absolute",
             bottom: "10px",
             left: "10px",
@@ -776,32 +761,85 @@ function setupDebugOverlay() {
             border: "1px solid #00ffaa",
             zIndex: "10000",
             pointerEvents: "none",
-            lineHeight: "1.4"
+            lineHeight: "1.4",
+            width: "280px"
         });
-        document.body.appendChild(debugDiv);
+        document.body.appendChild(debugLeft);
+    }
+
+    let debugRight = document.getElementById("terminal-debug-right");
+    if (!debugRight) {
+        debugRight = document.createElement("div");
+        debugRight.id = "terminal-debug-right";
+        Object.assign(debugRight.style, {
+            position: "absolute",
+            bottom: "10px",
+            right: "10px",
+            background: "rgba(0, 0, 0, 0.85)",
+            color: "#ff3366",
+            fontFamily: "monospace",
+            fontSize: "12px",
+            padding: "10px",
+            borderRadius: "4px",
+            border: "1px solid #ff3366",
+            zIndex: "10000",
+            pointerEvents: "none",
+            lineHeight: "1.4",
+            width: "280px"
+        });
+        document.body.appendChild(debugRight);
     }
 }
 
 function updateDebug() {
-    const debugDiv = document.getElementById("terminal-debug");
-    if (!debugDiv) return;
+    const debugLeft = document.getElementById("terminal-debug-left");
+    const debugRight = document.getElementById("terminal-debug-right");
+    if (!debugLeft || !debugRight) return;
+
+    const pressedLeft = Array.from(activePressedCodes).filter(code => code === "KeyR");
+    const pressedRight = Array.from(activePressedCodes).filter(code => code === "KeyB");
 
     const codeBufferDisplay = state.passwordBuffer.length > 0 
         ? `[ ${state.passwordBuffer.join(", ")} ]` 
         : "EMPTY";
 
-    debugDiv.innerHTML = `
-        <strong>⚙️ SYSTEM STATE DEBUGGER</strong><br>
+    let challengeState = "INACTIVE";
+    if (state.currentMode?.defaultAnimation === "iCouldDoThat") {
+        if (state.owner === "timer") {
+            challengeState = "TIMER RUNNING (ARMED FOR INTERRUPT)";
+        } else if (isICouldDoThatPrimed) {
+            challengeState = "PRIMED: WAITING FOR KEY RELEASE";
+        } else if (isReadyToStart()) {
+            challengeState = "WAITING FOR CHORD (BOTH SIDES)";
+        }
+    }
+
+    debugLeft.innerHTML = `
+        <strong>⚙️ LEFT SYSTEM PANEL</strong><br>
         -----------------------------------<br>
-        STATE OWNER    : <span style="color:#fff">${state.owner.toUpperCase()}</span><br>
-        ANIMATION      : <span style="color:#fff">${state.currentAnimName || 'NONE'}</span><br>
-        SHIFT MODIFIER : ${state.shiftDown ? '<span style="color:#ff3333;font-weight:bold">HELD</span>' : 'RELEASED'}<br>
-        SLIDING QUEUE  : <span style="color:#ffff33">${codeBufferDisplay}</span><br>
+        STATE OWNER   : <span style="color:#fff">${state.owner.toUpperCase()}</span><br>
+        ANIMATION     : <span style="color:#fff">${state.currentAnimName || 'NONE'}</span><br>
+        SHIFT MODIFIER: ${state.shiftDown ? '<span style="color:#ff3333;font-weight:bold">HELD (1)</span>' : 'RELEASED'}<br>
+        SLIDING QUEUE : <span style="color:#ffff33">${codeBufferDisplay}</span><br>
         TRANSITION LOCK: ${state.transitionActive ? 'ACTIVE' : 'READY'}<br>
-        CURRENT MODE   : <span style="color:#33ffff">${state.currentMode ? Object.keys(MODES).find(k => MODES[k].timerLength === state.currentMode.timerLength) : 'NONE'}</span>
+        CURRENT MODE  : <span style="color:#33ffff">${state.currentMode ? Object.keys(MODES).find(k => MODES[k].timerLength === state.currentMode.timerLength) : 'NONE'}</span><br>
+        -----------------------------------<br>
+        <strong>⬅️ LEFT PRESSED KEY LOG</strong><br>
+        ${pressedLeft.length > 0 ? `<span style="color:#fff">${pressedLeft.join(", ")}</span>` : '<span style="color:#666">NO KEYS PRESSED</span>'}
+    `;
+
+    debugRight.innerHTML = `
+        <strong>🎯 CHALLENGE MATRIX</strong><br>
+        -----------------------------------<br>
+        CHALLENGE     : <span style="color:#fff">iCouldDoThat</span><br>
+        STATUS        : <span style="color:#fff; font-weight:bold;">${challengeState}</span><br>
+        LEFT ARY STATE: ${pressedLeft.length > 0 ? '<span style="color:#00ffaa;font-weight:bold">ENGAGED</span>' : '<span style="color:#ff3366">EMPTY</span>'}<br>
+        RIGHT ARY STATE: ${pressedRight.length > 0 ? '<span style="color:#00ffaa;font-weight:bold">ENGAGED</span>' : '<span style="color:#ff3366">EMPTY</span>'}<br>
+        -----------------------------------<br>
+        <strong>➡️ RIGHT PRESSED KEY LOG</strong><br>
+        ${pressedRight.length > 0 ? `<span style="color:#fff">${pressedRight.join(", ")}</span>` : '<span style="color:#666">NO KEYS PRESSED</span>'}
     `;
 }
 
-// Entry Point Init
 initDefaultMode();
 startDefaultOrIdleCycle();
