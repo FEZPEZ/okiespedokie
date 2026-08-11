@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cute GIF Chaos</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #111;
+            touch-action: manipulation;
+        }
+
+        /* Container for un-shaken GIFs */
+        #gif-container {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* --------------------------------------------------
+           GIFS (No shake applied)
+        -------------------------------------------------- */
+        .gif {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 130px;
+            height: 130px;
+            object-fit: contain;
+            pointer-events: none;
+            user-select: none;
+            will-change: transform;
+        }
+
+        /* --------------------------------------------------
+           BOTTOM METER & TEXT (Shakes!)
+        -------------------------------------------------- */
+        #meter-container {
+            position: fixed;
+            z-index: 10000;
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            pointer-events: auto;
+            will-change: transform;
+        }
+
+        #cute-text {
+            color: white;
+            font-family: Arial, sans-serif;
+            font-weight: 1000;
+            font-size: clamp(24px, 6vw, 46px);
+            text-align: center;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+            transition: opacity 0.15s ease;
+        }
+
+        #meter {
+            height: 42px;
+            border: 5px solid white;
+            border-radius: 25px;
+            overflow: hidden;
+            background: #181818;
+            box-shadow: 0 0 10px white, 0 0 25px rgba(255,255,255,.6), inset 0 0 10px rgba(0,0,0,.8);
+        }
+
+        #meter-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 18px;
+            background: linear-gradient(90deg, red, orange, yellow, lime, cyan, blue, violet, magenta, red);
+            background-size: 400% 100%;
+            animation: rainbow 0.8s linear infinite;
+            transition: width 0.12s ease-out;
+            will-change: width;
+        }
+
+        @keyframes rainbow {
+            from { background-position: 0% 0%; }
+            to { background-position: 400% 0%; }
+        }
+
+        /* --------------------------------------------------
+           CHAOS SHAKING (Applied to meter & text)
+        -------------------------------------------------- */
+        .shaking {
+            animation-name: shake;
+            animation-duration: var(--shake-speed);
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translate3d(calc(var(--shake-amount) * -1), var(--shake-amount), 0) rotate(calc(var(--shake-rotation) * -1));
+            }
+            20% {
+                transform: translate3d(var(--shake-amount), calc(var(--shake-amount) * -0.5), 0) rotate(var(--shake-rotation));
+            }
+            40% {
+                transform: translate3d(calc(var(--shake-amount) * -0.7), calc(var(--shake-amount) * -1), 0) rotate(calc(var(--shake-rotation) * -1));
+            }
+            60% {
+                transform: translate3d(calc(var(--shake-amount) * 0.8), var(--shake-amount), 0) rotate(var(--shake-rotation));
+            }
+            80% {
+                transform: translate3d(calc(var(--shake-amount) * -1), calc(var(--shake-amount) * -0.4), 0) rotate(calc(var(--shake-rotation) * -1));
+            }
+            100% {
+                transform: translate3d(0, 0, 0) rotate(0deg);
+            }
+        }
+
+        /* --------------------------------------------------
+           PARTICLES
+        -------------------------------------------------- */
+        .particle {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            background: hsl(var(--hue), 100%, 60%);
+            box-shadow: 0 0 6px currentColor;
+            animation: particle-fly var(--particle-time) ease-out forwards;
+            will-change: transform, opacity;
+        }
+
+        @keyframes particle-fly {
+            from {
+                opacity: 1;
+                transform: translate3d(var(--start-x), var(--start-y), 0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translate3d(calc(var(--start-x) + var(--particle-x)), calc(var(--start-y) + var(--particle-y)), 0) scale(0);
+            }
+        }
+
+        /* --------------------------------------------------
+           OPTIMIZED CHAOS WORDS
+        -------------------------------------------------- */
+        .chaos-word {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10001;
+            pointer-events: none;
+            user-select: none;
+            font-family: Arial Black, Arial, sans-serif;
+            font-weight: 900;
+            font-size: 32px;
+            white-space: nowrap;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+            animation: word-chaos var(--word-time) ease-out forwards;
+            will-change: transform, opacity;
+        }
+
+        @keyframes word-chaos {
+            0% {
+                opacity: 0;
+                transform: translate3d(var(--word-x), var(--word-y), 0) translate(-50%, -50%) scale(0.4) rotate(var(--word-rotation));
+            }
+            20% {
+                opacity: 1;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate3d(var(--word-x), var(--word-y), 0) translate(-50%, -50%) scale(2.2) rotate(calc(var(--word-rotation) * -0.5));
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="gif-container"></div>
+
+    <div id="meter-container">
+        <div id="cute-text"></div>
+        <div id="meter">
+            <div id="meter-fill"></div>
+        </div>
+    </div>
+
+<script>
+    const gifContainer = document.getElementById("gif-container");
+    const meterContainer = document.getElementById("meter-container");
+    const meterFill = document.getElementById("meter-fill");
+    const cuteText = document.getElementById("cute-text");
+
+    const MAX_GIFS = 20;
+    const GIF_COUNT = 13;
+    const GIF_SIZE = 130;
+
+    const gifs = [];
+
+    let centerX = window.innerWidth / 2;
+    let centerY = window.innerHeight / 2;
+    let orbitTime = 0;
+
+    /* Circular Orbit Settings */
+    const ORBIT_RADIUS = 90;
+    const ORBIT_SPEED = 0.0015;
+
+    const chaosWords = [ "wow", "cat", "funny"];
+    const wordColors = ["#ff3366", "#ff9933", "#ffff33", "#33ff66", "#33ffff", "#cc66ff"];
+
+    let lastWordSpawn = 0;
+    let lastParticleSpawn = 0;
+
+    function randomGifNumber() {
+        return Math.floor(Math.random() * GIF_COUNT) + 1;
+    }
+
+    function spawnGif(x, y) {
+        const number = randomGifNumber();
+        const img = document.createElement("img");
+
+        img.className = "gif";
+        img.src = `gifs/${number}.gif`;
+        img.style.width = `${GIF_SIZE}px`;
+        img.style.height = `${GIF_SIZE}px`;
+
+        gifContainer.appendChild(img);
+
+        let dx = x - centerX;
+        let dy = y - centerY;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 8) {
+            const angle = Math.random() * Math.PI * 2;
+            dx = Math.cos(angle);
+            dy = Math.sin(angle);
+            distance = 1;
+        }
+
+        dx /= distance;
+        dy /= distance;
+
+        const gif = {
+            element: img,
+            x: x,
+            y: y,
+            vx: dx,
+            vy: dy,
+            speedMultiplier: 0.85 + Math.random() * 0.3,
+            number: number
+        };
+
+        gifs.push(gif);
+        updateMeter();
+    }
+
+    function updateGif(gif) {
+        const dx = gif.x - centerX;
+        const dy = gif.y - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        const speed = (0.7 + distance * 0.009) * gif.speedMultiplier;
+
+        gif.x += gif.vx * speed;
+        gif.y += gif.vy * speed;
+
+        gif.element.style.transform = `translate3d(${gif.x - GIF_SIZE / 2}px, ${gif.y - GIF_SIZE / 2}px, 0)`;
+
+        const isOffscreen = 
+            gif.x < -GIF_SIZE || 
+            gif.x > window.innerWidth + GIF_SIZE || 
+            gif.y < -GIF_SIZE || 
+            gif.y > window.innerHeight + GIF_SIZE;
+
+        if (isOffscreen) {
+            gif.element.remove();
+            const index = gifs.indexOf(gif);
+            if (index !== -1) {
+                gifs.splice(index, 1);
+            }
+            updateMeter();
+        }
+    }
+
+    function updateCenter(timestamp) {
+        orbitTime = timestamp * ORBIT_SPEED;
+
+        /* Circular center path */
+        centerX = window.innerWidth / 2 + Math.cos(orbitTime) * ORBIT_RADIUS;
+        centerY = window.innerHeight / 2 + Math.sin(orbitTime) * ORBIT_RADIUS;
+    }
+
+    function updateMeter() {
+        const count = gifs.length;
+        const percentage = Math.min(count / MAX_GIFS, 1) * 100;
+
+        meterFill.style.width = `${percentage}%`;
+
+        if (count > 0) {
+            cuteText.textContent = "It's a...CUTE!!";
+            cuteText.style.opacity = "1";
+
+            const shakeAmount = Math.min(2 + count * 0.75, 17);
+            const shakeRotation = Math.min(0.2 + count * 0.12, 2.5);
+            const shakeSpeed = Math.max(0.11, 0.25 - count * 0.007);
+
+            meterContainer.style.setProperty("--shake-amount", `${shakeAmount}px`);
+            meterContainer.style.setProperty("--shake-rotation", `${shakeRotation}deg`);
+            meterContainer.style.setProperty("--shake-speed", `${shakeSpeed}s`);
+
+            meterContainer.classList.add("shaking");
+        } else {
+            cuteText.textContent = "";
+            cuteText.style.opacity = "0";
+            meterContainer.classList.remove("shaking");
+        }
+    }
+
+    function spawnParticle() {
+        const edge = Math.floor(Math.random() * 4);
+        let x, y, dx, dy;
+
+        if (edge === 0) {
+            x = Math.random() * window.innerWidth;
+            y = -5;
+            dx = (Math.random() - 0.5) * 200;
+            dy = 50 + Math.random() * 180;
+        } else if (edge === 1) {
+            x = window.innerWidth + 5;
+            y = Math.random() * window.innerHeight;
+            dx = -(50 + Math.random() * 180);
+            dy = (Math.random() - 0.5) * 200;
+        } else if (edge === 2) {
+            x = Math.random() * window.innerWidth;
+            y = window.innerHeight + 5;
+            dx = (Math.random() - 0.5) * 200;
+            dy = -(50 + Math.random() * 180);
+        } else {
+            x = -5;
+            y = Math.random() * window.innerHeight;
+            dx = 50 + Math.random() * 180;
+            dy = (Math.random() - 0.5) * 200;
+        }
+
+        const particle = document.createElement("div");
+        particle.className = "particle";
+
+        const size = 4 + Math.random() * 8;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+
+        particle.style.setProperty("--start-x", `${x}px`);
+        particle.style.setProperty("--start-y", `${y}px`);
+        particle.style.setProperty("--particle-x", `${dx}px`);
+        particle.style.setProperty("--particle-y", `${dy}px`);
+        particle.style.setProperty("--particle-time", `${0.4 + Math.random() * 0.6}s`);
+        particle.style.setProperty("--hue", Math.floor(Math.random() * 360));
+
+        document.body.appendChild(particle);
+
+        setTimeout(() => particle.remove(), 1000);
+    }
+
+    function spawnChaosWord() {
+        const word = chaosWords[Math.floor(Math.random() * chaosWords.length)];
+        const color = wordColors[Math.floor(Math.random() * wordColors.length)];
+
+        const element = document.createElement("div");
+        element.className = "chaos-word";
+        element.textContent = word;
+        element.style.color = color;
+
+        const x = window.innerWidth * (0.1 + Math.random() * 0.8);
+        const y = window.innerHeight * (0.1 + Math.random() * 0.65);
+
+        element.style.setProperty("--word-x", `${x}px`);
+        element.style.setProperty("--word-y", `${y}px`);
+        element.style.setProperty("--word-time", `${0.8 + Math.random() * 0.6}s`);
+        element.style.setProperty("--word-rotation", `${-20 + Math.random() * 40}deg`);
+
+        document.body.appendChild(element);
+
+        setTimeout(() => element.remove(), 1500);
+    }
+
+    function animate(timestamp) {
+        updateCenter(timestamp);
+
+        for (let i = gifs.length - 1; i >= 0; i--) {
+            updateGif(gifs[i]);
+        }
+
+        if (gifs.length >= MAX_GIFS) {
+            if (timestamp - lastParticleSpawn > 35) {
+                spawnParticle();
+                lastParticleSpawn = timestamp;
+            }
+
+            if (timestamp - lastWordSpawn > 350) {
+                spawnChaosWord();
+                lastWordSpawn = timestamp;
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener("pointerdown", event => {
+        if (event.clientY > window.innerHeight - 80) return;
+        spawnGif(event.clientX, event.clientY);
+    });
+
+    window.addEventListener("resize", updateMeter);
+
+    updateMeter();
+    requestAnimationFrame(animate);
+</script>
+
+</body>
+</html>

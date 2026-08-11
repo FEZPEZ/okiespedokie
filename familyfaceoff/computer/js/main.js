@@ -42,7 +42,7 @@ let characterSwapInterval = null;
 
 let isICouldDoThatPrimed = false;
 
-const activePressedCodes = new Set();
+const activePressedKeys = new Set();
 
 /* =========================================================
    STATE MACHINE CONFIGURATION
@@ -68,7 +68,6 @@ const MODES = {
         endAnimationTime: 3000,
         sideGlowEnabled: false,
         interruptEnabled: false, 
-        idle: { pool: ["blank"], minDelay: 9999999, maxDelay: 9999999 }
     },
     "rrrb": {
         timerLength: 20,
@@ -78,7 +77,6 @@ const MODES = {
         endAnimationTime: 3000,
         sideGlowEnabled: false,
         interruptEnabled: false, 
-        idle: { pool: ["familyFaceOff"], minDelay: 9999999, maxDelay: 9999999 }
     },
     "rrbb": {
         timerLength: 3,
@@ -87,7 +85,6 @@ const MODES = {
         endAnimationTime: 2000,
         sideGlowEnabled: true,
         interruptEnabled: false, 
-        idle: { pool: ["oneTicketPlease"], minDelay: 4000, maxDelay: 8000 }
     },
     "rbbb": {
         timerLength: 10,
@@ -98,7 +95,6 @@ const MODES = {
         interruptEnabled: true,          
         interruptAnimation: "iCouldDoThatSuccess",   
         interruptAnimationTime: 5000,    
-        idle: { pool: ["iCouldDoThat"], minDelay: 4000, maxDelay: 8000 }
     },
     "bbbb": {
         timerLength: 60,
@@ -107,7 +103,6 @@ const MODES = {
         endAnimationTime: 9000,
         sideGlowEnabled: false,
         interruptEnabled: false, 
-        idle: { pool: ["deadlyDinner"], minDelay: 4000, maxDelay: 8000 }
     },
     "rbrb": { 
         timerLength: 20,
@@ -116,7 +111,6 @@ const MODES = {
         endAnimationTime: 3000,
         sideGlowEnabled: false,
         interruptEnabled: false, 
-        idle: { pool: ["familyFaceOff"], minDelay: 3000, maxDelay: 10000 }
     }
 };
 
@@ -194,13 +188,13 @@ function triggerSideGlow(e) {
     if (isLeftKey) {
         glowLeft.style.opacity = "1";
         setTimeout(() => {
-            glowLeft.style.transition = "opacity 0.4s ease-out";
+            glowLeft.style.transition = "opacity 3s ease-out";
             glowLeft.style.opacity = "0";
         }, 50);
     } else if (isRightKey) {
         glowRight.style.opacity = "1";
         setTimeout(() => {
-            glowRight.style.transition = "opacity 0.4s ease-out";
+            glowRight.style.transition = "opacity 3s ease-out";
             glowRight.style.opacity = "0";
         }, 50);
     }
@@ -286,20 +280,12 @@ function startDefaultOrIdleCycle() {
         return;
     }
     
+    // Play the stable loop/default baseline graphic
     playEngineAnimation(mode.defaultAnimation, "default");
     clearIdleTimeout();
 
-    const config = mode.idle;
-    const randomDelay = Math.random() * (config.maxDelay - config.minDelay) + config.minDelay;
-
-    state.countdownInterval = setTimeout(() => {
-        if (state.owner !== "default") return;
-
-        const selectedIdle = config.pool[Math.floor(Math.random() * config.pool.length)];
-        playEngineAnimation(selectedIdle, "idle", () => {
-            startDefaultOrIdleCycle();
-        });
-    }, randomDelay);
+    // IDLE ANIMATIONS DISABLED ENTIRELY
+    // The previous setTimeout block that scheduled config.pool variants has been removed.
 }
 
 /* =========================================================
@@ -586,20 +572,18 @@ function resetPassword() {
    EVENT WIREUP
 ========================================================= */
 const keyPressTimestamps = new Map();
-const MAX_KEY_HOLD_DURATION = 10000; 
+const MAX_KEY_HOLD_DURATION = 30000; 
 
 function purgeStaleKeys() {
     const now = Date.now();
     let changed = false;
 
-    for (const [code, timestamp] of keyPressTimestamps.entries()) {
-        if (code === "Digit1") {
-            continue;
-        }
+    for (const [key, timestamp] of keyPressTimestamps.entries()) {
+        if (key === "1") continue;
 
         if (now - timestamp > MAX_KEY_HOLD_DURATION) {
-            activePressedCodes.delete(code);
-            keyPressTimestamps.delete(code);
+            activePressedKeys.delete(key);
+            keyPressTimestamps.delete(key);
             changed = true;
         }
     }
@@ -613,7 +597,6 @@ function purgeStaleKeys() {
                 screen.classList.remove("screen-holding-pulse");
             }
         }
-        updateDebug();
     }
 }
 
@@ -621,37 +604,32 @@ window.addEventListener("keydown", e => {
     if (e.repeat) return; 
 
     purgeStaleKeys();
+    
+    // Normalize keys immediately to lowercase to catch iPad auto-caps
+    const cleanKey = e.key.toLowerCase();
 
-    if (e.code !== "CapsLock") {
-        activePressedCodes.add(e.code);
-        keyPressTimestamps.set(e.code, Date.now()); 
+    if (e.key !== "CapsLock") {
+        activePressedKeys.add(cleanKey);
+        keyPressTimestamps.set(cleanKey, Date.now()); 
     }
 
     // 1. If '1' is pressed and modifier isn't active yet, turn it on
-    if (e.code === "Digit1" && !state.shiftDown) {
+    if (cleanKey === "1" && !state.shiftDown) {
         state.shiftDown = true;
         resetPassword();
-        updateDebug(); 
         return;
     }
 
     if (!state.shiftDown) {
-        if (e.key !== "F12" && e.key !== "R" && !e.ctrlKey && !e.metaKey) {
-            if (e.code === "KeyR" || e.code === "KeyB") {
-                e.preventDefault();
-            }
-        }
-        
         if (state.currentMode?.defaultAnimation === "iCouldDoThat") {
             const { hasLeft, hasRight } = checkHandArrays();
 
             if (state.owner === "timer" && state.currentMode?.interruptEnabled) {
                 if (hasLeft && hasRight) {
-                    activePressedCodes.clear(); 
+                    activePressedKeys.clear(); 
                     keyPressTimestamps.clear();
                     runInterruptSequence();
                 }
-                updateDebug(); 
                 return;
             }
 
@@ -660,29 +638,21 @@ window.addEventListener("keydown", e => {
                     screen.classList.add("screen-holding-pulse");
                     isICouldDoThatPrimed = true;
                 }
-                updateDebug(); 
                 return;
             }
         }
         
-        handleActionTrigger(e); 
-        updateDebug();
+        handleActionTrigger(cleanKey); 
         return;
     }
 
-    // 2. Fix: Capture letters (or any key) while 1 is held, ignoring the 1 key itself
-    if (e.code !== "Digit1") {
-        e.preventDefault();
+    // 2. Capture letter patterns while "1" is held down
+    if (cleanKey !== "1") {
+        state.passwordBuffer.push(cleanKey);
         
-        // Use lowercase string to match the MODES configuration keys (e.g., "rrrr")
-        const inputChar = e.key.toLowerCase();
-        state.passwordBuffer.push(inputChar);
-        
-        // Your mode configurations are 4 characters long (e.g., "rrrb")
         if (state.passwordBuffer.length > 4) {
             state.passwordBuffer.shift();
         }
-        updateDebug();
 
         if (state.passwordBuffer.length === 4) {
             const matchStr = state.passwordBuffer.join("");
@@ -695,29 +665,28 @@ window.addEventListener("keydown", e => {
 }, { capture: true });
 
 window.addEventListener("keyup", e => {
-    activePressedCodes.delete(e.code);
-    keyPressTimestamps.delete(e.code);
+    const cleanKey = e.key.toLowerCase();
+    activePressedKeys.delete(cleanKey);
+    keyPressTimestamps.delete(cleanKey);
 
     if (state.currentMode?.defaultAnimation === "iCouldDoThat" && isICouldDoThatPrimed) {
         const { hasLeft, hasRight } = checkHandArrays();
 
         if (!hasLeft || !hasRight) {
             isICouldDoThatPrimed = false; 
-            handleActionTrigger(e);
+            handleActionTrigger(cleanKey);
             screen.classList.remove("screen-holding-pulse");
         }
     }
 
-    if (e.code === "Digit1") {
+    if (cleanKey === "1") {
         state.shiftDown = false;
         resetPassword();
     }
-    
-    updateDebug(); 
 }, { capture: true });
 
 window.addEventListener("blur", () => {
-    activePressedCodes.clear();
+    activePressedKeys.clear();
     keyPressTimestamps.clear();
     isICouldDoThatPrimed = false; 
     if (state.shiftDown) {
@@ -725,18 +694,15 @@ window.addEventListener("blur", () => {
         resetPassword();
     }
     screen.classList.remove("screen-holding-pulse");
-    updateDebug(); 
 });
 
-window.addEventListener("mousedown", e => {
+window.addEventListener("mousedown", () => {
     if (state.shiftDown) return;
-    e.preventDefault();
     handleActionTrigger();
 }, { capture: true });
 
-window.addEventListener("touchstart", e => {
+window.addEventListener("touchstart", () => {
     if (state.shiftDown) return;
-    e.preventDefault();
     handleActionTrigger();
 }, { capture: true });
 

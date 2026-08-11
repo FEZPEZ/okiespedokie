@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Key Capture</title>
+
+<style>
+    body {
+        font-family: monospace;
+        background: #111;
+        color: #eee;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    textarea {
+        width: 100%;
+        height: 180px;
+        background: #1e1e1e;
+        color: #00ff99;
+        border: 1px solid #444;
+        padding: 10px;
+        resize: vertical;
+        font-family: monospace;
+        font-size: 14px;
+    }
+
+    .buttons {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+    }
+
+    button {
+        padding: 8px 14px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .info {
+        margin-top: 12px;
+        color: #aaa;
+        font-size: 13px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Unique Key Capture</h1>
+
+<textarea id="output" readonly></textarea>
+
+<div class="buttons">
+    <button id="undoBtn">Undo Last</button>
+    <button id="resetBtn">Reset</button>
+    <button id="copyBtn">Copy</button>
+</div>
+
+<div class="info">
+    Press any keys. Captures unique <code>e.code</code> values.
+</div>
+
+<script>
+const keys = [];
+const output = document.getElementById("output");
+
+function render() {
+    output.value =
+        "[\n" +
+        keys.map(k => `    "${k}"`).join(",\n") +
+        "\n]";
+}
+
+window.addEventListener("keydown", (e) => {
+    e.preventDefault();
+
+    if (!keys.includes(e.code)) {
+        keys.push(e.code);
+        render();
+    }
+});
+
+document.getElementById("undoBtn").addEventListener("click", () => {
+    keys.pop();
+    render();
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+    keys.length = 0;
+    render();
+});
+
+document.getElementById("copyBtn").addEventListener("click", async () => {
+    await navigator.clipboard.writeText(output.value);
+});
+
+render();
+</script>
+
+</body>
+</html>
